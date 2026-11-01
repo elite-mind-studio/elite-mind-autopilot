@@ -53,19 +53,27 @@ def kokoro_tts_save(text: str, voice: str, filename: str) -> None:
     lang = "en-gb" if voice.startswith("b") else "en-us"
     stripped = text.strip()
     # Questions are delivered a touch slower so they sound deliberate
-    speed = 0.94 if stripped.endswith("?") else 1.0
+    base_speed = float(os.getenv("KOKORO_SPEED", "1.0"))
+    speed = base_speed * (0.94 if stripped.endswith("?") else 1.0)
+    # "Number two." list markers get a clear stop on both sides
+    is_marker = bool(re.match(r"^number\s+\w+[.!:]?$", stripped, re.IGNORECASE))
 
     parts = [p for p in BREAK_PATTERN.split(stripped) if p.strip()] or [stripped]
     audio, sample_rate = [], 24000
+    lead = 0.35 if is_marker else 0.0
     for i, part in enumerate(parts):
         samples, sample_rate = kokoro.create(part, voice=voice, speed=speed, lang=lang)
         audio.append(samples)
         if i < len(parts) - 1:
             audio.append(np.zeros(int(sample_rate * BREAK_PAUSE), dtype=samples.dtype))
 
-    if stripped.endswith(("...", "…")):
+    if is_marker:
+        end_pause = 0.45
+    elif stripped.endswith(("...", "…")):
         end_pause = BREAK_PAUSE
     else:
         end_pause = END_PAUSE.get(stripped[-1:], DEFAULT_END_PAUSE)
     audio.append(np.zeros(int(sample_rate * end_pause), dtype=audio[0].dtype))
+    if lead:
+        audio.insert(0, np.zeros(int(sample_rate * lead), dtype=audio[0].dtype))
     sf.write(filename, np.concatenate(audio), sample_rate, format="WAV")

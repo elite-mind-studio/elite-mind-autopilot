@@ -10,6 +10,22 @@ if sys.stdout is None or sys.stderr is None:
     sys.stdout = sys.stdout or _log_file
     sys.stderr = sys.stderr or _log_file
 
+# Child processes (ffmpeg) started from pythonw.exe would each open a console
+# window; closing one kills the render (exit 0xC000013A). Start them hidden.
+import os as _os
+if _os.name == "nt":
+    import subprocess as _subprocess
+
+    _original_popen_init = _subprocess.Popen.__init__
+
+    def _popen_no_window(self, *args, **kwargs):
+        if not kwargs.get("creationflags"):
+            kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
+        _original_popen_init(self, *args, **kwargs)
+
+    _subprocess.Popen.__init__ = _popen_no_window
+
+
 import time
 
 from dotenv import load_dotenv

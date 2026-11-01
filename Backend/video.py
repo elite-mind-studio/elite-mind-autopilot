@@ -382,7 +382,12 @@ def _generate_video_ffmpeg(
     # Always bottom-anchored (alignment 2 means the same in SSA and ASS) and
     # moved up with a vertical margin, on the 288px subtitle canvas
     vertical = (subtitles_position or "center,center").split(",")[-1].strip()
-    margin = {"bottom": 28, "top": 288 - ass_size - 24}.get(vertical, 288 // 2 - ass_size // 2)
+    margin = {
+        "bottom": 28,
+        "top": 288 - ass_size - 24,
+        # letterbox picture spans y=560..1168 of 1920; sit near its bottom edge
+        "letterbox": round(288 * (1920 - 1130) / 1920),
+    }.get(vertical, 288 // 2 - ass_size // 2)
     style = (
         f"FontName={font_name},FontSize={ass_size},PrimaryColour={ass_color},"
         "OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=0,"

@@ -24,3 +24,6 @@ voice_samples/
 autopilot_state.json
 logs/
 models/
+reference/
+kaggle/
+image_library/

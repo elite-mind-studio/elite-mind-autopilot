@@ -168,3 +168,27 @@ def check_env_vars() -> None:
     except Exception as e:
         logger.error(f"Error occurred while checking environment variables: {str(e)}")
         sys.exit(1)  # Aborts the program if an unexpected error occurs
+
+
+def song_credit(song_path: str) -> str:
+    """
+    Attribution line for a background track, required by Creative Commons
+    licensed music. Tracks listed in Songs/credits.txt ("file name | credit")
+    use that credit; others get none.
+
+    Args:
+        song_path (str): Path to the chosen song.
+
+    Returns:
+        str: The credit line, or an empty string.
+    """
+    credits_file = SONGS_DIR / "credits.txt"
+    if not credits_file.exists():
+        return ""
+    name = Path(song_path).name
+    for line in credits_file.read_text(encoding="utf-8").splitlines():
+        if "|" in line:
+            file_name, credit = (part.strip() for part in line.split("|", 1))
+            if file_name == name:
+                return credit
+    return ""

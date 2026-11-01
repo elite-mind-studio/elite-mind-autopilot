@@ -83,7 +83,7 @@ def _cloudflare(prompt: str, size=(WIDTH, HEIGHT)) -> bytes:
         f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/"
         "@cf/black-forest-labs/flux-1-schnell",
         headers={"Authorization": f"Bearer {token}"},
-        json={"prompt": prompt, "steps": 8},
+        json={"prompt": prompt, "steps": int(os.getenv("CLOUDFLARE_STEPS", "8"))},
         timeout=120,
     )
     if not response.ok:
@@ -92,6 +92,36 @@ def _cloudflare(prompt: str, size=(WIDTH, HEIGHT)) -> bytes:
     if not image_b64:
         raise ProviderError(f"No image in response: {response.text[:200]}")
     return base64.b64decode(image_b64)
+
+
+def _gemini(prompt: str, size=(WIDTH, HEIGHT)) -> bytes:
+    """Google Gemini image generation (free tier with an AI Studio key)."""
+    key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not key:
+        raise ProviderError("GEMINI_API_KEY not set")
+
+    model = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+    aspect = "16:9" if size[0] > size[1] else ("9:16" if size[0] < size[1] else "1:1")
+    response = requests.post(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+        headers={"x-goog-api-key": key},
+        json={
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseModalities": ["IMAGE"],
+                "imageConfig": {"aspectRatio": aspect},
+            },
+        },
+        timeout=120,
+    )
+    if not response.ok:
+        raise ProviderError(f"HTTP {response.status_code} {response.text[:200]}")
+    for candidate in response.json().get("candidates", []):
+        for part in candidate.get("content", {}).get("parts", []):
+            data = part.get("inlineData") or part.get("inline_data")
+            if data and data.get("data"):
+                return base64.b64decode(data["data"])
+    raise ProviderError(f"No image in response: {response.text[:200]}")
 
 
 def _local(prompt: str, size=(WIDTH, HEIGHT)) -> bytes:
@@ -122,13 +152,33 @@ def _local(prompt: str, size=(WIDTH, HEIGHT)) -> bytes:
     return buffer.getvalue()
 
 
-PROVIDERS = {"pollinations": _pollinations, "cloudflare": _cloudflare, "local": _local}
+PROVIDERS = {
+    "pollinations": _pollinations,
+    "cloudflare": _cloudflare,
+    "gemini": _gemini,
+    "local": _local,
+}
 
 
 def _cover(image: Image.Image, size=(WIDTH, HEIGHT)) -> Image.Image:
     """Scale and center-crop an image to fill the frame."""
     width, height = size
     image = image.convert("RGB")
+
+    # A square image in a wide frame would lose its top and bottom (heads get
+    # cut off), so show it whole over a blurred, stretched copy of itself
+    if image.width / image.height < (width / height) * 0.75:
+        background = image.resize((width, height), Image.LANCZOS).filter(
+            ImageFilter.GaussianBlur(radius=40)
+        )
+        fitted = image.resize(
+            (round(image.width * height / image.height), height), Image.LANCZOS
+        )
+        if fitted.width > image.width:
+            fitted = fitted.filter(ImageFilter.UnsharpMask(radius=2, percent=70, threshold=2))
+        background.paste(fitted, ((width - fitted.width) // 2, 0))
+        return background
+
     scale = max(width / image.width, height / image.height)
     image = image.resize(
         (round(image.width * scale), round(image.height * scale)), Image.LANCZOS
@@ -167,8 +217,11 @@ class ImageGenerator:
                 )
                 return provider
             except Exception as err:
-                self.failures[provider] += 1
-                self.on_log(f"   [{provider}] failed: {str(err)[:200]}", "warning")
+                message = str(err)
+                # A content-filter rejection is about this prompt, not the provider
+                if not re.search(r"nsfw|safety|content policy|blocked", message, re.IGNORECASE):
+                    self.failures[provider] += 1
+                self.on_log(f"   [{provider}] failed: {message[:200]}", "warning")
         return None
 
 
@@ -184,7 +237,9 @@ def group_scenes(sentences: List[str], durations: List[float], target: float = 3
     for sentence, duration in zip(sentences, durations):
         text = f"{carry_text} {sentence}".strip()
         duration += carry_time
-        if duration < 1.2:
+        # Merge short sentences until a scene is ~70% of the target, so a
+        # longer target means fewer images (stays within free image quotas)
+        if duration < max(1.2, target * 0.7):
             carry_text, carry_time = text, duration
             continue
         carry_text, carry_time = "", 0.0
@@ -252,30 +307,154 @@ def _ken_burns_segment(
     )
 
 
+# Letterbox layout: a 16:9 picture in the middle of a 1080x1920 frame, with a
+# title in the black bar above it (the classic animated-explainer Shorts look)
+LETTERBOX_FRAME = (1080, 1920)
+LETTERBOX_PICTURE = (1080, 608)
+LETTERBOX_TOP = 560
+
+NUMBER_WORDS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+    "eight": 8, "nine": 9, "ten": 10,
+}
+NUMBER_PATTERN = re.compile(r"^\s*number\s+(\d+|" + "|".join(NUMBER_WORDS) + r")\b", re.IGNORECASE)
+
+
+def _font(size: int):
+    from PIL import ImageFont
+
+    return ImageFont.truetype(str(Path(__file__).resolve().parent.parent / "fonts" / "bold_font.ttf"), size)
+
+
+def _draw_number(image_path: str, number: int) -> None:
+    """Stamp a big list number on the left of a scene image ("Number 3" scenes)."""
+    from PIL import ImageDraw
+
+    image = Image.open(image_path).convert("RGB")
+    draw = ImageDraw.Draw(image)
+    font = _font(int(image.height * 0.55))
+    text = str(number)
+    x, y = int(image.width * 0.05), int(image.height * 0.18)
+    draw.text((x, y), text, font=font, fill="#FFFFFF", stroke_width=max(6, image.height // 60), stroke_fill="#000000")
+    image.save(image_path, "JPEG", quality=95)
+
+
+def _title_frame(title: str, path: str) -> None:
+    """Black 1080x1920 frame with the video title in the top bar."""
+    import textwrap
+
+    from PIL import ImageDraw
+
+    frame = Image.new("RGB", LETTERBOX_FRAME, "#000000")
+    draw = ImageDraw.Draw(frame)
+    text = re.sub(r"#\w+", "", title).strip().upper()
+    size = 92
+    while size > 44:
+        font = _font(size)
+        lines = textwrap.wrap(text, width=max(8, int(1000 / (size * 0.55))))
+        if len(lines) * size * 1.15 <= LETTERBOX_TOP - 120 and max(draw.textlength(l, font=font) for l in lines) <= 1000:
+            break
+        size -= 6
+    line_height = int(size * 1.15)
+    y = (LETTERBOX_TOP - line_height * len(lines)) // 2 + 20
+    for i, line in enumerate(lines):
+        width = draw.textlength(line, font=font)
+        draw.text(
+            ((LETTERBOX_FRAME[0] - width) / 2, y),
+            line,
+            font=font,
+            fill="#FFFFFF" if i % 2 == 0 else "#FFD400",
+            stroke_width=4,
+            stroke_fill="#000000",
+        )
+        y += line_height
+    frame.save(path)
+
+
+def _sdxl_prompt(prompt: str) -> str:
+    """
+    SDXL reads only ~77 tokens, so put the scene first, swap the long character
+    description for a short one, and finish with a short style.
+    """
+    long_look = os.getenv("STORY_CHARACTER_LOOK", "").strip()
+    short_look = os.getenv("STORY_CHARACTER_LOOK_SHORT", "").strip()
+    if long_look and short_look:
+        prompt = prompt.replace(long_look, short_look)
+    style = os.getenv("IMAGE_STYLE_SHORT", "flat 2D cartoon illustration, clean bold outlines, simple light background")
+    # Keeps the main character big and in focus (SDXL tends to shrink him into crowds)
+    return f"{prompt}, main character large and centered in frame, medium shot, {style}"
+
+
 def build_ai_video(
     scenes: List[tuple],
     prompts: List[str],
     on_log=None,
     min_success_ratio: float = 0.6,
     size=(WIDTH, HEIGHT),
+    layout: str = "full",
+    title: str = "",
 ) -> str:
     """
-    Generate one image per scene and render them into a silent 1080x1920
-    video (default 1080x1920) whose length matches the narration.
+    Generate one image per scene and render them into a silent video
+    (default 1080x1920) whose length matches the narration.
+
+    layout="letterbox" renders 16:9 pictures inside a 1080x1920 frame with the
+    title in the top bar; scenes that start with "Number N" get a big N.
 
     Raises RuntimeError if too few images could be generated, so the caller
     can fall back to stock footage.
     """
     emit = on_log or (lambda message, level: log(message, level))
-    generator = ImageGenerator(on_log=emit, size=size)
+    picture_size = LETTERBOX_PICTURE if layout == "letterbox" else size
+    generator = ImageGenerator(on_log=emit, size=(1920, 1080) if layout == "letterbox" else size)
     work_dir = Path(TEMP_DIR) / f"ai_{uuid.uuid4().hex[:8]}"
     work_dir.mkdir(parents=True, exist_ok=True)
 
-    image_paths: List[Optional[str]] = []
+    image_paths: List[Optional[str]] = [None] * len(prompts)
+
+    order = [p.strip() for p in os.getenv("IMAGE_PROVIDERS", "").split(",") if p.strip()]
+    kaggle_first = bool(order) and order[0] == "kaggle"
+
+    def kaggle_batch(indices: List[int]) -> None:
+        """Generate the given scenes in one free Kaggle GPU run."""
+        if "kaggle" not in order or not indices:
+            return
+        try:
+            import kaggle_images
+
+            if not kaggle_images.available():
+                return
+            gen_size = (1344, 768) if generator.size[0] >= generator.size[1] else (768, 1344)
+            jobs = [
+                {"id": f"s{i:03d}", "prompt": _sdxl_prompt(prompts[i]), "width": gen_size[0], "height": gen_size[1]}
+                for i in indices
+            ]
+            results = kaggle_images.generate(jobs, on_log=emit)
+            for i in indices:
+                data = results.get(f"s{i:03d}")
+                if data:
+                    path = str(work_dir / f"scene_{i:02d}.jpg")
+                    _cover(Image.open(io.BytesIO(data)), generator.size).save(path, "JPEG", quality=92)
+                    image_paths[i] = path
+        except Exception as err:
+            emit(f"[-] Kaggle images failed: {str(err)[:200]}", "warning")
+
+    # Kaggle first only if it leads IMAGE_PROVIDERS; otherwise it fills gaps at the end
+    if kaggle_first:
+        kaggle_batch(list(range(len(prompts))))
+
     for i, prompt in enumerate(prompts):
+        if image_paths[i]:
+            continue
         emit(f"[+] Image {i + 1}/{len(prompts)}: {prompt[:90]}", "info")
         path = str(work_dir / f"scene_{i:02d}.jpg")
-        image_paths.append(path if generator.generate(prompt, path) else None)
+        image_paths[i] = path if generator.generate(prompt, path) else None
+
+    if not kaggle_first:
+        missing = [i for i, path in enumerate(image_paths) if not path]
+        if missing:
+            emit(f"[+] {len(missing)} images missing, generating them on Kaggle...", "info")
+            kaggle_batch(missing)
 
     made = sum(1 for p in image_paths if p)
     if made < max(1, int(len(prompts) * min_success_ratio)):
@@ -289,12 +468,136 @@ def build_ai_video(
         else:
             image_paths[i] = last
 
+    if layout == "letterbox":
+        for i, (text, _) in enumerate(scenes):
+            match = NUMBER_PATTERN.match(text)
+            if match:
+                word = match.group(1).lower()
+                number = int(word) if word.isdigit() else NUMBER_WORDS[word]
+                numbered = str(work_dir / f"scene_{i:02d}_n.jpg")
+                Image.open(image_paths[i]).save(numbered, "JPEG", quality=95)
+                _draw_number(numbered, number)
+                image_paths[i] = numbered
+
     emit("[+] Animating images...", "info")
     segment_list = work_dir / "segments.txt"
     with open(segment_list, "w", encoding="utf-8") as f:
         for i, ((_, duration), image_path) in enumerate(zip(scenes, image_paths)):
             segment = str(work_dir / f"segment_{i:02d}.mp4")
-            _ken_burns_segment(image_path, duration, i, segment, size)
+            _ken_burns_segment(image_path, duration, i, segment, picture_size)
+            f.write(f"file '{Path(segment).as_posix()}'\n")
+
+    concatenated = str(work_dir / "pictures.mp4")
+    subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y",
+            "-f", "concat", "-safe", "0", "-i", str(segment_list),
+            "-c", "copy", concatenated,
+        ],
+        check=True,
+    )
+
+    output = str(Path(TEMP_DIR) / f"{uuid.uuid4()}.mp4")
+    if layout != "letterbox":
+        os.replace(concatenated, output)
+        return output
+
+    frame_path = str(work_dir / "frame.png")
+    _title_frame(title, frame_path)
+    subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y",
+            "-loop", "1", "-i", frame_path,
+            "-i", concatenated,
+            "-filter_complex", f"[0:v][1:v]overlay=0:{LETTERBOX_TOP}:shortest=1,format=yuv420p",
+            "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "14",
+            output,
+        ],
+        check=True,
+    )
+    return output
+
+
+def build_stock_video(
+    scenes: List[tuple],
+    queries: List[str],
+    on_log=None,
+    size=(WIDTH, HEIGHT),
+    min_success_ratio: float = 0.6,
+) -> str:
+    """
+    Stock-footage version of build_ai_video: for each scene, search a clip
+    that matches what is being said, trim it to the scene's length and crop it
+    to `size`, then join the clips. Unlimited and free (Pixabay/Pexels).
+
+    Raises RuntimeError if too few scenes found a clip, so the caller can fall
+    back to the generic stock montage.
+    """
+    from search import search_for_stock_videos
+    from video import save_video
+
+    emit = on_log or (lambda message, level: log(message, level))
+    work_dir = Path(TEMP_DIR) / f"stock_{uuid.uuid4().hex[:8]}"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    used_urls = set()
+    clip_paths: List[Optional[str]] = []
+
+    for i, ((text, duration), query) in enumerate(zip(scenes, queries)):
+        emit(f"[+] Clip {i + 1}/{len(scenes)}: \"{query}\"", "info")
+        clip = None
+        # Try the full phrase, then a shorter version if nothing matches
+        for attempt in (query, " ".join(query.split()[-2:])):
+            try:
+                urls = search_for_stock_videos(attempt, 20, max(1, int(duration)))
+            except Exception as err:
+                emit(f"   search failed: {err}", "warning")
+                urls = []
+            for url in urls:
+                if url in used_urls:
+                    continue
+                try:
+                    clip = save_video(url, str(work_dir))
+                    used_urls.add(url)
+                    break
+                except Exception as err:
+                    emit(f"   download failed: {str(err)[:120]}", "warning")
+            if clip:
+                break
+        clip_paths.append(clip)
+
+    found = sum(1 for c in clip_paths if c)
+    if found < max(1, int(len(scenes) * min_success_ratio)):
+        raise RuntimeError(f"Only {found}/{len(scenes)} scenes found a stock clip.")
+
+    # Reuse the previous clip for any scene that found nothing
+    last = next(c for c in clip_paths if c)
+    for i, clip in enumerate(clip_paths):
+        if clip:
+            last = clip
+        else:
+            clip_paths[i] = last
+
+    emit("[+] Cutting clips...", "info")
+    segment_list = work_dir / "segments.txt"
+    width, height = size
+    with open(segment_list, "w", encoding="utf-8") as f:
+        for i, ((_, duration), clip) in enumerate(zip(scenes, clip_paths)):
+            segment = str(work_dir / f"segment_{i:03d}.mp4")
+            subprocess.run(
+                [
+                    imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y",
+                    # Loop clips that are shorter than their scene
+                    "-stream_loop", "-1", "-i", clip,
+                    "-t", f"{duration:.3f}",
+                    "-vf", (
+                        f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos,"
+                        f"crop={width}:{height},fps={FPS},format=yuv420p"
+                    ),
+                    "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "16",
+                    segment,
+                ],
+                check=True,
+            )
             f.write(f"file '{Path(segment).as_posix()}'\n")
 
     output = str(Path(TEMP_DIR) / f"{uuid.uuid4()}.mp4")

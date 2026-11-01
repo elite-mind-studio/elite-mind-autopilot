@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from gpt import (
     generate_image_prompts,
+    generate_stock_queries,
     generate_metadata,
     generate_script,
     get_search_terms,
@@ -26,8 +27,9 @@ from search import search_for_stock_videos
 from edgevoice import edge_tts_save
 from kokorovoice import kokoro_tts_save
 from tiktokvoice import tts
-from visuals import build_ai_video, group_scenes
+from visuals import build_ai_video, build_stock_video, group_scenes
 from utils import (
+    song_credit,
     BASE_DIR,
     PROJECT_ROOT,
     SONGS_DIR,
@@ -104,6 +106,9 @@ def run_generation_pipeline(
         voice,
         data["customPrompt"],
         video_format=video_format,
+        # Long videos can use their own style (e.g. "pov" stories)
+        script_style=data.get("scriptStyle")
+        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None),        series=data.get("series"),
     )
 
     if not script:
@@ -115,18 +120,32 @@ def run_generation_pipeline(
     # at a sentence boundary once it passes VIDEO_MAX_WORDS
     max_words = int(data.get("maxWords") or os.getenv("VIDEO_MAX_WORDS", "0") or 0)
     if max_words and len(script.split()) > max_words:
-        kept, count = [], 0
-        for sentence in re.split(SENTENCE_END, script.strip()):
-            words = len(sentence.split())
-            if kept and count + words > max_words:
+        original_words = len(script.split())
+        # Shorten every paragraph evenly (dropping closing sentences from the
+        # longest one first) so numbered list items are never cut off the end
+        paragraphs = [
+            [s for s in re.split(SENTENCE_END, p.strip()) if s.strip()]
+            for p in re.split(r"\n\s*\n", script.strip())
+            if p.strip()
+        ]
+        count = lambda: sum(len(s.split()) for p in paragraphs for s in p)
+        while count() > max_words:
+            longest = max(paragraphs, key=lambda p: sum(len(s.split()) for s in p))
+            # Keep at least the first two sentences ("Number one." + item name)
+            if len(longest) <= 2:
                 break
-            kept.append(sentence)
-            count += words
-        emit(f"[*] Script trimmed from {len(script.split())} to {count} words.", "info")
-        script = " ".join(kept)
+            longest.pop()
+        script = "\n\n".join(" ".join(p) for p in paragraphs)
+        emit(f"[*] Script trimmed from {original_words} to {count()} words.", "info")
 
     # Spoken outro appended to every video, e.g. "Like, share and subscribe!"
     call_to_action = os.getenv("VIDEO_CALL_TO_ACTION", "").strip()
+    series = data.get("series")
+    if series and series["part"] < series["parts"]:
+        # Series parts end with a reason to follow instead of the generic outro
+        call_to_action = (
+            f"Follow Elite Mind Decoder so you don't miss Part {series['part'] + 1}!"
+        )
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"
 
@@ -165,8 +184,13 @@ def run_generation_pipeline(
         return video_paths
 
     # "ai_images": AI-generated stills per scene; "stock": stock footage
-    visual_mode = os.getenv("VISUAL_MODE", "stock").strip().lower()
-    video_paths = fetch_stock_videos() if visual_mode != "ai_images" else []
+    visual_mode = (
+        data.get("visualMode")
+        or (os.getenv("LONG_VISUAL_MODE") if video_format == "long" else None)
+        or os.getenv("VISUAL_MODE", "stock")
+    ).strip().lower()
+    # Scene-matched modes fetch their own visuals after the voiceover
+    video_paths = fetch_stock_videos() if visual_mode == "stock" else []
 
     emit("[+] Script generated!", "success")
 
@@ -227,7 +251,24 @@ def run_generation_pipeline(
         )
 
     combined_video_path = None
-    if visual_mode == "ai_images":
+    if visual_mode == "stock_scenes":
+        # One stock clip per scene, matched to what is being said
+        scenes = group_scenes(
+            sentences,
+            sentence_durations,
+            target=float(data.get("sceneSeconds") or os.getenv("IMAGE_SCENE_SECONDS", "5")),
+        )
+        emit(f"[+] Finding stock footage for {len(scenes)} scenes...", "info")
+        queries = generate_stock_queries(data["videoSubject"], [text for text, _ in scenes])
+        unload_model(ai_model)
+        try:
+            combined_video_path = build_stock_video(
+                scenes, queries, on_log=emit, size=frame_size
+            )
+        except Exception as err:
+            emit(f"[-] Scene stock footage failed, using a stock montage: {err}", "warning")
+            video_paths = fetch_stock_videos()
+    elif visual_mode == "ai_images":
         scenes = group_scenes(
             sentences,
             sentence_durations,
@@ -240,9 +281,18 @@ def run_generation_pipeline(
         # Free the model's RAM before image generation and rendering
         unload_model(ai_model)
         try:
+            # Shorts can use the letterbox "explainer" layout with a title bar
+            layout = os.getenv("VIDEO_LAYOUT", "full") if video_format == "short" else "full"
             combined_video_path = build_ai_video(
-                scenes, prompts, on_log=emit, size=frame_size
+                scenes,
+                prompts,
+                on_log=emit,
+                size=frame_size,
+                layout=layout,
+                title=data.get("title") or data["videoSubject"],
             )
+            if layout == "letterbox":
+                subtitles_position = "center,letterbox"
         except Exception as err:
             emit(f"[-] AI images failed, falling back to stock footage: {err}", "warning")
             video_paths = fetch_stock_videos()
@@ -277,6 +327,12 @@ def run_generation_pipeline(
     title, description, keywords = generate_metadata(
         data["videoSubject"], script, ai_model
     )
+    if series:
+        # Series parts keep a consistent, numbered title so viewers can binge in order
+        title = data["videoSubject"][:100]
+    elif video_format == "long" and data["videoSubject"].lower().startswith("pov:"):
+        # "POV: You're ..." titles are the hook itself, keep them exactly
+        title = data["videoSubject"][:100]
 
     emit("[-] Metadata for YouTube upload:", "info")
     emit("   Title:", "info")
@@ -286,79 +342,13 @@ def run_generation_pipeline(
     emit("   Keywords:", "info")
     emit(f"  {', '.join(keywords)}", "info")
 
-    if automate_youtube_upload:
-        client_secrets_file = str((BASE_DIR / "client_secret.json").resolve())
-        skip_yt_upload = False
-        if not os.path.exists(client_secrets_file):
-            skip_yt_upload = True
-            emit(
-                "[-] Client secrets file missing. YouTube upload will be skipped.",
-                "warning",
-            )
-            emit(
-                "[-] Please download the client_secret.json from Google Cloud Platform and store this inside the /Backend directory.",
-                "error",
-            )
-
-        if not skip_yt_upload:
-            video_category_id = os.getenv("YOUTUBE_CATEGORY_ID", "28")
-            privacy_status = os.getenv("YOUTUBE_PRIVACY_STATUS", "private")
-            # e.g. "Educational content only, not financial advice."
-            footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
-            video_metadata = {
-                "video_path": str((TEMP_DIR / final_video_path).resolve()),
-                "title": title,
-                "description": f"{description}\n\n{footer}" if footer else description,
-                "category": video_category_id,
-                "keywords": ",".join(keywords),
-                "privacyStatus": privacy_status,
-            }
-
-            try:
-                video_response = upload_video(
-                    video_path=video_metadata["video_path"],
-                    title=video_metadata["title"],
-                    description=video_metadata["description"],
-                    category=video_metadata["category"],
-                    keywords=video_metadata["keywords"],
-                    privacy_status=video_metadata["privacyStatus"],
-                )
-                emit(f"Uploaded video ID: {video_response.get('id')}", "success")
-
-                # Thumbnail failures shouldn't fail an already-uploaded video
-                try:
-                    thumbnail_path = generate_thumbnail(
-                        combined_video_path,
-                        title,
-                        size=(1280, 720) if video_format == "long" else (1080, 1920),
-                    )
-                    set_thumbnail(video_response.get("id"), thumbnail_path)
-                    emit("[+] Custom thumbnail set.", "success")
-                except Exception as thumb_err:
-                    emit(
-                        f"[-] Could not set thumbnail (is the channel phone-verified?): {thumb_err}",
-                        "warning",
-                    )
-
-                # Group uploads in a playlist so viewers binge (more watch time)
-                playlist_title = os.getenv("YOUTUBE_PLAYLIST", "").strip()
-                if playlist_title:
-                    try:
-                        add_to_playlist(video_response.get("id"), playlist_title)
-                        emit(f"[+] Added to playlist: {playlist_title}", "success")
-                    except Exception as playlist_err:
-                        emit(f"[-] Could not add to playlist: {playlist_err}", "warning")
-            except HttpError as err:
-                emit(
-                    f"An HTTP error {err.resp.status} occurred:\n{err.content}", "error"
-                )
-
     final_output_path = str(PROJECT_ROOT / final_video_path)
     rendered_video_path = str(TEMP_DIR / final_video_path)
     render_threads = n_threads or (os.cpu_count() or 2)
 
     guard_cancelled()
 
+    music_credit = ""
     if use_music:
         song_path = choose_random_song()
 
@@ -370,6 +360,7 @@ def run_generation_pipeline(
             use_music = False
 
         if use_music:
+            music_credit = song_credit(song_path)
             video_clip = VideoFileClip(rendered_video_path)
             song_clip = None
             mixed_audio = None
@@ -381,7 +372,7 @@ def run_generation_pipeline(
                 song_clip = song_clip.with_effects(
                     [afx.AudioLoop(duration=original_duration)]
                 )
-                song_clip = song_clip.with_volume_scaled(0.1).with_fps(44100)
+                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1"))).with_fps(44100)
 
                 mixed_audio = CompositeAudioClip(
                     [original_audio, song_clip]
@@ -439,7 +430,7 @@ def run_generation_pipeline(
                     song_clip = song_clip.with_effects(
                         [afx.AudioLoop(duration=original_duration)]
                     )
-                    song_clip = song_clip.with_volume_scaled(0.1).with_fps(44100)
+                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1"))).with_fps(44100)
                     comp_audio = CompositeAudioClip(
                         [original_audio, song_clip]
                     ).with_duration(original_duration)
@@ -466,6 +457,78 @@ def run_generation_pipeline(
 
     if not use_music:
         shutil.copy2(rendered_video_path, final_output_path)
+
+    if automate_youtube_upload:
+        client_secrets_file = str((BASE_DIR / "client_secret.json").resolve())
+        skip_yt_upload = False
+        if not os.path.exists(client_secrets_file):
+            skip_yt_upload = True
+            emit(
+                "[-] Client secrets file missing. YouTube upload will be skipped.",
+                "warning",
+            )
+            emit(
+                "[-] Please download the client_secret.json from Google Cloud Platform and store this inside the /Backend directory.",
+                "error",
+            )
+
+        if not skip_yt_upload:
+            video_category_id = os.getenv("YOUTUBE_CATEGORY_ID", "28")
+            privacy_status = os.getenv("YOUTUBE_PRIVACY_STATUS", "private")
+            # e.g. "Educational content only, not financial advice."
+            footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
+            video_metadata = {
+                "video_path": final_output_path,
+                "title": title,
+                "description": "\n\n".join(
+                    part for part in (description, music_credit, footer) if part
+                ),
+                "category": video_category_id,
+                "keywords": ",".join(keywords),
+                "privacyStatus": privacy_status,
+            }
+
+            try:
+                video_response = upload_video(
+                    video_path=video_metadata["video_path"],
+                    title=video_metadata["title"],
+                    description=video_metadata["description"],
+                    category=video_metadata["category"],
+                    keywords=video_metadata["keywords"],
+                    privacy_status=video_metadata["privacyStatus"],
+                )
+                emit(f"Uploaded video ID: {video_response.get('id')}", "success")
+
+                # Thumbnail failures shouldn't fail an already-uploaded video
+                try:
+                    thumbnail_path = generate_thumbnail(
+                        combined_video_path,
+                        title,
+                        size=(1280, 720) if video_format == "long" else (1080, 1920),
+                    )
+                    set_thumbnail(video_response.get("id"), thumbnail_path)
+                    emit("[+] Custom thumbnail set.", "success")
+                except Exception as thumb_err:
+                    emit(
+                        f"[-] Could not set thumbnail (is the channel phone-verified?): {thumb_err}",
+                        "warning",
+                    )
+
+                # Group uploads in a playlist so viewers binge (more watch time)
+                playlist_titles = [os.getenv("YOUTUBE_PLAYLIST", "").strip()]
+                if series:
+                    playlist_titles.append(series["title"].title())
+                for playlist_title in [t for t in playlist_titles if t]:
+                    try:
+                        add_to_playlist(video_response.get("id"), playlist_title)
+                        emit(f"[+] Added to playlist: {playlist_title}", "success")
+                    except Exception as playlist_err:
+                        emit(f"[-] Could not add to playlist: {playlist_err}", "warning")
+            except HttpError as err:
+                emit(
+                    f"An HTTP error {err.resp.status} occurred:\n{err.content}", "error"
+                )
+
 
     emit(f"[+] Video generated: {final_video_path}!", "success")
 

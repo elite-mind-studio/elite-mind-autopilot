@@ -45,22 +45,36 @@ jobs:
       VIDEO_CALL_TO_ACTION: "Like, share and subscribe to Elite Mind Decoder for more!"
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"
       AUTOPILOT_VOICE: "kokoro:am_onyx"
-      AUTOPILOT_PARAGRAPHS: "4"
-      VIDEO_MAX_WORDS: "270"
+      AUTOPILOT_PARAGRAPHS: "8"
+      VIDEO_MAX_WORDS: "470"
       VISUAL_MODE: ai_images
-      TEXT_PROVIDER: pollinations
+      TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"
-      STORY_CHARACTER_LOOK: "a confident businessman in his late 40s with dark skin, short black hair with grey at the temples, a neat short beard, wearing a tailored black suit, black shirt and a gold wristwatch"
-      IMAGE_SCENE_SECONDS: "3.5"
+      STORY_CHARACTER_LOOK: "a simple flat 2D cartoon man with dark brown skin, a round head, short black hair with grey temples, a neat short beard, wearing a black suit, black shirt and a gold wristwatch"
+      IMAGE_SCENE_SECONDS: "10"
       # Local Stable Diffusion is too heavy for the runner; stock footage is the last fallback
-      IMAGE_PROVIDERS: "pollinations,cloudflare"
+      IMAGE_PROVIDERS: "cloudflare,kaggle,pollinations"
       POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      TEXT_PROVIDERS: "groq,cloudflare,pollinations"
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       AUTOPILOT_STOCK_VIDEOS: "12"
-      AUTOPILOT_LONG_PARAGRAPHS: "14"
-      AUTOPILOT_LONG_MAX_WORDS: "1600"
-      AUTOPILOT_LONG_SCENE_SECONDS: "9"
+      AUTOPILOT_LONG_PARAGRAPHS: "10"
+      AUTOPILOT_LONG_MAX_WORDS: "1500"
+      AUTOPILOT_LONG_SCENE_SECONDS: "5"
+      VIDEO_LAYOUT: "letterbox"
+      SCRIPT_STYLE: "listicle"
+      KOKORO_SPEED: "1.1"
+      IMAGE_STYLE: "flat 2D vector cartoon illustration, explainer animation style, clean simple shapes, bold dark outlines, plain light cream background, bright friendly colors, minimal detail, 16:9 composition"
+      IMAGE_PROMPT_KIND: "Flat 2D cartoon illustration"
+      AUTOPILOT_CAPTION_COLOR: "#FFE600"
+      CLOUDFLARE_STEPS: "4"
+      LONG_SCRIPT_STYLE: "pov"
+      LONG_VISUAL_MODE: "stock_scenes"
       YOUTUBE_SYNTHETIC_MEDIA: "true"
       YOUTUBE_DESCRIPTION_FOOTER: "Educational content only - not financial advice. Visuals and narration are AI-generated."
       YOUTUBE_PLAYLIST: "Black's Money Lessons"
@@ -105,6 +119,15 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://localhost:11434/api/tags && break; sleep 2; done
           OLLAMA_MODELS="$HOME/.ollama/models" ollama pull "$OLLAMA_MODEL"
 
+      - name: Download background music
+        run: |
+          mkdir -p Songs
+          : > Songs/credits.txt
+          for t in "Sneaky Snitch" "Fluffing a Duck" "Carefree" "Wallpaper" "Investigations" "Monkeys Spinning Monkeys"; do
+            curl -sfL -o "Songs/$t.mp3" "https://incompetech.com/music/royalty-free/mp3-royaltyfree/${t// /%20}.mp3" || continue
+            echo "$t.mp3 | Music: \"$t\" Kevin MacLeod (incompetech.com) - Licensed under Creative Commons: By Attribution 4.0 License - http://creativecommons.org/licenses/by/4.0/" >> Songs/credits.txt
+          done
+
       - name: Write YouTube credentials
         env:
           CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
@@ -141,6 +164,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add topics.txt topics_used.txt topics_long.txt topics_long_used.txt 2>/dev/null || true
           git add topics.txt topics_used.txt
           git commit -m "autopilot: mark topic as used" || exit 0
           git pull --rebase

@@ -29,6 +29,22 @@ if sys.stdout is None or sys.stderr is None:
     sys.stdout = sys.stdout or _log_file
     sys.stderr = sys.stderr or _log_file
 
+# Child processes (ffmpeg) started from pythonw.exe would each open a console
+# window; closing one kills the render (exit 0xC000013A). Start them hidden.
+import os as _os
+if _os.name == "nt":
+    import subprocess as _subprocess
+
+    _original_popen_init = _subprocess.Popen.__init__
+
+    def _popen_no_window(self, *args, **kwargs):
+        if not kwargs.get("creationflags"):
+            kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
+        _original_popen_init(self, *args, **kwargs)
+
+    _subprocess.Popen.__init__ = _popen_no_window
+
+
 import json
 import os
 import random
@@ -50,6 +66,8 @@ from sqlalchemy import select  # noqa: E402
 
 TOPICS_FILE = PROJECT_ROOT / "topics.txt"
 USED_TOPICS_FILE = PROJECT_ROOT / "topics_used.txt"
+LONG_TOPICS_FILE = PROJECT_ROOT / "topics_long.txt"
+LONG_USED_TOPICS_FILE = PROJECT_ROOT / "topics_long_used.txt"
 STATE_FILE = PROJECT_ROOT / "autopilot_state.json"
 
 # Posting windows for `tick`: each day one random time is picked inside each
@@ -76,12 +94,29 @@ def _read_lines(path: Path) -> List[str]:
     return [line.strip() for line in lines if line.strip() and not line.startswith("#")]
 
 
-def _generate_topics(used: List[str]) -> List[str]:
+def _topic_files(video_format: str = "short"):
+    """Shorts and long videos keep separate topic queues."""
+    if video_format == "long":
+        return LONG_TOPICS_FILE, LONG_USED_TOPICS_FILE
+    return TOPICS_FILE, USED_TOPICS_FILE
+
+
+def _generate_topics(used: List[str], video_format: str = "short") -> List[str]:
     recent = "\n".join(f"- {t}" for t in used[-50:])
+    if video_format == "long":
+        kind = (
+            "long-form YouTube video topics in the viral 'POV' format, where the viewer "
+            "lives an escalating money scenario, for example: 'POV: You're a billionaire "
+            "for 24 hours' or 'POV: You won 10 million dollars in the lottery'"
+        )
+    else:
+        kind = (
+            "YouTube Shorts topics as short numbered-list titles, for example: "
+            "'7 pricing tricks stores use on you' or '6 money habits that keep you broke'"
+        )
     prompt = (
-        f"Generate {NEW_TOPICS_BATCH} new, specific, catchy YouTube Shorts video topics "
+        f"Generate {NEW_TOPICS_BATCH} new, specific, catchy {kind}, "
         f"for a channel about {NICHE}.\n"
-        "Each topic is a short title, for example: '5 habits of people with elite mindsets'.\n"
         f"Do not repeat any of these already-used topics:\n{recent}\n\n"
         "Return ONLY a JSON array of strings, nothing else."
     )
@@ -89,39 +124,64 @@ def _generate_topics(used: List[str]) -> List[str]:
 
     match = re.search(r"\[.*\]", response, re.DOTALL)
     if not match:
-        raise RuntimeError(f"Could not parse topics from Ollama response: {response}")
+        raise RuntimeError(f"Could not parse topics from model response: {response}")
 
     used_lower = {t.lower() for t in used}
     topics = [str(t).strip() for t in json.loads(match.group(0))]
     return [t for t in topics if t and t.lower() not in used_lower]
 
 
-def peek_topic() -> str:
+def peek_topic(video_format: str = "short") -> str:
     """Return the next topic without consuming it, generating more if needed."""
-    topics = _read_lines(TOPICS_FILE)
+    topics_file, used_file = _topic_files(video_format)
+    topics = _read_lines(topics_file)
 
     if not topics:
-        print("[*] topics.txt is empty, generating new topics with Ollama...")
-        topics = _generate_topics(_read_lines(USED_TOPICS_FILE))
+        print(f"[*] {topics_file.name} is empty, generating new topics...")
+        topics = _generate_topics(_read_lines(used_file), video_format)
         if not topics:
-            raise RuntimeError("Ollama did not return any new topics.")
-        TOPICS_FILE.write_text("\n".join(topics) + "\n", encoding="utf-8")
+            raise RuntimeError("The model did not return any new topics.")
+        topics_file.write_text("\n".join(topics) + "\n", encoding="utf-8")
 
     return topics[0]
 
 
-def mark_topic_used(topic: str) -> None:
-    """Move a topic from topics.txt to topics_used.txt."""
-    remaining = [t for t in _read_lines(TOPICS_FILE) if t != topic]
-    TOPICS_FILE.write_text("\n".join(remaining) + "\n", encoding="utf-8")
-    with USED_TOPICS_FILE.open("a", encoding="utf-8") as f:
+def mark_topic_used(topic: str, video_format: str = "short") -> None:
+    """Move a topic from the topics file to the used-topics file."""
+    topics_file, used_file = _topic_files(video_format)
+    remaining = [t for t in _read_lines(topics_file) if t != topic]
+    topics_file.write_text("\n".join(remaining) + "\n", encoding="utf-8")
+    with used_file.open("a", encoding="utf-8") as f:
         f.write(topic + "\n")
 
 
-def next_topic() -> str:
-    topic = peek_topic()
-    mark_topic_used(topic)
+def next_topic(video_format: str = "short") -> str:
+    topic = peek_topic(video_format)
+    mark_topic_used(topic, video_format)
     return topic
+
+
+SERIES_PATTERN = re.compile(
+    r"^(?P<series>.+?)\s*\(Part\s*(?P<part>\d+)\s*/\s*(?P<parts>\d+)\)\s*:?\s*(?P<episode>[^|]*?)\s*(?:\|\s*Next:\s*(?P<next>.+))?$",
+    re.IGNORECASE,
+)
+
+
+def parse_series(topic: str) -> Optional[dict]:
+    """
+    Parse a series topic line such as
+    "Psychology tricks to control any room (Part 1/5): First impressions | Next: Body language".
+    """
+    match = SERIES_PATTERN.match(topic.strip())
+    if not match:
+        return None
+    return {
+        "title": match.group("series").strip(),
+        "part": int(match.group("part")),
+        "parts": int(match.group("parts")),
+        "episode": (match.group("episode") or "").strip(),
+        "next": (match.group("next") or "").strip(),
+    }
 
 
 def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict:
@@ -135,7 +195,12 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
             "stockVideos": int(os.getenv("AUTOPILOT_LONG_STOCK_VIDEOS", "40")),
             "subtitlesPosition": "center,bottom",
         }
+    series = parse_series(topic)
+    if series:
+        # The "| Next: ..." hint is for the script, not the title
+        topic = topic.split("|")[0].strip()
     return {
+        "series": series,
         "format": "short",
         "videoSubject": topic,
         "aiModel": os.getenv("OLLAMA_MODEL", ""),
@@ -146,7 +211,7 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
         "paragraphNumber": int(os.getenv("AUTOPILOT_PARAGRAPHS", "3")),
         "stockVideos": int(os.getenv("AUTOPILOT_STOCK_VIDEOS", "5")),
         "subtitlesPosition": "center,center",
-        "color": "#FFFFFF",
+        "color": os.getenv("AUTOPILOT_CAPTION_COLOR", "#FFFFFF"),
         "customPrompt": "",
         "useMusic": True,
         "automateYoutubeUpload": upload,
@@ -156,7 +221,7 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
 def queue_video(
     allow_upload: bool = True, topic: Optional[str] = None, video_format: str = "short"
 ) -> str:
-    topic = topic or next_topic()
+    topic = topic or next_topic(video_format)
     upload = allow_upload and (BASE_DIR / "client_secret.json").exists()
 
     init_db()
@@ -213,7 +278,7 @@ def tick() -> None:
         busy = session.execute(
             select(GenerationJob.id).where(GenerationJob.status.in_(["queued", "running"]))
         ).first()
-    if busy:
+    if busy and os.getenv("AUTOPILOT_TICK_MODE", "queue").strip().lower() != "run":
         print("[*] A video is already being made, checking again later.")
         return
 
@@ -224,6 +289,34 @@ def tick() -> None:
         video_format = formats[i]
 
         job_id = state["jobs"][i]
+
+        # "run" mode: make the video in this process (always the newest code,
+        # no long-running worker needed). A failed run is retried on a later tick.
+        if os.getenv("AUTOPILOT_TICK_MODE", "queue").strip().lower() == "run":
+            if job_id == "done" or state["attempts"][i] >= MAX_ATTEMPTS_PER_SLOT:
+                continue
+            # Another tick is already making this post; only take over if it
+            # looks abandoned (e.g. the PC was shut down mid-render)
+            started = (state.get("started") or {}).get(str(i))
+            if job_id == "running" and started and (
+                datetime.now() - datetime.fromisoformat(started)
+            ) < timedelta(hours=4):
+                print(f"[*] Post {i + 1} is already being made, checking again later.")
+                return
+            print(f"[+] Post {i + 1} ({video_format}) was due at {slot}, making it now.")
+            state.setdefault("started", {})[str(i)] = datetime.now().isoformat(timespec="seconds")
+            state["jobs"][i] = "running"
+            state["attempts"][i] += 1
+            STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+            try:
+                run_video(video_format=video_format)
+                state["jobs"][i] = "done"
+            except Exception as err:
+                print(f"[-] Post {i + 1} failed: {err}")
+                state["jobs"][i] = "failed"
+            STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+            return
+
         if job_id:
             with SessionLocal() as session:
                 job = get_job(session, job_id)
@@ -254,10 +347,15 @@ def run_video(allow_upload: bool = True, video_format: str = "short") -> None:
     from utils import SUBTITLES_DIR, TEMP_DIR, check_env_vars, clean_dir
 
     check_env_vars()
+    if os.name == "nt":
+        # Keep Windows awake until this process exits (sleep paused a long render once)
+        import ctypes
+
+        ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)
     clean_dir(str(TEMP_DIR))
     clean_dir(str(SUBTITLES_DIR))
 
-    topic = peek_topic()
+    topic = peek_topic(video_format)
     upload = allow_upload and (BASE_DIR / "client_secret.json").exists()
     print(f"[+] Generating: {topic} (upload: {upload})")
 
@@ -277,7 +375,7 @@ def run_video(allow_upload: bool = True, video_format: str = "short") -> None:
 
     # Test runs don't consume the topic, so it still gets posted for real later
     if allow_upload:
-        mark_topic_used(topic)
+        mark_topic_used(topic, video_format)
     print(f"[+] Done: {topic}")
 
 

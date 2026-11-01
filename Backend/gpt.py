@@ -97,11 +97,11 @@ def generate_response(prompt: str, ai_model: str) -> str:
     model_name = (ai_model or "").strip() or OLLAMA_MODEL
 
     # Optional: use a fast hosted model, falling back to local Ollama on failure
-    if os.getenv("TEXT_PROVIDER", "ollama").strip().lower() == "pollinations":
+    if os.getenv("TEXT_PROVIDER", "ollama").strip().lower() in ("pollinations", "hosted"):
         try:
-            return pollinations_chat(prompt).strip()
+            return hosted_chat(prompt).strip()
         except Exception as err:
-            log(f"[-] Pollinations text failed, using Ollama: {err}", "warning")
+            log(f"[-] Hosted text failed, using Ollama: {err}", "warning")
 
     try:
         client = _ollama_client()
@@ -168,6 +168,8 @@ def generate_script(
     voice: str,
     customPrompt: str,
     video_format: str = "short",
+    script_style: Optional[str] = None,
+    series: Optional[dict] = None,
 ) -> Optional[str]:
     """
     Generate a script for a video, depending on the subject of the video, the number of paragraphs, and the AI model.
@@ -243,6 +245,79 @@ def generate_script(
 
     # Recurring story character, e.g. "Mr. Black", who the lesson is told through
     character = os.getenv("STORY_CHARACTER", "").strip()
+    script_style = (script_style or os.getenv("SCRIPT_STYLE", "story")).strip().lower()
+    if series:
+        part, parts = series["part"], series["parts"]
+        recap = (
+            f"Right after the opening line, add ONE short sentence that recaps the previous "
+            f"part of the series, then move on."
+            if part > 1 else "This is the first part, so briefly promise the viewer the whole series."
+        )
+        ending = (
+            f'End with a one-sentence cliffhanger that teases the next part: "{series["next"]}", '
+            f"making the viewer curious, but do NOT ask them to follow or subscribe (that is added separately)."
+            if part < parts and series.get("next")
+            else "This is the final part: end with a strong one-sentence takeaway that sums up the whole series."
+        )
+        prompt += f"""
+            This video is PART {part} OF {parts} of the series "{series['title']}".
+            This part covers: {series.get('episode') or video_subject}. Cover exactly 3 items in it.
+            The opening line should mention it is part {part} of {parts}.
+            {recap}
+            {ending}
+            Keep it practical, ethical and realistic: confidence and social skills, not manipulation.
+        """
+
+    if script_style == "pov":
+        prompt += """
+            Style: an immersive second-person "POV" story, like the hit YouTube channel
+            format "POV: You're a Trillionaire". The viewer IS the main character: always
+            say "you" ("You wake up...", "You walk into..."), present tense.
+            1. Open with one gripping sentence that drops the viewer straight into the
+               scenario (e.g. "You wake up, check your phone, and your bank account now
+               has ten million dollars in it.").
+            2. Build the story in clear stages that ESCALATE - each stage bigger, crazier
+               or more surprising than the last (first hour, first day, first week, first
+               year...). Every few lines add a twist, a consequence or a funny detail.
+            3. Weave real facts and money psychology into the story naturally (how things
+               actually work: taxes, lifestyle inflation, how the rich protect wealth),
+               without telling the viewer what to buy or invest in.
+            4. Describe concrete, visual moments (places, objects, people, actions) so every
+               line can be shown on screen.
+            5. End with a twist or a reflective line that makes the viewer think.
+            LENGTH: this is a long video. Write about {target_words} words in total, with
+            6 to 10 sentences per stage. Do not stop early.
+            Paragraphs: one per stage.
+        """.replace("{target_words}", str(int(os.getenv("AUTOPILOT_LONG_MAX_WORDS", "1500")) - 100))
+        character = ""
+
+    if script_style == "listicle":
+        prompt += """
+            Style: a fast, punchy, casual numbered-list explainer, talking directly to the
+            viewer as "you", like a confident friend.
+            0. LENGTH IS STRICT: the whole script must be under {max_words} words and must
+               cover EVERY item promised in the title. Keep each item to about 35-45 words.
+            1. Open with ONE sentence that states how many items and teases them, then
+               challenges the viewer, e.g. "So, here are 7 money traps that keep you broke,
+               and I bet you have fallen for at least 4 of them." Then go straight to
+               "Number one." - no extra intro sentences.
+            2. Then each item paragraph MUST start exactly like this, as two separate short
+               sentences: "Number one. Living paycheck to paycheck." - the number spelled out
+               and followed by a full stop, then the item name and a full stop. Never write
+               "Number one is..." or "Number one, ..." and never mention a number in the opening.
+               After that, 3 to 5 punchy sentences explaining it with
+               funny, concrete everyday examples (a coffee shop, a sale at the mall, a 3 a.m.
+               online order). Use lists of three and rhetorical questions.
+            3. Repeat a short catchy phrase tied to the topic across items.
+            4. End with one short, quotable line that sums it all up.
+            Paragraphs: one per item (the opening is its own paragraph).
+        """.replace("{max_words}", str(int(os.getenv("VIDEO_MAX_WORDS", "450") or 450) - 20))
+        # The opening + one paragraph per item must all fit
+        numbers = re.findall(r"\b(\d+)\b", video_subject)
+        if numbers:
+            paragraph_number = max(paragraph_number, int(numbers[0]) + 1)
+        character = ""
+
     if character:
         prompt += f"""
             Structure:
@@ -269,7 +344,7 @@ def generate_script(
 
     Subject: {video_subject}
     Number of paragraphs: {paragraph_number}
-    Language: {voice}
+    Language: English
 
     """
 
@@ -277,6 +352,12 @@ def generate_script(
     response = generate_response(prompt, ai_model)
 
     log(response, "info")
+
+    # Reject provider error text or a suspiciously short reply instead of
+    # narrating it
+    if response and (_looks_like_service_error(response) or len(response.split()) < 40):
+        log(f"[-] Rejected invalid script: {response[:120]}", "error")
+        return None
 
     # Return the generated script
     if response:
@@ -420,7 +501,132 @@ def pollinations_chat(prompt: str, timeout: int = 90) -> str:
         timeout=timeout,
     )
     response.raise_for_status()
-    return response.json()["choices"][0]["message"]["content"]
+    content = response.json()["choices"][0]["message"]["content"]
+    # Pollinations sometimes answers "out of credits" as a normal chat reply;
+    # never let that text be used as a script or prompt
+    if _looks_like_service_error(content):
+        raise RuntimeError(f"Pollinations returned a service message: {content[:120]}")
+    return content
+
+
+def cloudflare_chat(prompt: str, timeout: int = 120) -> str:
+    """
+    Run a prompt on a Cloudflare Workers AI text model (free daily allowance,
+    same CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN as image generation).
+
+    Args:
+        prompt (str): The user prompt.
+        timeout (int): Request timeout in seconds.
+
+    Returns:
+        str: The model's reply.
+    """
+    import requests
+
+    account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "").strip()
+    token = os.getenv("CLOUDFLARE_API_TOKEN", "").strip()
+    if not account or not token:
+        raise RuntimeError("CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN not set")
+    model = os.getenv("CLOUDFLARE_TEXT_MODEL", "@cf/meta/llama-3.3-70b-instruct-fp8-fast")
+    response = requests.post(
+        f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"messages": [{"role": "user", "content": prompt}], "max_tokens": 4096},
+        timeout=timeout,
+    )
+    if not response.ok:
+        raise RuntimeError(f"Cloudflare text HTTP {response.status_code}: {response.text[:200]}")
+    content = response.json().get("result", {}).get("response", "")
+    if not isinstance(content, str):
+        content = json.dumps(content)
+    if not content.strip() or _looks_like_service_error(content):
+        raise RuntimeError(f"Cloudflare text returned no usable reply: {content[:120]}")
+    return content
+
+
+def groq_chat(prompt: str, timeout: int = 120) -> str:
+    """
+    Run a prompt on Groq (free tier, no card; key from console.groq.com).
+
+    Args:
+        prompt (str): The user prompt.
+        timeout (int): Request timeout in seconds.
+
+    Returns:
+        str: The model's reply.
+    """
+    import requests
+
+    key = os.getenv("GROQ_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("GROQ_API_KEY not set")
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {key}"},
+        json={
+            "model": os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+            "messages": [{"role": "user", "content": prompt}],
+            # gpt-oss is a reasoning model: keep its thinking short and leave
+            # room for long scripts, or the answer can come back empty
+            "reasoning_effort": "low",
+            "max_completion_tokens": 8192,
+        },
+        timeout=timeout,
+    )
+    if not response.ok:
+        raise RuntimeError(f"Groq HTTP {response.status_code}: {response.text[:200]}")
+    content = response.json()["choices"][0]["message"].get("content") or ""
+    if not content.strip() or _looks_like_service_error(content):
+        raise RuntimeError(f"Groq returned no usable reply: {content[:120]}")
+    return content
+
+
+def hosted_chat(prompt: str) -> str:
+    """
+    Try the hosted text providers in TEXT_PROVIDERS order (default
+    "groq,pollinations,cloudflare"); raises if all of them fail.
+    """
+    errors = []
+    order = os.getenv("TEXT_PROVIDERS", "groq,pollinations,cloudflare")
+    for provider in [p.strip() for p in order.split(",") if p.strip()]:
+        try:
+            if provider == "groq":
+                return _normalize_text(groq_chat(prompt))
+            if provider == "pollinations":
+                return _normalize_text(pollinations_chat(prompt))
+            if provider == "cloudflare":
+                return _normalize_text(cloudflare_chat(prompt))
+        except Exception as err:
+            errors.append(f"{provider}: {str(err)[:120]}")
+    raise RuntimeError("; ".join(errors) or "no hosted text provider configured")
+
+
+# Typographic characters some models emit; they break the Windows console and
+# can confuse text-to-speech. Em/en dashes are kept (they mark dramatic pauses).
+_CHAR_FIXES = {
+    " ": " ", " ": " ", " ": " ", "​": "",
+    "‐": "-", "‑": "-", "‒": "-", "‘": "'", "’": "'", "“": '"', "”": '"', "…": "...",
+}
+
+
+def _normalize_text(text: str) -> str:
+    for bad, good in _CHAR_FIXES.items():
+        text = text.replace(bad, good)
+    return text
+
+
+def _looks_like_service_error(text: str) -> bool:
+    """True for provider error/billing messages returned as normal text."""
+    lowered = (text or "").lower()
+    # Real error replies are short; a long script that happens to say "top up"
+    # or "quota" in its story is not one
+    if len((text or "").split()) > 120:
+        return False
+    markers = (
+        "api key", "top up", "top-up", "enough credits", "insufficient balance",
+        "pollinations", "rate limit", "quota", "complete a quest",
+    )
+    return any(marker in lowered for marker in markers)
 
 
 def generate_image_prompts(
@@ -457,7 +663,7 @@ Rules:
 - Anything named must appear exactly: a place named -> that place (Italy -> an Italian piazza
   with Italian architecture; Wall Street -> Wall Street); "streets" -> people walking on a busy street;
   a person or job named -> that person/job; an object named -> that object.
-- Realistic, cinematic photo. One clear subject. Max 30 words.
+- {{image_kind}}. One clear subject. Max 30 words.
 - No readable text, words, numbers, signs, logos or charts in the picture.
 {{character_rule}}
 Lines:
@@ -478,19 +684,18 @@ Return ONLY a JSON array with exactly {len(scenes)} objects in the same order:
             f"when the line is clearly about other people or a place on its own."
         )
     prompt = prompt.replace("{character_rule}", character_rule)
+    prompt = prompt.replace(
+        "{image_kind}", os.getenv("IMAGE_PROMPT_KIND", "Realistic, cinematic photo")
+    )
 
     items: List = []
-    for source in ("pollinations", "ollama"):
-        if source == "pollinations" and not os.getenv("POLLINATIONS_API_KEY", "").strip():
-            continue
+    for source in ("hosted", "ollama"):
         try:
-            if source == "pollinations":
-                response = pollinations_chat(prompt)
+            if source == "hosted":
+                response = hosted_chat(prompt)
             else:
                 response = generate_response(prompt, ai_model)
-            match = re.search(r"\[.*\]", response, re.DOTALL)
-            if match:
-                items = json.loads(match.group(0))
+            items = _parse_prompt_items(response)
             if len(items) >= len(scenes):
                 break
             log(f"[-] {source} returned {len(items)}/{len(scenes)} image prompts", "warning")
@@ -510,8 +715,76 @@ Return ONLY a JSON array with exactly {len(scenes)} objects in the same order:
         elif isinstance(item, str) and item.strip():
             prompts.append(item.strip())
         else:
-            prompts.append(f"realistic photo literally showing: {scene}")
+            # Keep the channel's look even when the model's output was unusable
+            kind = os.getenv("IMAGE_PROMPT_KIND", "Realistic, cinematic photo")
+            subject = f"{character} ({look}) " if character_rule else ""
+            prompts.append(f"{kind} of {subject}illustrating: {scene}")
     return prompts
+
+
+def generate_stock_queries(video_subject: str, scenes: List[str]) -> List[str]:
+    """
+    Write one short stock-footage search phrase per narration scene, naming
+    something that can actually be filmed (e.g. "crowded shopping mall",
+    "phone banking app", "man counting cash"), so each clip matches its line.
+
+    Args:
+        video_subject (str): The subject of the video.
+        scenes (List[str]): Narration text of each scene, in order.
+
+    Returns:
+        List[str]: One search phrase per scene.
+    """
+    numbered = "\n".join(f'{i + 1}. "{scene}"' for i, scene in enumerate(scenes))
+    prompt = f"""
+You are picking stock video clips (from a free stock footage site) to play while each line
+of a voiceover is spoken. Video topic: {video_subject}
+
+For EACH numbered line, write ONE search phrase of 2 to 4 words describing real footage
+that literally shows what the line talks about. Use concrete, filmable things: people,
+places, objects, actions (e.g. "crowded shopping mall", "woman paying with card",
+"stack of dollar bills", "man stressed bills", "city skyline night").
+Never use abstract words like "psychology", "strategy", "concept" or brand names.
+
+Lines:
+{numbered}
+
+Return ONLY a JSON array with exactly {len(scenes)} strings, in the same order.
+"""
+    queries: List[str] = []
+    try:
+        response = hosted_chat(prompt)
+        match = re.search(r"\[.*\]", response, re.DOTALL)
+        if match:
+            queries = [str(q).strip() for q in json.loads(match.group(0)) if str(q).strip()]
+    except Exception as err:
+        log(f"[-] Could not generate stock queries: {err}", "warning")
+
+    queries = queries[: len(scenes)]
+    fallback = " ".join(video_subject.split()[:3])
+    while len(queries) < len(scenes):
+        queries.append(fallback)
+    return queries
+
+
+def _parse_prompt_items(response: str) -> List:
+    """Parse the JSON array of image prompts, salvaging items from broken JSON."""
+    match = re.search(r"\[.*\]", response, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+    # Salvage each {"keyword": ..., "image": ...} object that parses on its own
+    items = []
+    for chunk in re.findall(r"\{[^{}]*\}", response, re.DOTALL):
+        try:
+            items.append(json.loads(chunk))
+        except json.JSONDecodeError:
+            image = re.search(r'"image"\s*:\s*"([^"]+)', chunk)
+            if image:
+                items.append({"image": image.group(1)})
+    return items
 
 
 def _clean_metadata_text(text: str) -> str:
