@@ -278,12 +278,12 @@ def _ken_burns_segment(
     image_path: str, duration: float, index: int, out_path: str, size=(WIDTH, HEIGHT)
 ) -> None:
     frames = max(1, round(duration * FPS))
-    zoom_step = 0.12 / frames
+    zoom_step = 0.08 / frames
     # Alternate zoom in / zoom out and drift direction for variety
     if index % 2 == 0:
-        zoom = f"min(1+{zoom_step}*on,1.12)"
+        zoom = f"min(1+{zoom_step}*on,1.08)"
     else:
-        zoom = f"max(1.12-{zoom_step}*on,1)"
+        zoom = f"max(1.08-{zoom_step}*on,1)"
     x = "iw/2-(iw/zoom/2)" if index % 3 == 0 else (
         "(iw-iw/zoom)*on/{f}".format(f=frames) if index % 3 == 1 else "(iw-iw/zoom)*(1-on/{f})".format(f=frames)
     )

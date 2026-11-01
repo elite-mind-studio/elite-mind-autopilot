@@ -404,9 +404,12 @@ def _generate_video_ffmpeg(
             imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-hide_banner", "-loglevel", "error",
             "-i", rel(combined_video_path),
             "-i", rel(tts_path),
-            "-vf", f"subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'",
+            # Light sharpening before the captions restores crisp outlines that
+            # zooming and YouTube's re-compression soften
+            "-vf", f"unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'",
             "-map", "0:v", "-map", "1:a",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p",
+            # Higher quality source gives YouTube more detail to keep
+            "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart",
             rel(output_path),
         ],
