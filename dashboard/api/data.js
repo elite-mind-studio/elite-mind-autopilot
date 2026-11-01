@@ -113,8 +113,9 @@ async function communityIdeas() {
 module.exports = async (req, res) => {
   try {
     const [yt, extras, ideas] = await Promise.all([channelData(), githubExtras(), communityIdeas()]);
-    // Cache at Vercel's edge for 15 minutes to stay well inside YouTube's API quota
-    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
+    // Cache at Vercel's edge for 5 minutes (about 3 quota units per refresh,
+    // far inside YouTube's 10,000/day); never serve data older than ~6 minutes
+    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=60");
     res.status(200).json({ updated: new Date().toISOString(), ...yt, ...extras, community: { ideas } });
   } catch (err) {
     res.status(500).json({ error: String(err.message || err) });

@@ -100,9 +100,10 @@ const ago = iso => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 async function load() {
-  const data = await fetch("/api/data").then(r => r.json());
+  const data = await fetch("/api/data?t=" + Math.floor(Date.now() / 300000)).then(r => r.json());
   if (data.error) throw new Error(data.error);
-  document.getElementById("updated").textContent = "Updated " + ago(data.updated) + " · refreshes every 15 min";
+  window.lastUpdated = data.updated;
+  document.getElementById("updated").textContent = "Updated " + ago(data.updated) + " · auto-refreshes every 5 min";
 
   // Stat cards
   const shorts = data.videos.filter(v => v.type === "short");
@@ -121,7 +122,8 @@ async function load() {
 
   // Views per video (oldest -> newest), shorts yellow, long blue
   const chrono = [...data.videos].reverse().slice(-20);
-  new Chart(document.getElementById("growth"), {
+  if (window.viewsChart) window.viewsChart.destroy();
+  window.viewsChart = new Chart(document.getElementById("growth"), {
     type: "bar",
     data: {
       labels: chrono.map(v => v.title.length > 22 ? v.title.slice(0, 22) + "…" : v.title),
@@ -175,7 +177,17 @@ async function load() {
     navigator.clipboard.writeText(data.community.ideas[b.dataset.i]); b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500);
   });
 }
-load().catch(err => { document.getElementById("updated").textContent = "Could not load data: " + err; });
+const refresh = () => load().catch(err => { document.getElementById("updated").textContent = "Could not load data: " + err; });
+refresh();
+// Pull fresh numbers every 5 minutes while the page is open, and right away
+// when you come back to the tab
+setInterval(refresh, 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+// Keep the "Updated ... ago" label current between refreshes
+setInterval(() => {
+  if (window.lastUpdated) document.getElementById("updated").textContent =
+    "Updated " + ago(window.lastUpdated) + " · auto-refreshes every 5 min";
+}, 30 * 1000);
 </script>
 </body>
 </html>
