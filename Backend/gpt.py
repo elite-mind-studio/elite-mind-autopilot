@@ -296,10 +296,10 @@ def generate_script(
             Style: a fast, punchy, casual numbered-list explainer, talking directly to the
             viewer as "you", like a confident friend.
             0. LENGTH IS STRICT: the whole script must be under {max_words} words and must
-               cover EVERY item promised in the title. Keep each item to about 35-45 words.
-            1. Open with ONE sentence that states how many items and teases them, then
-               challenges the viewer, e.g. "So, here are 7 money traps that keep you broke,
-               and I bet you have fallen for at least 4 of them." Then go straight to
+               cover EVERY item promised in the title. Keep each item to about 25-35 words.
+            1. Open with ONE bold-claim sentence that states how many items and challenges
+               the viewer, e.g. "Stores are stealing from you every day - here are 4 tricks
+               they use, and I bet you've fallen for at least 3." Then go straight to
                "Number one." - no extra intro sentences.
             2. Then each item paragraph MUST start exactly like this, as two separate short
                sentences: "Number one. Living paycheck to paycheck." - the number spelled out
@@ -309,7 +309,8 @@ def generate_script(
                funny, concrete everyday examples (a coffee shop, a sale at the mall, a 3 a.m.
                online order). Use lists of three and rhetorical questions.
             3. Repeat a short catchy phrase tied to the topic across items.
-            4. End with one short, quotable line that sums it all up.
+            4. End with one short, quotable line that sums it all up and leads naturally
+               back into the opening line, so the video loops seamlessly when replayed.
             Paragraphs: one per item (the opening is its own paragraph).
         """.replace("{max_words}", str(int(os.getenv("VIDEO_MAX_WORDS", "450") or 450) - 20))
         # The opening + one paragraph per item must all fit

@@ -1,14 +1,15 @@
 # Generates one video from topics.txt and uploads it to YouTube.
-# One Short every day, plus a long-form (8-12 min) video on Mon/Wed/Fri.
+# Two Shorts a day (a series part + an explainer) and a long video on Fridays.
 # Each scheduled run waits a random 0-3 hours first, so posting times differ
 # every day. See docs/autopilot.md.
 name: Autopilot
 
 on:
   schedule:
-    # Times are UTC (West Africa Time = UTC+1).
-    - cron: "0 8 * * *"        # daily Short, 09:00-12:00 WAT
-    - cron: "0 12 * * 1,3,5"   # long video Mon/Wed/Fri, 13:00-16:00 WAT
+    # Times are UTC (West Africa Time = UTC+1); each run adds a random 0-3 h delay.
+    - cron: "0 7 * * *"     # series Short (Part N/M), 08:00-11:00 WAT
+    - cron: "0 15 * * *"    # explainer Short, 16:00-19:00 WAT
+    - cron: "0 12 * * 5"    # long video, Fridays 13:00-16:00 WAT
   workflow_dispatch:
     inputs:
       upload:
@@ -20,6 +21,10 @@ on:
         type: choice
         options: [short, long]
         default: short
+      series:
+        description: "Short from the series queue (Part N/M)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -46,7 +51,7 @@ jobs:
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"
       AUTOPILOT_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
-      VIDEO_MAX_WORDS: "470"
+      VIDEO_MAX_WORDS: "250"
       VISUAL_MODE: ai_images
       TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"
@@ -147,8 +152,11 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             [ "${{ inputs.upload }}" = "false" ] && args="$args --no-upload"
             [ "${{ inputs.format }}" = "long" ] && args="$args --long"
-          elif [ "${{ github.event.schedule }}" = "0 12 * * 1,3,5" ]; then
+            [ "${{ inputs.series }}" = "true" ] && args="$args --series"
+          elif [ "${{ github.event.schedule }}" = "0 12 * * 5" ]; then
             args="--long"
+          elif [ "${{ github.event.schedule }}" = "0 7 * * *" ]; then
+            args="--series"
           fi
           uv run python Backend/autopilot.py run $args
 
@@ -165,7 +173,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add topics.txt topics_used.txt topics_long.txt topics_long_used.txt 2>/dev/null || true
+          git add topics.txt topics_used.txt topics_long.txt topics_long_used.txt topics_series.txt topics_series_used.txt 2>/dev/null || true
           git add topics.txt topics_used.txt
           git commit -m "autopilot: mark topic as used" || exit 0
           git pull --rebase

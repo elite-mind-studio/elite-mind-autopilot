@@ -5,7 +5,8 @@ Usage:
     python Backend/autopilot.py queue   # queue one video from the next unused topic
     python Backend/autopilot.py queue --no-upload   # same, but never upload (for testing)
     python Backend/autopilot.py run [--no-upload]   # generate + upload now, no worker needed
-    (add --long to queue/run for an 8-12 minute horizontal video)
+    (add --long to queue/run for an 8-12 minute horizontal video,
+     --series to take the next "Part N/M" topic from topics_series.txt)
     python Backend/autopilot.py tick    # queue a post if one is due today (run every ~30 min)
     python Backend/autopilot.py auth    # one-time YouTube login (opens a browser)
 
@@ -68,6 +69,8 @@ TOPICS_FILE = PROJECT_ROOT / "topics.txt"
 USED_TOPICS_FILE = PROJECT_ROOT / "topics_used.txt"
 LONG_TOPICS_FILE = PROJECT_ROOT / "topics_long.txt"
 LONG_USED_TOPICS_FILE = PROJECT_ROOT / "topics_long_used.txt"
+SERIES_TOPICS_FILE = PROJECT_ROOT / "topics_series.txt"
+SERIES_USED_TOPICS_FILE = PROJECT_ROOT / "topics_series_used.txt"
 STATE_FILE = PROJECT_ROOT / "autopilot_state.json"
 
 # Posting windows for `tick`: each day one random time is picked inside each
@@ -95,9 +98,11 @@ def _read_lines(path: Path) -> List[str]:
 
 
 def _topic_files(video_format: str = "short"):
-    """Shorts and long videos keep separate topic queues."""
+    """Explainer Shorts, series Shorts and long videos keep separate topic queues."""
     if video_format == "long":
         return LONG_TOPICS_FILE, LONG_USED_TOPICS_FILE
+    if video_format == "series":
+        return SERIES_TOPICS_FILE, SERIES_USED_TOPICS_FILE
     return TOPICS_FILE, USED_TOPICS_FILE
 
 
@@ -156,7 +161,12 @@ def mark_topic_used(topic: str, video_format: str = "short") -> None:
 
 
 def next_topic(video_format: str = "short") -> str:
-    topic = peek_topic(video_format)
+    # The "series" queue holds "Part N/M" Shorts; when it runs dry, fall back
+    # to the regular explainer queue
+    queue = queue or video_format
+    if queue == "series" and not _read_lines(SERIES_TOPICS_FILE):
+        queue = "short"
+    topic = peek_topic(queue)
     mark_topic_used(topic, video_format)
     return topic
 
@@ -337,7 +347,9 @@ def tick() -> None:
     print("[*] Nothing due right now.")
 
 
-def run_video(allow_upload: bool = True, video_format: str = "short") -> None:
+def run_video(
+    allow_upload: bool = True, video_format: str = "short", queue: Optional[str] = None
+) -> None:
     """
     Generate (and upload) one video in this process, without the queue/worker.
     The topic is only marked as used when the video succeeds, so a failed run
@@ -375,7 +387,7 @@ def run_video(allow_upload: bool = True, video_format: str = "short") -> None:
 
     # Test runs don't consume the topic, so it still gets posted for real later
     if allow_upload:
-        mark_topic_used(topic, video_format)
+        mark_topic_used(topic, queue)
     print(f"[+] Done: {topic}")
 
 
@@ -394,7 +406,11 @@ if __name__ == "__main__":
     elif command == "tick":
         tick()
     elif command == "run":
-        run_video(allow_upload="--no-upload" not in sys.argv[2:], video_format=video_format)
+        run_video(
+            allow_upload="--no-upload" not in sys.argv[2:],
+            video_format=video_format,
+            queue="series" if "--series" in sys.argv[2:] else None,
+        )
     elif command == "auth":
         youtube_auth()
     else:
