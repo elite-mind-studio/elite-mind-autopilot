@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elite Mind Decoder Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0d0f; --panel: #17171b; --line: #2a2a31; --text: #f2f2f4; --muted: #9a9aa6;
+    --accent: #ffd400; --good: #3ddc84; --bad: #ff5c5c; --warn: #ffb020;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+  h1 { margin: 0; font-size: 22px; } h1 span { color: var(--accent); }
+  h2 { font-size: 16px; margin: 28px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat .n { font-size: 28px; font-weight: 700; } .stat .l { color: var(--muted); font-size: 13px; }
+  .stat .d { font-size: 13px; color: var(--good); }
+  .chart { height: 240px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td a { color: var(--text); text-decoration: none; } td a:hover { color: var(--accent); }
+  .thumb { width: 64px; height: 36px; object-fit: cover; border-radius: 4px; display: block; }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 999px; background: var(--line); color: var(--muted); }
+  .tag.short { background: #3a3200; color: var(--accent); }
+  .tag.long { background: #12304a; color: #6cc3ff; }
+  .ok { color: var(--good); } .fail { color: var(--bad); } .run { color: var(--warn); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  ol { margin: 6px 0 0; padding-left: 20px; } li { margin: 4px 0; }
+  .idea { position: relative; padding-right: 64px; white-space: pre-wrap; }
+  .idea + .idea { margin-top: 10px; }
+  button.copy { position: absolute; top: 12px; right: 12px; background: var(--accent); color: #000; border: 0;
+                border-radius: 6px; padding: 4px 10px; font-weight: 600; cursor: pointer; }
+  .scroll { overflow-x: auto; }
+  @media (max-width: 600px) { .hide-sm { display: none; } .stat .n { font-size: 22px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Elite Mind <span>Decoder</span> · Dashboard</h1>
+    <div class="muted" id="updated">Loading…</div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <h2>Growth</h2>
+  <div class="card chart"><canvas id="growth"></canvas></div>
+
+  <h2>Videos <span class="muted">(click a column to sort)</span></h2>
+  <div class="card scroll">
+    <table id="videos">
+      <thead><tr>
+        <th></th><th data-k="title">Title</th><th data-k="type">Type</th>
+        <th class="num" data-k="views">Views</th><th class="num" data-k="likes">Likes</th>
+        <th class="num hide-sm" data-k="comments">Comments</th><th class="num hide-sm" data-k="rate">Like %</th>
+        <th class="hide-sm" data-k="published">Posted</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <h2>Automation runs</h2>
+      <div class="card scroll"><table id="runs"><tbody></tbody></table></div>
+    </div>
+    <div>
+      <h2>Coming next</h2>
+      <div class="card" id="next"></div>
+    </div>
+  </div>
+
+  <h2>Community post ideas <span class="muted">(this week — copy into YouTube Studio → Create → Post)</span></h2>
+  <div id="ideas"></div>
+</main>
+
+<script>
+const fmt = n => n.toLocaleString();
+const ago = iso => {
+  const s = (Date.now() - new Date(iso)) / 1000;
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + " min ago";
+  if (s < 86400) return Math.round(s / 3600) + " h ago";
+  return Math.round(s / 86400) + " d ago";
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function load() {
+  const [data, history] = await Promise.all([
+    fetch("data.json?" + Date.now()).then(r => r.json()),
+    fetch("history.json?" + Date.now()).then(r => r.json()).catch(() => []),
+  ]);
+  document.getElementById("updated").textContent = "Updated " + ago(data.updated);
+
+  // Stat cards, with change over the last 24 h
+  const dayAgo = history.filter(h => Date.now() - new Date(h.time) >= 86400e3).pop();
+  const delta = (k) => dayAgo ? data.channel[k] - dayAgo[k] : null;
+  const shorts = data.videos.filter(v => v.type === "short");
+  const best = [...data.videos].sort((a, b) => b.views - a.views)[0];
+  const cards = [
+    ["Subscribers", fmt(data.channel.subscribers), delta("subscribers")],
+    ["Total views", fmt(data.channel.views), delta("views")],
+    ["Videos", fmt(data.videos.length), null],
+    ["Avg views / Short", fmt(Math.round(shorts.reduce((a, v) => a + v.views, 0) / Math.max(1, shorts.length))), null],
+    ["Best video", best ? fmt(best.views) + " views" : "—", null],
+  ];
+  document.getElementById("stats").innerHTML = cards.map(([l, n, d]) =>
+    `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div>${d !== null ? `<div class="d">${d >= 0 ? "+" : ""}${fmt(d)} in 24 h</div>` : ""}</div>`
+  ).join("");
+
+  // Growth chart
+  new Chart(document.getElementById("growth"), {
+    type: "line",
+    data: {
+      labels: history.map(h => new Date(h.time).toLocaleDateString(undefined, {month: "short", day: "numeric", hour: "2-digit"})),
+      datasets: [
+        {label: "Subscribers", data: history.map(h => h.subscribers), borderColor: "#ffd400", yAxisID: "y", tension: .3, pointRadius: 0},
+        {label: "Views", data: history.map(h => h.views), borderColor: "#6cc3ff", yAxisID: "y2", tension: .3, pointRadius: 0},
+      ],
+    },
+    options: {
+      maintainAspectRatio: false, interaction: {mode: "index", intersect: false},
+      plugins: {legend: {labels: {color: "#9a9aa6"}}},
+      scales: {
+        x: {ticks: {color: "#9a9aa6", maxTicksLimit: 8}, grid: {color: "#2a2a31"}},
+        y: {position: "left", ticks: {color: "#ffd400"}, grid: {color: "#2a2a31"}},
+        y2: {position: "right", ticks: {color: "#6cc3ff"}, grid: {display: false}},
+      },
+    },
+  });
+
+  // Videos table (sortable)
+  const rows = data.videos.map(v => ({...v, rate: v.views ? +(100 * v.likes / v.views).toFixed(1) : 0}));
+  let sortKey = "views", sortDir = -1;
+  const render = () => {
+    rows.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * sortDir);
+    document.querySelector("#videos tbody").innerHTML = rows.map(v => `<tr>
+      <td><a href="https://youtu.be/${v.id}" target="_blank"><img class="thumb" src="${v.thumbnail}" alt=""></a></td>
+      <td><a href="https://youtu.be/${v.id}" target="_blank">${esc(v.title)}</a></td>
+      <td><span class="tag ${v.type}">${v.type}</span></td>
+      <td class="num">${fmt(v.views)}</td><td class="num">${fmt(v.likes)}</td>
+      <td class="num hide-sm">${fmt(v.comments)}</td><td class="num hide-sm">${v.rate}%</td>
+      <td class="hide-sm muted">${ago(v.published)}</td></tr>`).join("");
+  };
+  document.querySelectorAll("#videos th[data-k]").forEach(th => th.onclick = () => {
+    sortDir = sortKey === th.dataset.k ? -sortDir : -1; sortKey = th.dataset.k; render();
+  });
+  render();
+
+  // Automation runs
+  const label = r => r.status !== "completed" ? `<span class="run">● running</span>`
+    : r.conclusion === "success" ? `<span class="ok">✔ success</span>` : `<span class="fail">✖ ${esc(r.conclusion)}</span>`;
+  document.querySelector("#runs tbody").innerHTML = data.runs.length ? data.runs.map(r => `<tr>
+    <td>${label(r)}</td><td class="muted">${r.event === "schedule" ? "scheduled" : "manual"}</td>
+    <td class="muted">${ago(r.started)}</td><td><a href="${r.url}" target="_blank" class="muted">log ↗</a></td></tr>`).join("")
+    : `<tr><td class="muted">No runs yet</td></tr>`;
+
+  // Coming next
+  const list = (title, items) => items.length ? `<div><b>${title}</b><ol>${items.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>` : "";
+  document.getElementById("next").innerHTML =
+    list("Series (morning Short)", data.next.series) + list("Explainers (afternoon Short)", data.next.explainers) + list("Long videos (Fridays)", data.next.long);
+
+  // Community ideas with copy buttons
+  document.getElementById("ideas").innerHTML = (data.community.ideas || []).map((t, i) =>
+    `<div class="card idea" id="idea${i}">${esc(t)}<button class="copy" data-i="${i}">Copy</button></div>`).join("") || `<div class="card muted">No ideas yet</div>`;
+  document.querySelectorAll("button.copy").forEach(b => b.onclick = () => {
+    navigator.clipboard.writeText(data.community.ideas[b.dataset.i]); b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500);
+  });
+}
+load().catch(err => { document.getElementById("updated").textContent = "Could not load data: " + err; });
+</script>
+</body>
+</html>
