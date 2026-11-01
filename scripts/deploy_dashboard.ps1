@@ -4,7 +4,8 @@
 # Usage (from the project root):
 #   powershell -ExecutionPolicy Bypass -File scripts\deploy_dashboard.ps1
 
-$ErrorActionPreference = "Stop"
+# Vercel CLI prints status lines on stderr; do not treat them as errors
+$ErrorActionPreference = "Continue"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Dashboard = Join-Path $ProjectRoot "dashboard"
 Set-Location $Dashboard
@@ -22,15 +23,15 @@ $values = [ordered]@{
 }
 
 Write-Host "Linking Vercel project 'elite-mind-dashboard'..."
-npx --yes vercel@latest link --yes --project elite-mind-dashboard | Out-Null
+cmd /c "npx --yes vercel@latest link --yes --project elite-mind-dashboard 2>&1" | Out-Null
 
 foreach ($name in $values.Keys) {
     # Replace any old value, then add the new one for production
-    npx --yes vercel@latest env rm $name production --yes 2>$null | Out-Null
-    $values[$name] | npx --yes vercel@latest env add $name production | Out-Null
+    cmd /c "npx --yes vercel@latest env rm $name production --yes 2>&1" | Out-Null
+    $values[$name] | cmd /c "npx --yes vercel@latest env add $name production 2>&1" | Out-Null
     if ($LASTEXITCODE -eq 0) { Write-Host "set $name" } else { Write-Host "FAILED $name" }
 }
 
 Write-Host ""
 Write-Host "Deploying..."
-npx --yes vercel@latest deploy --prod --yes
+cmd /c "npx --yes vercel@latest deploy --prod --yes 2>&1"
