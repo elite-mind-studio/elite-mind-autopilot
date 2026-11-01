@@ -285,10 +285,21 @@ def generate_script(
             4. Describe concrete, visual moments (places, objects, people, actions) so every
                line can be shown on screen.
             5. End with a twist or a reflective line that makes the viewer think.
-            LENGTH: this is a long video. Write about {target_words} words in total, with
-            6 to 10 sentences per stage. Do not stop early.
+            {length_rule}
             Paragraphs: one per stage.
-        """.replace("{target_words}", str(int(os.getenv("AUTOPILOT_LONG_MAX_WORDS", "1500")) - 100))
+        """.replace(
+            "{length_rule}",
+            (
+                f"LENGTH: this is a long video. Write about {int(os.getenv('AUTOPILOT_LONG_MAX_WORDS', '1500')) - 100} "
+                "words in total, with 6 to 10 sentences per stage. Do not stop early."
+            )
+            if video_format == "long"
+            else (
+                f"LENGTH: this is a YouTube Short. Stay under {int(os.getenv('VIDEO_MAX_WORDS', '160') or 160) - 10} "
+                "words: EXACTLY 4 very short stages of 2 sentences each, and the last stage "
+                "must contain the twist ending."
+            ),
+        )
         character = ""
 
     if script_style == "listicle":

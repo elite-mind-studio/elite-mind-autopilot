@@ -74,6 +74,9 @@ def run_generation_pipeline(
             raise PipelineCancelled("Video generation was cancelled.")
 
     paragraph_number = int(data.get("paragraphNumber", 1))
+    # POV Shorts are told in 4 short stages
+    if data.get("format", "short") == "short" and data["videoSubject"].lower().startswith("pov"):
+        paragraph_number = min(paragraph_number, 4)
     # "short": 1080x1920 YouTube Short; "long": 1920x1080 long-form video
     video_format = data.get("format", "short")
     frame_size = (1920, 1080) if video_format == "long" else (1080, 1920)
@@ -110,7 +113,10 @@ def run_generation_pipeline(
         video_format=video_format,
         # Long videos can use their own style (e.g. "pov" stories)
         script_style=data.get("scriptStyle")
-        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None),        series=data.get("series"),
+        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None)
+        # "POV: You're ..." topics are told as POV stories, Shorts included
+        or ("pov" if data["videoSubject"].lower().startswith("pov") else None),
+        series=data.get("series"),
     )
 
     if not script:
@@ -133,8 +139,10 @@ def run_generation_pipeline(
         count = lambda: sum(len(s.split()) for p in paragraphs for s in p)
         while count() > max_words:
             longest = max(paragraphs, key=lambda p: sum(len(s.split()) for s in p))
-            # Keep at least the first two sentences ("Number one." + item name)
-            if len(longest) <= 2:
+            # List items keep "Number one." + the item name; story paragraphs
+            # can shrink to a single sentence
+            keep = 2 if longest and longest[0].lower().startswith("number") else 1
+            if len(longest) <= keep:
                 break
             longest.pop()
         script = "\n\n".join(" ".join(p) for p in paragraphs)

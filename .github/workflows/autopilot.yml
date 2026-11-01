@@ -51,7 +51,7 @@ jobs:
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"
       AUTOPILOT_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
-      VIDEO_MAX_WORDS: "250"
+      VIDEO_MAX_WORDS: "160"
       VISUAL_MODE: ai_images
       TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"

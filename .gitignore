@@ -29,3 +29,5 @@ kaggle/
 image_library/
 dashboard/.vercel
 .vercel
+research/raw.json
+research/report.json
