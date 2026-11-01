@@ -52,7 +52,7 @@
 
   <section class="stats" id="stats"></section>
 
-  <h2>Growth</h2>
+  <h2>Views per video</h2>
   <div class="card chart"><canvas id="growth"></canvas></div>
 
   <h2>Videos <span class="muted">(click a column to sort)</span></h2>
@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <h2>Community post ideas <span class="muted">(this week — copy into YouTube Studio → Create → Post)</span></h2>
+  <h2>Community post ideas <span class="muted">(copy into YouTube Studio → Create → Post)</span></h2>
   <div id="ideas"></div>
 </main>
 
@@ -94,45 +94,39 @@ const ago = iso => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 async function load() {
-  const [data, history] = await Promise.all([
-    fetch("data.json?" + Date.now()).then(r => r.json()),
-    fetch("history.json?" + Date.now()).then(r => r.json()).catch(() => []),
-  ]);
-  document.getElementById("updated").textContent = "Updated " + ago(data.updated);
+  const data = await fetch("/api/data").then(r => r.json());
+  if (data.error) throw new Error(data.error);
+  document.getElementById("updated").textContent = "Updated " + ago(data.updated) + " · refreshes every 15 min";
 
-  // Stat cards, with change over the last 24 h
-  const dayAgo = history.filter(h => Date.now() - new Date(h.time) >= 86400e3).pop();
-  const delta = (k) => dayAgo ? data.channel[k] - dayAgo[k] : null;
+  // Stat cards
   const shorts = data.videos.filter(v => v.type === "short");
   const best = [...data.videos].sort((a, b) => b.views - a.views)[0];
+  const likes = data.videos.reduce((a, v) => a + v.likes, 0);
   const cards = [
-    ["Subscribers", fmt(data.channel.subscribers), delta("subscribers")],
-    ["Total views", fmt(data.channel.views), delta("views")],
-    ["Videos", fmt(data.videos.length), null],
-    ["Avg views / Short", fmt(Math.round(shorts.reduce((a, v) => a + v.views, 0) / Math.max(1, shorts.length))), null],
-    ["Best video", best ? fmt(best.views) + " views" : "—", null],
+    ["Subscribers", fmt(data.channel.subscribers)],
+    ["Total views", fmt(data.channel.views)],
+    ["Videos", fmt(data.videos.length)],
+    ["Avg views / Short", fmt(Math.round(shorts.reduce((a, v) => a + v.views, 0) / Math.max(1, shorts.length)))],
+    ["Total likes", fmt(likes)],
+    ["Best video", best ? fmt(best.views) + " views" : "-"],
   ];
-  document.getElementById("stats").innerHTML = cards.map(([l, n, d]) =>
-    `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div>${d !== null ? `<div class="d">${d >= 0 ? "+" : ""}${fmt(d)} in 24 h</div>` : ""}</div>`
-  ).join("");
+  document.getElementById("stats").innerHTML = cards.map(([l, n]) =>
+    `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
 
-  // Growth chart
+  // Views per video (oldest -> newest), shorts yellow, long blue
+  const chrono = [...data.videos].reverse().slice(-20);
   new Chart(document.getElementById("growth"), {
-    type: "line",
+    type: "bar",
     data: {
-      labels: history.map(h => new Date(h.time).toLocaleDateString(undefined, {month: "short", day: "numeric", hour: "2-digit"})),
-      datasets: [
-        {label: "Subscribers", data: history.map(h => h.subscribers), borderColor: "#ffd400", yAxisID: "y", tension: .3, pointRadius: 0},
-        {label: "Views", data: history.map(h => h.views), borderColor: "#6cc3ff", yAxisID: "y2", tension: .3, pointRadius: 0},
-      ],
+      labels: chrono.map(v => v.title.length > 22 ? v.title.slice(0, 22) + "…" : v.title),
+      datasets: [{ label: "Views", data: chrono.map(v => v.views),
+        backgroundColor: chrono.map(v => v.type === "short" ? "#ffd400" : "#6cc3ff") }],
     },
     options: {
-      maintainAspectRatio: false, interaction: {mode: "index", intersect: false},
-      plugins: {legend: {labels: {color: "#9a9aa6"}}},
+      maintainAspectRatio: false, plugins: { legend: { display: false } },
       scales: {
-        x: {ticks: {color: "#9a9aa6", maxTicksLimit: 8}, grid: {color: "#2a2a31"}},
-        y: {position: "left", ticks: {color: "#ffd400"}, grid: {color: "#2a2a31"}},
-        y2: {position: "right", ticks: {color: "#6cc3ff"}, grid: {display: false}},
+        x: { ticks: { color: "#9a9aa6", maxRotation: 60, minRotation: 45 }, grid: { display: false } },
+        y: { ticks: { color: "#9a9aa6" }, grid: { color: "#2a2a31" } },
       },
     },
   });
@@ -158,7 +152,7 @@ async function load() {
   // Automation runs
   const label = r => r.status !== "completed" ? `<span class="run">● running</span>`
     : r.conclusion === "success" ? `<span class="ok">✔ success</span>` : `<span class="fail">✖ ${esc(r.conclusion)}</span>`;
-  document.querySelector("#runs tbody").innerHTML = data.runs.length ? data.runs.map(r => `<tr>
+  document.querySelector("#runs tbody").innerHTML = (data.runs || []).length ? data.runs.map(r => `<tr>
     <td>${label(r)}</td><td class="muted">${r.event === "schedule" ? "scheduled" : "manual"}</td>
     <td class="muted">${ago(r.started)}</td><td><a href="${r.url}" target="_blank" class="muted">log ↗</a></td></tr>`).join("")
     : `<tr><td class="muted">No runs yet</td></tr>`;
@@ -166,7 +160,7 @@ async function load() {
   // Coming next
   const list = (title, items) => items.length ? `<div><b>${title}</b><ol>${items.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>` : "";
   document.getElementById("next").innerHTML =
-    list("Series (morning Short)", data.next.series) + list("Explainers (afternoon Short)", data.next.explainers) + list("Long videos (Fridays)", data.next.long);
+    list("Series (morning Short)", data.next.series || []) + list("Explainers (afternoon Short)", data.next.explainers || []) + list("Long videos (Fridays)", data.next.long || []);
 
   // Community ideas with copy buttons
   document.getElementById("ideas").innerHTML = (data.community.ideas || []).map((t, i) =>
