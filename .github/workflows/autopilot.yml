@@ -97,7 +97,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
 
       - name: Install Python dependencies
-        run: uv sync
+        # Python 3.11: pinned packages (e.g. Pillow 9.5) have no 3.12+ wheels
+        run: uv sync --python 3.11
 
       - name: Cache Kokoro voice model
         uses: actions/cache@v4
