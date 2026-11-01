@@ -39,6 +39,10 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtubepartner",
+    # Posting comment replies
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    # Retention / watch-time reports for the learning loop
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"

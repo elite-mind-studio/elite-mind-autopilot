@@ -394,6 +394,8 @@ def run_video(
 def youtube_auth() -> None:
     from youtube import get_authenticated_service
 
+    # Start from a clean login so newly added permissions are requested
+    (BASE_DIR / "youtube-oauth2.json").unlink(missing_ok=True)
     get_authenticated_service()
     print("[+] YouTube login saved. Scheduled uploads can now run unattended.")
 
