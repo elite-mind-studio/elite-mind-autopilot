@@ -44,7 +44,7 @@ from video import (
     generate_video,
     save_video,
 )
-from youtube import add_to_playlist, set_thumbnail, upload_video
+from youtube import add_to_playlist, latest_long_video, set_thumbnail, upload_video
 
 
 # Sentence boundary: . ! ? followed by whitespace, except after titles like
@@ -477,6 +477,14 @@ def run_generation_pipeline(
             privacy_status = os.getenv("YOUTUBE_PRIVACY_STATUS", "private")
             # e.g. "Educational content only, not financial advice."
             footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
+            # Shorts point viewers to the newest long video (Shorts -> long-form funnel)
+            if video_format == "short":
+                try:
+                    latest = latest_long_video()
+                    if latest:
+                        description = f"🎬 Watch the full story: https://youtu.be/{latest[0]}\n\n{description}"
+                except Exception as link_err:
+                    emit(f"[-] Could not find a long video to link: {link_err}", "warning")
             video_metadata = {
                 "video_path": final_output_path,
                 "title": title,

@@ -282,3 +282,28 @@ def add_to_playlist(video_id: str, playlist_title: str) -> str:
         },
     ).execute()
     return playlist_id
+
+
+def latest_long_video(min_seconds: int = 180):
+    """
+    Returns (video_id, title) of the channel's newest public video longer than
+    `min_seconds`, so Shorts can point viewers to it. None if there is none.
+    """
+    import re
+
+    youtube = get_authenticated_service()
+    channel = youtube.channels().list(part="contentDetails", mine=True).execute()["items"][0]
+    uploads = channel["contentDetails"]["relatedPlaylists"]["uploads"]
+    items = youtube.playlistItems().list(
+        part="contentDetails", playlistId=uploads, maxResults=25
+    ).execute().get("items", [])
+    ids = [item["contentDetails"]["videoId"] for item in items]
+    if not ids:
+        return None
+    videos = youtube.videos().list(part="contentDetails,snippet,status", id=",".join(ids)).execute()["items"]
+    for video in videos:  # newest first
+        match = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", video["contentDetails"]["duration"])
+        hours, minutes, secs = (int(x or 0) for x in match.groups())
+        if video["status"]["privacyStatus"] == "public" and hours * 3600 + minutes * 60 + secs >= min_seconds:
+            return video["id"], video["snippet"]["title"]
+    return None
