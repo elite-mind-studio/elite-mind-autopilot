@@ -296,6 +296,10 @@ def run_generation_pipeline(
             if layout == "letterbox":
                 subtitles_position = "center,letterbox"
         except Exception as err:
+            # AI_IMAGES_FALLBACK=none: never post a lower-quality video; fail the run
+            # so the topic is retried at the next slot
+            if os.getenv("AI_IMAGES_FALLBACK", "stock").strip().lower() == "none":
+                raise RuntimeError(f"Not enough sharp AI images, skipping this video: {err}") from err
             emit(f"[-] AI images failed, falling back to stock footage: {err}", "warning")
             video_paths = fetch_stock_videos()
     else:
