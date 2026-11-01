@@ -857,3 +857,20 @@ def generate_metadata(
     keywords = get_search_terms(video_subject, 6, script, ai_model)
 
     return title, description, keywords
+
+
+def thumbnail_word(title: str) -> str:
+    """1-2 punchy words for a thumbnail (e.g. "TRAP", "STOP", "BROKE")."""
+    try:
+        reply = hosted_chat(
+            f'Video title: "{title}". Give ONE or TWO punchy words (max 12 characters total) '
+            "for a YouTube thumbnail that create curiosity or emotion, like TRAP, STOP, "
+            "BROKE, RICH, THE TRICK. Reply with the words only."
+        )
+        word = re.sub(r"[^A-Za-z0-9 !?$]", "", reply).strip().upper()
+        if 0 < len(word) <= 14:
+            return word
+    except Exception:
+        pass
+    words = [w for w in re.findall(r"[A-Za-z]+", title) if len(w) > 3]
+    return (words[0] if words else "WATCH").upper()

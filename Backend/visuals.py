@@ -38,6 +38,8 @@ IMAGE_STYLE = os.getenv(
 NEGATIVE = "no text, no words, no letters, no watermark, no logo"
 
 _local_pipe = None
+# Scene images of the most recent AI video (used to build its thumbnail)
+LAST_SCENE_IMAGES: List[str] = []
 
 
 class ProviderError(Exception):
@@ -467,6 +469,9 @@ def build_ai_video(
             last = path
         else:
             image_paths[i] = last
+
+    global LAST_SCENE_IMAGES
+    LAST_SCENE_IMAGES = [p for p in image_paths if p]
 
     if layout == "letterbox":
         for i, (text, _) in enumerate(scenes):

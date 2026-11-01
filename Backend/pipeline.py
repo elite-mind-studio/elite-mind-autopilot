@@ -20,6 +20,7 @@ from gpt import (
     generate_metadata,
     generate_script,
     get_search_terms,
+    thumbnail_word,
     unload_model,
 )
 from logstream import log
@@ -40,6 +41,7 @@ from utils import (
 from video import (
     combine_videos,
     generate_subtitles,
+    generate_bold_thumbnail,
     generate_thumbnail,
     generate_video,
     save_video,
@@ -509,11 +511,16 @@ def run_generation_pipeline(
 
                 # Thumbnail failures shouldn't fail an already-uploaded video
                 try:
-                    thumbnail_path = generate_thumbnail(
-                        combined_video_path,
-                        title,
-                        size=(1280, 720) if video_format == "long" else (1080, 1920),
-                    )
+                    thumb_size = (1280, 720) if video_format == "long" else (1080, 1920)
+                    import visuals as _visuals
+
+                    if visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
+                        word = f"PART {series['part']}" if series else thumbnail_word(title)
+                        thumbnail_path = generate_bold_thumbnail(
+                            _visuals.LAST_SCENE_IMAGES[0], word, size=thumb_size
+                        )
+                    else:
+                        thumbnail_path = generate_thumbnail(combined_video_path, title, size=thumb_size)
                     set_thumbnail(video_response.get("id"), thumbnail_path)
                     emit("[+] Custom thumbnail set.", "success")
                 except Exception as thumb_err:

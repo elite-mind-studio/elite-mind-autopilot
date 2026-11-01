@@ -1,3 +1,4 @@
+import math
 import os
 import uuid
 
@@ -70,6 +71,63 @@ def save_video(video_url: str, directory: str = str(TEMP_DIR)) -> str:
             video_path.unlink(missing_ok=True)
 
     raise RuntimeError(f"Could not download {video_url}: {last_error}")
+
+
+def generate_bold_thumbnail(image_path: str, word: str, size=(1280, 720)) -> str:
+    """
+    Big-channel style thumbnail: a striking scene image, one huge word in red
+    with a white outline, and a red arrow pointing at the subject.
+
+    Args:
+        image_path (str): Scene image to use as the background.
+        word (str): 1-2 words, e.g. "TRAP" or "PART 2".
+        size (tuple): Output size, (1280, 720) for long videos, (1080, 1920) for Shorts.
+
+    Returns:
+        str: Path to the thumbnail JPEG.
+    """
+    width, height = size
+    image = Image.open(image_path).convert("RGB")
+    scale = max(width / image.width, height / image.height)
+    image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    left, top = (image.width - width) // 2, (image.height - height) // 2
+    image = image.crop((left, top, left + width, top + height))
+    image = ImageEnhance.Contrast(ImageEnhance.Color(image).enhance(1.25)).enhance(1.1)
+    draw = ImageDraw.Draw(image)
+
+    text = re.sub(r"[^A-Za-z0-9 !?$%]", "", word).strip().upper()[:14] or "WATCH"
+    font_path = str((FONTS_DIR / "bold_font.ttf").resolve())
+    font_size = int(height * (0.16 if width > height else 0.15))
+    while font_size > 30:
+        font = ImageFont.truetype(font_path, font_size)
+        if draw.textlength(text, font=font) <= width * 0.88:
+            break
+        font_size -= 6
+
+    text_width = draw.textlength(text, font=font)
+    x = (width - text_width) / 2 if width < height else width * 0.05
+    y = height * (0.06 if width > height else 0.08)
+    stroke = max(6, font_size // 9)
+    # Drop shadow, then red text with a thick white outline
+    draw.text((x + stroke, y + stroke), text, font=font, fill="#000000", stroke_width=stroke, stroke_fill="#000000")
+    draw.text((x, y), text, font=font, fill="#E62117", stroke_width=stroke, stroke_fill="#FFFFFF")
+
+    # Red arrow from under the word toward the middle of the picture
+    start = (x + text_width * (0.55 if width > height else 0.5), y + font_size * 1.25)
+    end = (width * (0.5 if width > height else 0.3), height * (0.5 if width > height else 0.6))
+    shaft = max(10, max(width, height) // 80)
+    for colour, extra in (("#FFFFFF", shaft // 2), ("#E62117", 0)):
+        draw.line([start, end], fill=colour, width=shaft + extra)
+    angle = math.atan2(end[1] - start[1], end[0] - start[0])
+    head = shaft * 3.2
+    tip = (end[0] + math.cos(angle) * head * 0.6, end[1] + math.sin(angle) * head * 0.6)
+    wing1 = (end[0] + math.cos(angle + 2.5) * head, end[1] + math.sin(angle + 2.5) * head)
+    wing2 = (end[0] + math.cos(angle - 2.5) * head, end[1] + math.sin(angle - 2.5) * head)
+    draw.polygon([tip, wing1, wing2], fill="#E62117", outline="#FFFFFF", width=max(3, shaft // 4))
+
+    thumbnail_path = Path(image_path).with_name(f"{uuid.uuid4()}_thumbnail.jpg")
+    image.save(thumbnail_path, "JPEG", quality=90, optimize=True)
+    return str(thumbnail_path)
 
 
 def generate_thumbnail(
