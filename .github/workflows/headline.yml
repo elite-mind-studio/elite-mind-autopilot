@@ -47,6 +47,11 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
+      # HyperFrames (motion graphics) renders with Node 22 + headless Chrome
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Install Python dependencies
         run: uv sync --python 3.11
 
