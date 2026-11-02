@@ -4,15 +4,17 @@
 // Secrets are only used server-side; the response never contains them.
 
 const YT = "https://www.googleapis.com/youtube/v3";
+// Values set from a Windows shell can carry a trailing line break; trim them
+const env = name => (process.env[name] || "").trim();
 
 async function accessToken() {
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: process.env.YT_CLIENT_ID,
-      client_secret: process.env.YT_CLIENT_SECRET,
-      refresh_token: process.env.YT_REFRESH_TOKEN,
+      client_id: env("YT_CLIENT_ID"),
+      client_secret: env("YT_CLIENT_SECRET"),
+      refresh_token: env("YT_REFRESH_TOKEN"),
       grant_type: "refresh_token",
     }),
   });
@@ -72,7 +74,7 @@ async function channelData() {
 }
 
 async function githubExtras() {
-  const repo = process.env.GITHUB_REPO;
+  const repo = env("GITHUB_REPO");
   if (!repo) return { runs: [], next: {} };
   const raw = name => fetch(`https://raw.githubusercontent.com/${repo}/main/${name}`)
     .then(r => (r.ok ? r.text() : ""))
@@ -89,11 +91,11 @@ async function githubExtras() {
 }
 
 async function communityIdeas() {
-  if (!process.env.GROQ_API_KEY) return [];
+  if (!env("GROQ_API_KEY")) return [];
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${env("GROQ_API_KEY")}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "openai/gpt-oss-120b",
         reasoning_effort: "low",
