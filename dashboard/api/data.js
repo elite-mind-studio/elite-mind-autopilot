@@ -7,14 +7,22 @@ const YT = "https://www.googleapis.com/youtube/v3";
 // Values set from a Windows shell can carry a trailing line break; trim them
 const env = name => (process.env[name] || "").trim();
 
-async function accessToken() {
+// One entry per channel; each has its own saved YouTube login
+const CHANNELS = {
+  elite: { name: "Elite Mind Decoder", token: "YT_REFRESH_TOKEN", workflow: "autopilot.yml",
+           about: "money psychology and mind tricks" },
+  headline: { name: "Headline Tales", token: "YT_REFRESH_TOKEN_HEADLINE", workflow: "headline.yml",
+              about: "short documentaries about what is happening in the world" },
+};
+
+async function accessToken(tokenEnv) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: env("YT_CLIENT_ID"),
       client_secret: env("YT_CLIENT_SECRET"),
-      refresh_token: env("YT_REFRESH_TOKEN"),
+      refresh_token: env(tokenEnv),
       grant_type: "refresh_token",
     }),
   });
@@ -35,8 +43,8 @@ function seconds(duration) {
   return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
 }
 
-async function channelData() {
-  const token = await accessToken();
+async function channelData(ch) {
+  const token = await accessToken(ch.token);
   const channel = (await yt("channels", { part: "snippet,statistics,contentDetails", mine: "true" }, token)).items[0];
   const uploads = channel.contentDetails.relatedPlaylists.uploads;
 
@@ -117,7 +125,7 @@ async function watchData(token, videos) {
   }
 }
 
-async function githubExtras() {
+async function githubExtras(ch) {
   const repo = env("GITHUB_REPO");
   if (!repo) return { runs: [], next: {} };
   const raw = name => fetch(`https://raw.githubusercontent.com/${repo}/main/${name}`)
@@ -125,16 +133,16 @@ async function githubExtras() {
     .then(t => t.split("\n").map(l => l.split("|")[0].trim()).filter(Boolean))
     .catch(() => []);
   const [runs, series, explainers, long] = await Promise.all([
-    fetch(`https://api.github.com/repos/${repo}/actions/workflows/autopilot.yml/runs?per_page=12`)
+    fetch(`https://api.github.com/repos/${repo}/actions/workflows/${ch.workflow}/runs?per_page=12`)
       .then(r => (r.ok ? r.json() : { workflow_runs: [] }))
       .then(d => d.workflow_runs.map(r => ({ started: r.run_started_at, event: r.event, status: r.status, conclusion: r.conclusion, url: r.html_url })))
       .catch(() => []),
-    raw("topics_series.txt"), raw("topics.txt"), raw("topics_long.txt"),
+    ...(ch.workflow === "autopilot.yml" ? [raw("topics_series.txt"), raw("topics.txt"), raw("topics_long.txt")] : [[], [], []]),
   ]);
   return { runs, next: { series: series.slice(0, 5), explainers: explainers.slice(0, 5), long: long.slice(0, 3) } };
 }
 
-async function communityIdeas() {
+async function communityIdeas(ch) {
   if (!env("GROQ_API_KEY")) return [];
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -145,7 +153,7 @@ async function communityIdeas() {
         reasoning_effort: "low",
         messages: [{
           role: "user",
-          content: "Write 3 short YouTube community posts for 'Elite Mind Decoder', a channel about money psychology and mind tricks. Mix: one poll (question + 3-4 short options), one question that invites comments, one teaser for the next video. Casual, punchy, max 40 words each. Return ONLY a JSON array of 3 strings.",
+          content: `Write 3 short YouTube community posts for '${ch.name}', a channel about ${ch.about}. Mix: one poll (question + 3-4 short options), one question that invites comments, one teaser for the next video. Casual, punchy, max 40 words each. Return ONLY a JSON array of 3 strings.`,
         }],
       }),
     });
@@ -158,7 +166,8 @@ async function communityIdeas() {
 
 module.exports = async (req, res) => {
   try {
-    const [yt, extras, ideas] = await Promise.all([channelData(), githubExtras(), communityIdeas()]);
+    const ch = CHANNELS[req.query.ch] || CHANNELS.elite;
+    const [yt, extras, ideas] = await Promise.all([channelData(ch), githubExtras(ch), communityIdeas(ch)]);
     // Cache at Vercel's edge for 5 minutes (about 3 quota units per refresh,
     // far inside YouTube's 10,000/day); never serve data older than ~6 minutes
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=60");

@@ -12,12 +12,15 @@ Set-Location $Dashboard
 
 $client = (Get-Content (Join-Path $ProjectRoot "Backend\client_secret.json") -Raw | ConvertFrom-Json).installed
 $token = Get-Content (Join-Path $ProjectRoot "Backend\youtube-oauth2.json") -Raw | ConvertFrom-Json
+$headlineFile = Join-Path $ProjectRoot "Backend\youtube-oauth2-headline_tales.json"
+$headline = if (Test-Path $headlineFile) { (Get-Content $headlineFile -Raw | ConvertFrom-Json).refresh_token } else { "" }
 $groq = (Get-Content (Join-Path $ProjectRoot ".env") | Where-Object { $_ -match '^GROQ_API_KEY=' }) -replace '^GROQ_API_KEY="?(.*?)"?$', '$1'
 
 $values = [ordered]@{
     YT_CLIENT_ID     = $client.client_id
     YT_CLIENT_SECRET = $client.client_secret
     YT_REFRESH_TOKEN = $token.refresh_token
+    YT_REFRESH_TOKEN_HEADLINE = $headline
     GROQ_API_KEY     = $groq
     GITHUB_REPO      = "elite-mind-studio/elite-mind-autopilot"
 }

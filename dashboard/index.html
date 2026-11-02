@@ -40,6 +40,10 @@
   button.copy { position: absolute; top: 12px; right: 12px; background: var(--accent); color: #000; border: 0;
                 border-radius: 6px; padding: 4px 10px; font-weight: 600; cursor: pointer; }
   .scroll { overflow-x: auto; }
+  .tabs { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .tabs button { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 999px;
+                 padding: 7px 16px; font: inherit; font-size: 14px; cursor: pointer; }
+  .tabs button.on { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
   .goal + .goal { margin-top: 14px; }
   .goal .top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
   .bar { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 6px; }
@@ -50,9 +54,14 @@
 <body>
 <main>
   <header>
-    <h1>Elite Mind <span>Decoder</span> · Dashboard</h1>
+    <h1 id="title">Elite Mind <span>Decoder</span> · Dashboard</h1>
     <div class="muted" id="updated">Loading…</div>
   </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-ch="elite">Elite Mind Decoder</button>
+    <button data-ch="headline">Headline Tales</button>
+  </nav>
 
   <section class="stats" id="stats"></section>
 
@@ -108,7 +117,7 @@ const ago = iso => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 async function load() {
-  const data = await fetch("/api/data?t=" + Math.floor(Date.now() / 300000)).then(r => r.json());
+  const data = await fetch(`/api/data?ch=${channel}&t=` + Math.floor(Date.now() / 300000)).then(r => r.json());
   if (data.error) throw new Error(data.error);
   window.lastUpdated = data.updated;
   document.getElementById("updated").textContent = "Updated " + ago(data.updated) + " · auto-refreshes every 5 min";
@@ -193,7 +202,8 @@ async function load() {
   // Coming next
   const list = (title, items) => items.length ? `<div><b>${title}</b><ol>${items.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>` : "";
   document.getElementById("next").innerHTML =
-    list("Explainers (morning Short)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || []);
+    list("Explainers (morning Short)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || [])
+    || `<div class="muted">Each documentary is picked from the day's news and fact-checked before it is made.</div>`;
 
   // Community ideas with copy buttons
   document.getElementById("ideas").innerHTML = (data.community.ideas || []).map((t, i) =>
@@ -202,6 +212,18 @@ async function load() {
     navigator.clipboard.writeText(data.community.ideas[b.dataset.i]); b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500);
   });
 }
+// Channel tabs; the choice is remembered in the URL (#headline) so it can be bookmarked
+let channel = location.hash === "#headline" ? "headline" : "elite";
+const showTabs = () => {
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.ch === channel));
+  const [a, b] = channel === "headline" ? ["Headline", "Tales"] : ["Elite Mind", "Decoder"];
+  document.getElementById("title").innerHTML = `${a} <span>${b}</span> · Dashboard`;
+};
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  channel = b.dataset.ch; location.hash = channel === "headline" ? "headline" : ""; showTabs();
+  document.getElementById("updated").textContent = "Loading…"; refresh();
+});
+showTabs();
 const refresh = () => load().catch(err => { document.getElementById("updated").textContent = "Could not load data: " + err; });
 refresh();
 // Pull fresh numbers every 5 minutes while the page is open, and right away
