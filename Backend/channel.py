@@ -272,7 +272,18 @@ if __name__ == "__main__":
     elif command == "auto-short":  # a standalone news Short on another big story of the day
         from news import prepare_short
 
-        script = prepare_short()
+        # A hand-written, fact-checked Short waiting in the queue goes first
+        queue = sorted((ROOT / "channels" / profile / "scripts" / "queue").glob("*.txt"))
+        if queue:
+            auto_dir = ROOT / "channels" / profile / "scripts" / "auto"
+            auto_dir.mkdir(parents=True, exist_ok=True)
+            from datetime import date
+
+            script = auto_dir / f"{date.today().isoformat()}_{queue[0].stem}_news.txt"
+            queue[0].replace(script)
+            print(f"[+] Using queued script {queue[0].name}", flush=True)
+        else:
+            script = prepare_short()
         if "--dry-run" in sys.argv:
             make_checked(profile, script, reuse=False)
         else:

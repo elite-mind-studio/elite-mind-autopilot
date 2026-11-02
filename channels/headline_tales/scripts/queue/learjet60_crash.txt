@@ -1,0 +1,25 @@
+FORMAT: short
+SUBJECT: The Learjet 60 crash in Florida
+TITLE: 5 MILES IN 1 MINUTE
+YT_TITLE: This Jet Fell 5 Miles in One Minute. Investigators Found a Clue
+TAGS: learjet 60 crash, florida plane crash, palm beach plane crash, ntsb, plane crash explained, aviation, news explained
+DESCRIPTION: On 1 November 2026 a Learjet 60 flying from Austin to the Bahamas fell from 35,000 feet onto a Florida road. What the flight data and the NTSB have said so far. Our thoughts are with the families of the nine people on board.
+SOURCE: NBC News - https://www.nbcnews.com/news/us-news/jet-crashes-florida-nine-people-board-rcna606874
+SOURCE: PBS NewsHour - https://www.pbs.org/newshour/nation/all-9-people-aboard-a-jet-that-crashed-in-florida-have-died-transportation-secretary-says
+SOURCE: Wikipedia, 2026 Palm Beach County Learjet 60 crash - https://en.wikipedia.org/wiki/2026_Palm_Beach_County_Learjet_60_crash
+GRAPHIC: 3 | {"type": "chart", "title": "One minute", "sub": "ALTITUDE, FEET", "suffix": " FT", "points": [["CRUISE", 35250], ["ONE MINUTE LATER", 8750]]}
+GRAPHIC: 4 | {"type": "stat", "value": 30000, "suffix": " FT", "caption": "Falling per minute", "sub": "According to the flight data reported so far"}
+
+This private jet fell about five miles in one minute. And investigators may have found a clue to why.
+
+On Sunday, a Learjet 60 was flying from Austin, Texas, to the Bahamas, at thirty-five thousand feet.
+
+The crew reported ice and turbulence, and asked to climb higher.
+
+Then it dropped from about thirty-five thousand feet to under nine thousand in a single minute.
+
+That is a dive of more than thirty thousand feet per minute, almost straight down onto a Florida road.
+
+The NTSB says there is evidence that some parts may have broken off the plane during that dive. All nine people on board were killed.
+
+This is the story of the Learjet 60 crash. Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines.
