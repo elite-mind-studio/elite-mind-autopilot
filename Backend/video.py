@@ -452,6 +452,16 @@ def _generate_video_ffmpeg(
 
     with VideoFileClip(str(combined_video_path)) as clip:
         frame_width, frame_height = clip.w, clip.h
+    source_height = frame_height
+    # Export with a 1440 px short side by default: YouTube serves 1440p/4K uploads
+    # with its high-bitrate VP9 stream, which stays visibly sharper than a 1080p
+    # upload even when watched at 1080p. VIDEO_OUTPUT_SHORT_SIDE=0 keeps the source size.
+    short_side = int(os.getenv("VIDEO_OUTPUT_SHORT_SIDE", "1440") or 0)
+    scale_filter = ""
+    if short_side and short_side != min(frame_width, frame_height):
+        factor = short_side / min(frame_width, frame_height)
+        frame_width, frame_height = round(frame_width * factor / 2) * 2, round(frame_height * factor / 2) * 2
+        scale_filter = f"scale={frame_width}:{frame_height}:flags=lanczos,"
     with AudioFileClip(str(tts_path)) as narration:
         duration = narration.duration
 
@@ -459,7 +469,8 @@ def _generate_video_ffmpeg(
     font_name = ImageFont.truetype(str(font_path), 20).getname()[0]
 
     # SRT subtitles are laid out on a 288px-high canvas, so scale the pixel size
-    ass_size = max(8, round(font_size * 288 / frame_height))
+    # (font_size is in source pixels; libass scales the 288px canvas to any output size)
+    ass_size = max(8, round(font_size * 288 / source_height))
     hex_color = (text_color or "#FFFFFF").lstrip("#").rjust(6, "F")
     ass_color = f"&H00{hex_color[4:6]}{hex_color[2:4]}{hex_color[0:2]}"
     # Always bottom-anchored (alignment 2 means the same in SSA and ASS) and
@@ -485,7 +496,7 @@ def _generate_video_ffmpeg(
     # Light sharpening before the captions restores crisp outlines that zooming
     # and YouTube's re-compression soften
     video_filter = (
-        f"[0:v]unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:"
+        f"[0:v]{scale_filter}unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:"
         f"fontsdir={rel(FONTS_DIR)}:force_style='{style}'[captioned]"
     )
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]

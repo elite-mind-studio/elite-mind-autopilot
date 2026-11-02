@@ -85,8 +85,9 @@ def check_video(path: Path, video_format: str) -> list:
         return ["file missing or too small"]
     p = _probe(path)
     problems = []
-    expected = (1080, 1920) if video_format == "short" else (1920, 1080)
-    if p["size"] != expected:
+    # 1080p sources are exported at 1440p (see video._generate_video_ffmpeg)
+    expected = [(1080, 1920), (1440, 2560)] if video_format == "short" else [(1920, 1080), (2560, 1440)]
+    if p["size"] not in expected:
         problems.append(f"size {p['size']} instead of {expected}")
     low, high = (20, 60) if video_format == "short" else (300, 1200)
     if not low <= p["seconds"] <= high:
