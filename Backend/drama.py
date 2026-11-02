@@ -203,6 +203,23 @@ def _ffmpeg(*args: str) -> None:
     subprocess.run([FFMPEG, "-v", "error", "-y", *args], check=True)
 
 
+def _clip_segment(source: Path, duration: float, out: Path) -> None:
+    """A real video clip (e.g. Wan 2.2) fitted to the scene: cover-cropped to 1080x1920,
+    slowed up to 1.6x when the lines run long, then holding its last frame."""
+    import imageio_ffmpeg as iio
+
+    probe = subprocess.run([FFMPEG, "-i", str(source)], capture_output=True, text=True).stderr
+    match = re.search(r"Duration: (\d+):(\d+):([\d.]+)", probe)
+    length = int(match[1]) * 3600 + int(match[2]) * 60 + float(match[3]) if match else 3.4
+    speed = min(1.6, max(1.0, duration / length))
+    _ffmpeg(
+        "-i", str(source), "-an", "-vf",
+        f"setpts={speed:.3f}*PTS,scale={SIZE[0]}:{SIZE[1]}:force_original_aspect_ratio=increase:flags=lanczos,"
+        f"crop={SIZE[0]}:{SIZE[1]},fps=24,tpad=stop_mode=clone:stop_duration={duration:.2f},format=yuv420p",
+        "-t", f"{duration:.3f}", "-c:v", "libx264", "-crf", "15", "-preset", "medium", str(out),
+    )
+
+
 def render_episode(folder: Path, bible: dict, number: int, episode: dict, images: Dict[int, Path]) -> Path:
     from kokorovoice import kokoro_tts_save
     from visuals import _ken_burns_segment
@@ -228,7 +245,10 @@ def render_episode(folder: Path, bible: dict, number: int, episode: dict, images
         if i == len(episode["scenes"]) - 1:
             clock += 2.0  # room for the "To be continued" card
         clip = work / f"scene{i:02d}.mp4"
-        _ken_burns_segment(str(images[i]), clock - scene_start, i, str(clip), size=SIZE)
+        if Path(images[i]).suffix.lower() == ".mp4":
+            _clip_segment(Path(images[i]), clock - scene_start, clip)
+        else:
+            _ken_burns_segment(str(images[i]), clock - scene_start, i, str(clip), size=SIZE)
         segments.append(clip)
 
     # Dialogue track: each line followed by a short pause, then silence under the end card
@@ -358,13 +378,19 @@ if __name__ == "__main__":
         bible = json.loads((folder / "bible.json").read_text(encoding="utf-8"))
         for n in [int(x) for x in sys.argv[3].split(",")]:
             episode = json.loads((folder / f"episode_{n:02d}.json").read_text(encoding="utf-8"))
+            clips = Path(sys.argv[4]) if len(sys.argv) > 4 else None
             imgs = {i: folder / "images" / f"e{n:02d}s{i:02d}.jpg" for i in range(len(episode["scenes"]))}
+            if clips:
+                for i in imgs:
+                    video = clips / f"e{n:02d}s{i:02d}.mp4"
+                    if video.exists():
+                        imgs[i] = video
             for i in imgs:
                 if not imgs[i].exists():
                     imgs[i] = imgs[i - 1] if i else next((folder / "images").glob("*.jpg"))
             print(render_episode(folder, bible, n, episode, imgs))
             if n == 1:
-                _poster(folder, bible, imgs[0])
+                _poster(folder, bible, folder / "images" / "e01s00.jpg")
     elif len(sys.argv) >= 4 and sys.argv[1] == "episode":
         make_episodes(Path(sys.argv[2]), [int(sys.argv[3])])
     else:
