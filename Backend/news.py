@@ -220,7 +220,7 @@ striking fact), then context/history, what happened, impact on ordinary people, 
 next, and a closing paragraph asking viewers to subscribe and to tell us in the comments which story
 in the news we should explain next.
 
-SHORT script: 90-110 words, 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."),
+SHORT script: 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."),
 each sentence a consequence of the last, then end with: "This is the story of <subject>. For the full
 documentary, like, subscribe, and check the description for the full video. Which story should we explain next? Tell us in the comments."
 
@@ -249,7 +249,7 @@ Subject: {story['subject']}. Angle: {story['angle']}
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
 - Neutral tone, never take sides; attribute claims when the sources do. Numbers written in words.
-- 90-110 words, 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
+- 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
   consequence of the last, the most surprising fact early. End with exactly:
   "Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines."
 

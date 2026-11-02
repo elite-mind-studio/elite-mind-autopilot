@@ -94,7 +94,8 @@ def check_video(path: Path, video_format: str) -> list:
     expected = [(1080, 1920), (1440, 2560)] if video_format == "short" else [(1920, 1080), (2560, 1440)]
     if p["size"] not in expected:
         problems.append(f"size {p['size']} instead of {expected}")
-    low, high = (20, 60) if video_format == "short" else (300, 1200)
+    # YouTube treats vertical videos up to 3 minutes as Shorts
+    low, high = (20, 175) if video_format == "short" else (300, 1200)
     if not low <= p["seconds"] <= high:
         problems.append(f"length {p['seconds']:.0f}s outside {low}-{high}s")
     if not p["has_audio"] or p["mean_db"] < -35:
@@ -154,6 +155,8 @@ def make_checked(name: str, script_path: Path, reuse: bool = True) -> Path:
             print(f"[+] {target.name} passed all checks (attempt {attempt})", flush=True)
             return target
         print(f"[-] Attempt {attempt} rejected: {'; '.join(problems)}", flush=True)
+        if all(p.startswith("length") for p in problems):
+            break  # the same script always renders the same length; remaking won't help
     raise RuntimeError(f"{script_path.name} failed {MAX_ATTEMPTS} attempts; nothing was posted")
 
 
