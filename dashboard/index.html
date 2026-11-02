@@ -40,6 +40,10 @@
   button.copy { position: absolute; top: 12px; right: 12px; background: var(--accent); color: #000; border: 0;
                 border-radius: 6px; padding: 4px 10px; font-weight: 600; cursor: pointer; }
   .scroll { overflow-x: auto; }
+  .goal + .goal { margin-top: 14px; }
+  .goal .top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .bar { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 6px; }
+  .bar div { height: 100%; background: var(--accent); border-radius: 999px; }
   @media (max-width: 600px) { .hide-sm { display: none; } .stat .n { font-size: 22px; } }
 </style>
 </head>
@@ -52,6 +56,9 @@
 
   <section class="stats" id="stats"></section>
 
+  <h2>Monetization progress <span class="muted">(YouTube Partner Program · watch time updates 2-3 days late)</span></h2>
+  <div class="card" id="ypp"></div>
+
   <h2>Views per video</h2>
   <div class="card chart"><canvas id="growth"></canvas></div>
 
@@ -60,7 +67,8 @@
     <table id="videos">
       <thead><tr>
         <th></th><th data-k="title">Title</th><th data-k="type">Type</th>
-        <th class="num" data-k="views">Views</th><th class="num" data-k="likes">Likes</th>
+        <th class="num" data-k="views">Views</th><th class="num" data-k="watchHours">Watch h</th>
+        <th class="num hide-sm" data-k="avgPct">Watched %</th><th class="num" data-k="likes">Likes</th>
         <th class="num hide-sm" data-k="comments">Comments</th><th class="num hide-sm" data-k="rate">Like %</th>
         <th class="hide-sm" data-k="published">Posted</th>
       </tr></thead>
@@ -115,11 +123,26 @@ async function load() {
     ["Total views", fmt(Math.max(data.channel.views, data.videos.reduce((a, v) => a + v.views, 0)))],
     ["Videos", fmt(data.videos.length)],
     ["Avg views / Short", fmt(Math.round(shorts.reduce((a, v) => a + v.views, 0) / Math.max(1, shorts.length)))],
+    ["Watch hours (365 d)", data.watch ? fmt(data.watch.totalHours) : "-"],
     ["Total likes", fmt(likes)],
     ["Best video", best ? fmt(best.views) + " views" : "-"],
   ];
   document.getElementById("stats").innerHTML = cards.map(([l, n]) =>
     `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+
+  // Monetization goals: 1,000 subs + (4,000 long-video watch hours in 365 d OR 10M Shorts views in 90 d)
+  const goal = (label, have, need, note) => {
+    const pct = Math.min(100, 100 * have / need);
+    return `<div class="goal"><div class="top"><span>${label}</span><span><b>${fmt(have)}</b> / ${fmt(need)}
+      <span class="muted">(${pct < 1 && have > 0 ? pct.toFixed(2) : Math.floor(pct)}%)</span></span></div>
+      <div class="bar"><div style="width:${Math.max(pct, have > 0 ? 0.5 : 0)}%"></div></div>
+      <div class="muted">${note}</div></div>`;
+  };
+  document.getElementById("ypp").innerHTML = goal("Subscribers", data.channel.subscribers, 1000, "Needed for monetization")
+    + (data.watch
+      ? goal("Watch hours from long videos (last 365 days)", data.watch.yppLongHours, 4000, "Path 1 - only public long videos count, not Shorts")
+        + goal("Shorts views (last 90 days)", data.watch.yppShortViews, 10000000, "Path 2 - instead of watch hours")
+      : `<div class="muted" style="margin-top:12px">Watch time unavailable (YouTube Analytics not reachable)</div>`);
 
   // Views per video (oldest -> newest), shorts yellow, long blue
   const chrono = [...data.videos].reverse().slice(-20);
@@ -149,7 +172,8 @@ async function load() {
       <td><a href="https://youtu.be/${v.id}" target="_blank"><img class="thumb" src="${v.thumbnail}" alt=""></a></td>
       <td><a href="https://youtu.be/${v.id}" target="_blank">${esc(v.title)}</a></td>
       <td><span class="tag ${v.type}">${v.type}</span></td>
-      <td class="num">${fmt(v.views)}</td><td class="num">${fmt(v.likes)}</td>
+      <td class="num">${fmt(v.views)}</td><td class="num">${fmt(v.watchHours)}</td>
+      <td class="num hide-sm">${v.avgPct}%</td><td class="num">${fmt(v.likes)}</td>
       <td class="num hide-sm">${fmt(v.comments)}</td><td class="num hide-sm">${v.rate}%</td>
       <td class="hide-sm muted">${ago(v.published)}</td></tr>`).join("");
   };

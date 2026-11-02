@@ -66,11 +66,55 @@ async function channelData() {
       });
     }
   }
+  const watch = await watchData(token, videos);
+  for (const v of videos) Object.assign(v, (watch && watch.perVideo[v.id]) || { watchHours: 0, avgPct: 0 });
+  if (watch) delete watch.perVideo;
   const s = channel.statistics;
   return {
+    watch,
     channel: { title: channel.snippet.title, subscribers: +s.subscriberCount, views: +s.viewCount, videos: +s.videoCount },
     videos: videos.filter(v => v.privacy === "public").sort((a, b) => b.published.localeCompare(a.published)),
   };
+}
+
+// Watch time from YouTube Analytics (lags 2-3 days behind real time).
+// YouTube Partner Program counts watch hours of public LONG videos over the last
+// 365 days (Shorts don't count there; they need 10M Shorts views in 90 days).
+async function watchData(token, videos) {
+  const day = n => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+  const report = async (start, metrics) => {
+    const params = { ids: "channel==MINE", startDate: start, endDate: day(0), metrics, dimensions: "video", maxResults: "200", sort: "-views" };
+    const res = await fetch("https://youtubeanalytics.googleapis.com/v2/reports?" + new URLSearchParams(params), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Analytics " + res.status);
+    const r = await res.json();
+    const names = r.columnHeaders.map(h => h.name);
+    return (r.rows || []).map(row => Object.fromEntries(row.map((v, i) => [names[i], v])));
+  };
+  try {
+    const [year, quarter] = await Promise.all([
+      report(day(365), "views,estimatedMinutesWatched,averageViewPercentage"),
+      report(day(90), "views"),
+    ]);
+    const type = Object.fromEntries(videos.map(v => [v.id, v.type]));
+    const perVideo = {};
+    let longMinutes = 0, allMinutes = 0, shortViews90 = 0;
+    for (const r of year) {
+      perVideo[r.video] = { watchHours: +(r.estimatedMinutesWatched / 60).toFixed(1), avgPct: +r.averageViewPercentage.toFixed(1) };
+      allMinutes += r.estimatedMinutesWatched;
+      if (type[r.video] === "long") longMinutes += r.estimatedMinutesWatched;
+    }
+    for (const r of quarter) if (type[r.video] === "short") shortViews90 += r.views;
+    return {
+      perVideo,
+      totalHours: +(allMinutes / 60).toFixed(1),
+      yppLongHours: +(longMinutes / 60).toFixed(1),
+      yppShortViews: shortViews90,
+    };
+  } catch {
+    return null;  // dashboard still works without analytics
+  }
 }
 
 async function githubExtras() {
