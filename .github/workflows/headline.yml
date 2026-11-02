@@ -1,19 +1,26 @@
-# Headline Tales: makes a documentary (long) and its Short from hand-written,
-# fact-checked scripts, checks every render for errors (length, sound, black
+# Headline Tales: every day picks the biggest world story from news feeds,
+# writes a long documentary + Short from the articles only, fact-checks them
+# (Backend/news.py), or uses hand-written scripts when given; checks every render for errors (length, sound, black
 # frames, size) and remakes it if needed, then posts the long video first and
 # the Short with a link to it. Approved renders in channels/headline_tales/approved
 # are posted exactly as they are. Runs on GitHub, so the laptop can be off.
 name: Headline Tales
 
 on:
+  schedule:
+    - cron: "17 11 * * *"   # daily 12:17 West Africa Time (07:17 US Eastern): news documentary + Short
   workflow_dispatch:
     inputs:
       long:
-        description: "Long video script"
-        default: "channels/headline_tales/scripts/hormuz_long.txt"
+        description: "Long video script (blank = pick today's news story automatically)"
+        default: ""
       short:
         description: "Short script (blank = post only the long video)"
         default: ""
+      dry_run:
+        description: "Test: make and check today's videos but post nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,7 +32,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 330
     env:
       IMAGEMAGICK_BINARY: /usr/bin/convert
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -80,7 +87,12 @@ jobs:
           printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2-headline_tales.json
 
       - name: Make, check and post
-        run: uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}"
+        run: |
+          if [ -n "${{ inputs.long }}" ]; then
+            uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}"
+          else
+            uv run python Backend/channel.py headline_tales auto ${{ inputs.dry_run && '--dry-run' || '' }}
+          fi
 
       - name: Save videos as artifact
         if: always()
@@ -96,12 +108,14 @@ jobs:
         run: |
           [ -f channels/headline_tales/posted.json ] || exit 0
           cp channels/headline_tales/posted.json "$RUNNER_TEMP/posted.json"
+          mkdir -p "$RUNNER_TEMP/auto" && cp -r channels/headline_tales/scripts/auto/. "$RUNNER_TEMP/auto/" 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
             git fetch -q origin main && git reset -q --hard origin/main
             cp "$RUNNER_TEMP/posted.json" channels/headline_tales/posted.json
-            git add channels/headline_tales/posted.json
+            mkdir -p channels/headline_tales/scripts/auto && cp -r "$RUNNER_TEMP/auto/." channels/headline_tales/scripts/auto/ 2>/dev/null || true
+            git add channels/headline_tales/posted.json channels/headline_tales/scripts/auto
             git commit -q -m "headline: record posted videos" || exit 0
             git push -q && exit 0
             sleep 5

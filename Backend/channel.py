@@ -20,6 +20,7 @@ Usage:
     python Backend/channel.py <name> auth                  # one-time login for that channel
     python Backend/channel.py <name> make <script>         # render only, for review
     python Backend/channel.py <name> publish <long> <short>  # render, check, post (long first)
+    python Backend/channel.py headline_tales auto           # daily news documentary, end to end
 """
 
 import json
@@ -249,6 +250,15 @@ if __name__ == "__main__":
         make(profile, Path(sys.argv[3]))
     elif command == "check":
         print(check_video(Path(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else "short") or "OK")
+    elif command == "auto":  # daily: pick a news story, write + fact-check, then make, check and post
+        from news import prepare
+
+        long_script, short_script = prepare()
+        if "--dry-run" in sys.argv:  # make and check both videos, post nothing
+            for script in (long_script, short_script):
+                make_checked(profile, script, reuse=False)
+        else:
+            publish(profile, long_script, short_script)
     elif command == "publish":
         publish(profile, Path(sys.argv[3]), Path(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None)
     elif command == "post":  # post an already rendered/approved video, e.g. a Short linking to the long one
