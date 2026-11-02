@@ -67,6 +67,14 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
+def _http() -> httplib2.Http:
+    # httplib2 treats 308 as a redirect, but resumable uploads use 308 for
+    # "resume incomplete"; without this a dropped connection can't resume
+    http = httplib2.Http(timeout=120)
+    http.redirect_codes = http.redirect_codes - {308}
+    return http
+
+
 def token_file() -> Path:
     """Saved login; each channel profile has its own (YOUTUBE_TOKEN_FILE)."""
     return BASE_DIR / os.getenv("YOUTUBE_TOKEN_FILE", "youtube-oauth2.json")
@@ -78,7 +86,7 @@ def get_analytics_service():
     credentials = storage.get()
     if credentials is None or credentials.invalid:
         raise RuntimeError("No YouTube login saved; run `autopilot.py auth` first.")
-    return build("youtubeAnalytics", "v2", http=credentials.authorize(httplib2.Http()))
+    return build("youtubeAnalytics", "v2", http=credentials.authorize(_http()))
 
 
 def get_authenticated_service():
@@ -105,7 +113,7 @@ def get_authenticated_service():
     return build(
         YOUTUBE_API_SERVICE_NAME,
         YOUTUBE_API_VERSION,
-        http=credentials.authorize(httplib2.Http()),
+        http=credentials.authorize(_http()),
     )
 
 
@@ -147,7 +155,7 @@ def initialize_upload(youtube: any, options: dict):
     insert_request = youtube.videos().insert(
         part=",".join(body.keys()),
         body=body,
-        media_body=MediaFileUpload(options["file"], chunksize=-1, resumable=True),
+        media_body=MediaFileUpload(options["file"], chunksize=8 * 1024 * 1024, resumable=True),
     )
 
     return resumable_upload(insert_request)
@@ -168,10 +176,12 @@ def resumable_upload(insert_request: MediaFileUpload):
     error = None
     retry = 0
     while response is None:
+        error = None
         try:
-            log(" => Uploading file...", "info")
             status, response = insert_request.next_chunk()
-            if "id" in response:
+            if status:
+                log(f" => Uploaded {int(status.progress() * 100)}%", "info")
+            if response is not None and "id" in response:
                 log(f"Video id '{response['id']}' was successfully uploaded.", "success")
                 return response
         except HttpError as e:
