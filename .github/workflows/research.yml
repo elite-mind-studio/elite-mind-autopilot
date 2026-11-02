@@ -1,4 +1,4 @@
-# Weekly viral research: finds outlier videos in our niches and adds the best
+# Weekly learning loop (our own analytics -> research/lessons.json) and viral research: finds outlier videos in our niches and adds the best
 # matching topic ideas to the front of the queues. Report in research/report.md.
 name: Research
 
@@ -39,6 +39,10 @@ jobs:
           printf '%s' "$CLIENT_SECRET_JSON" > Backend/client_secret.json
           printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2.json
 
+      - name: Learn from our own videos' analytics
+        run: uv run python Backend/learning.py
+        continue-on-error: true   # research still runs if analytics is unavailable
+
       - name: Research and update topic queues
         run: uv run python Backend/research.py --apply
 
@@ -46,7 +50,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/report.md topics.txt topics_long.txt topics_series.txt
+          git add research/report.md research/lessons.json research/learning.md topics.txt topics_long.txt topics_series.txt
           git commit -m "research: weekly viral report and topic ideas" || exit 0
           git pull --rebase
           git push

@@ -158,6 +158,8 @@ def run_generation_pipeline(
         )
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"
+    # Kept for the learning loop (autopilot records the hook of each posted video)
+    (TEMP_DIR / "script.txt").write_text(script, encoding="utf-8")
 
     def fetch_stock_videos() -> list:
         search_terms = get_search_terms(

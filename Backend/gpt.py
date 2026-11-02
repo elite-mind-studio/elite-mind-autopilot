@@ -352,6 +352,16 @@ def generate_script(
             Do not end with a call to action such as "like and subscribe", it is added separately.
         """
 
+    # Learning loop: what our own analytics say keeps viewers watching
+    if not customPrompt:
+        from learning import load_lessons
+
+        tips = load_lessons().get("script_tips", [])
+        if tips:
+            prompt += "\n            Lessons from this channel's own viewer data (follow them):\n" + "".join(
+                f"            - {tip}\n" for tip in tips
+            )
+
     prompt += f"""
 
     Subject: {video_subject}

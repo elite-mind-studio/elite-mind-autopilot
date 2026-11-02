@@ -125,6 +125,19 @@ def ai_insights(top, patterns):
         f'- "{r["title"]}" | {r["views"]:,} views | {r["outlier"]}x channel size | {r["seconds"]}s | like rate {r["like_rate"]}%'
         for r in top[:40]
     )
+    from learning import load_lessons
+
+    lessons = load_lessons()
+    own = ""
+    if lessons.get("summary"):
+        # Our own analytics outrank other channels' patterns
+        own = (
+            "What OUR OWN viewers respond to (weigh this above the list above): "
+            + lessons["summary"]
+            + " Topic tips: " + " ".join(lessons.get("topic_tips", []))
+            + " Make more like: " + "; ".join(lessons.get("more_like", []))
+            + ". Avoid the style of: " + "; ".join(lessons.get("less_like", []))
+        )
     prompt = f"""
 You are a YouTube growth analyst for "Elite Mind Decoder", a faceless channel with a cartoon
 character called Black. Formats: 60-90 second numbered explainer Shorts, 5-part Shorts series,
@@ -135,6 +148,7 @@ Here are recent videos in our niches that outperformed their channel size the mo
 {listing}
 
 Title stats: {json.dumps(patterns)}
+{own}
 
 Return ONLY JSON with these keys:
 "patterns": 6 short bullet strings on what the winners have in common (topic, angle, emotion, title formula),

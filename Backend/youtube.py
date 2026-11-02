@@ -67,6 +67,15 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
+def get_analytics_service():
+    """YouTube Analytics API client sharing the same saved login."""
+    storage = Storage(str(BASE_DIR / "youtube-oauth2.json"))
+    credentials = storage.get()
+    if credentials is None or credentials.invalid:
+        raise RuntimeError("No YouTube login saved; run `autopilot.py auth` first.")
+    return build("youtubeAnalytics", "v2", http=credentials.authorize(httplib2.Http()))
+
+
 def get_authenticated_service():
     """
     This method retrieves the YouTube service.

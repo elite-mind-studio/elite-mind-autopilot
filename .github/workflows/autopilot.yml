@@ -182,7 +182,7 @@ jobs:
             git fetch -q origin main && git reset -q --hard origin/main
             cp "$RUNNER_TEMP/last_posted.json" .last_posted.json
             uv run python Backend/autopilot.py mark-posted
-            git add topics*.txt
+            git add topics*.txt history.jsonl
             git commit -q -m "autopilot: mark topic as used" || exit 0
             git push -q && exit 0
             sleep 5

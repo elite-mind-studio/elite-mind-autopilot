@@ -385,14 +385,39 @@ def run_video(
     if upload and not uploaded:
         raise RuntimeError("Video was generated but the YouTube upload failed.")
 
+    record = None
+    if uploaded:
+        script_file = TEMP_DIR / "script.txt"
+        script = script_file.read_text(encoding="utf-8") if script_file.exists() else ""
+        record = {
+            "id": uploaded[0].split(":", 1)[1].strip(),
+            "posted": datetime.now().isoformat(timespec="minutes"),
+            "topic": topic,
+            "format": video_format,
+            "queue": queue or video_format,
+            "hook": re.split(r"(?<=[.!?])\s+", script.strip(), maxsplit=1)[0] if script else "",
+            "words": len(script.split()),
+        }
+        _record_history(record)
+
     # Test runs don't consume the topic, so it still gets posted for real later
     if allow_upload:
         mark_topic_used(topic, queue)
         # Lets CI re-apply this after pulling a newer topic list (see mark_posted)
         (PROJECT_ROOT / ".last_posted.json").write_text(
-            json.dumps({"topic": topic, "queue": queue}), encoding="utf-8"
+            json.dumps({"topic": topic, "queue": queue, "record": record}), encoding="utf-8"
         )
     print(f"[+] Done: {topic}")
+
+
+def _record_history(record: dict) -> None:
+    """Append a posted video to history.jsonl (read by learning.py); once per video."""
+    history = PROJECT_ROOT / "history.jsonl"
+    lines = _read_lines(history) if history.exists() else []
+    if any(f'"id": "{record["id"]}"' in line for line in lines):
+        return
+    with history.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def mark_posted() -> None:
@@ -405,6 +430,8 @@ def mark_posted() -> None:
     if posted["topic"] in _read_lines(topics_file):
         mark_topic_used(posted["topic"], posted["queue"])
         print(f"[+] Marked as posted: {posted['topic']}")
+    if posted.get("record"):
+        _record_history(posted["record"])
 
 
 def youtube_auth() -> None:
