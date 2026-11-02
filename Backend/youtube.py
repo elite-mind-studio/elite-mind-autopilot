@@ -312,6 +312,16 @@ def add_to_playlist(video_id: str, playlist_title: str) -> str:
     return playlist_id
 
 
+def post_comment(video_id: str, text: str) -> str:
+    """Post a top-level comment as the channel (e.g. the link from a Short to its long video)."""
+    youtube = get_authenticated_service()
+    response = youtube.commentThreads().insert(
+        part="snippet",
+        body={"snippet": {"videoId": video_id, "topLevelComment": {"snippet": {"textOriginal": text}}}},
+    ).execute()
+    return response["id"]
+
+
 def latest_long_video(min_seconds: int = 180):
     """
     Returns (video_id, title) of the channel's newest public video longer than

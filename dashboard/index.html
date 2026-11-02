@@ -85,6 +85,9 @@
     </table>
   </div>
 
+  <h2>Link Shorts to a long video <span class="muted">(Studio → the Short → Details → Related video → pick the video shown → Save)</span></h2>
+  <div class="card scroll" id="related"></div>
+
   <div class="grid2">
     <div>
       <h2>Automation runs</h2>
@@ -190,6 +193,23 @@ async function load() {
     sortDir = sortKey === th.dataset.k ? -sortDir : -1; sortKey = th.dataset.k; render();
   });
   render();
+
+  // Shorts that still need a "Related video" (ticks are remembered in this browser)
+  const doneKey = "relatedDone";
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(doneKey) || "{}"); } catch {}
+  const todo = data.videos.filter(v => v.type === "short" && v.related && !done[v.id]).slice(0, 15);
+  document.getElementById("related").innerHTML = todo.length ? `<table><tbody>${todo.map(v => `<tr>
+      <td><img class="thumb" src="${v.thumbnail}" alt=""></td>
+      <td>${esc(v.title)}<div class="muted">→ ${esc(v.related.title)}</div></td>
+      <td><a class="muted" href="https://studio.youtube.com/video/${v.id}/edit" target="_blank">Open in Studio ↗</a></td>
+      <td><button class="copy" style="position:static" data-done="${v.id}">Done</button></td></tr>`).join("")}</tbody></table>`
+    : `<div class="muted">All Shorts are linked. 🎉</div>`;
+  document.querySelectorAll("[data-done]").forEach(b => b.onclick = () => {
+    done[b.dataset.done] = 1;
+    try { localStorage.setItem(doneKey, JSON.stringify(done)); } catch {}
+    b.closest("tr").remove();
+  });
 
   // Automation runs
   const label = r => r.status !== "completed" ? `<span class="run">● running</span>`

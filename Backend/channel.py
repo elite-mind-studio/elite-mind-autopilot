@@ -196,6 +196,13 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         raise RuntimeError(f"Upload of {spec['slug']} failed")
     url = f"https://youtu.be/{video_id}"
     print(f"[+] Posted {spec['slug']}: {url}", flush=True)
+    if long_url:  # the Short's first comment links its full documentary
+        try:
+            from youtube import post_comment
+
+            post_comment(video_id, f"▶ Watch the full documentary: {long_url}")
+        except Exception as err:
+            print(f"[-] Link comment failed: {err}", flush=True)
 
     thumb = ROOT / "channels" / name / "videos" / f"{spec['slug']}_thumb.jpg"
     # Shorts and full documentaries each get their own playlist (series)

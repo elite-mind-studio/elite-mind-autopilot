@@ -47,7 +47,7 @@ from video import (
     generate_video,
     save_video,
 )
-from youtube import add_to_playlist, latest_long_video, set_thumbnail, upload_video
+from youtube import add_to_playlist, latest_long_video, post_comment, set_thumbnail, upload_video
 
 
 # Sentence boundary: . ! ? followed by whitespace, except after titles like
@@ -506,6 +506,7 @@ def run_generation_pipeline(
             # e.g. "Educational content only, not financial advice."
             footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
             # Shorts point viewers to the newest long video (Shorts -> long-form funnel)
+            latest = None
             if video_format == "short":
                 try:
                     latest = latest_long_video()
@@ -534,6 +535,16 @@ def run_generation_pipeline(
                     privacy_status=video_metadata["privacyStatus"],
                 )
                 emit(f"Uploaded video ID: {video_response.get('id')}", "success")
+
+                # First comment on a Short links the full video (Shorts -> long-form funnel)
+                if latest:
+                    try:
+                        post_comment(
+                            video_response.get("id"),
+                            f"▶ Watch the full video: https://youtu.be/{latest[0]} ({latest[1]})",
+                        )
+                    except Exception as comment_err:
+                        emit(f"[-] Could not post the link comment: {comment_err}", "warning")
 
                 # Thumbnail failures shouldn't fail an already-uploaded video
                 try:

@@ -74,6 +74,14 @@ async function channelData(ch) {
       });
     }
   }
+  // For each Short, the long video to set as its "Related video" in Studio:
+  // the newest long video published before it, else the newest long video
+  const longs = videos.filter(v => v.type === "long" && v.privacy === "public").sort((a, b) => b.published.localeCompare(a.published));
+  for (const v of videos) {
+    if (v.type !== "short" || !longs.length) continue;
+    const match = longs.find(l => l.published <= v.published) || longs[0];
+    v.related = { id: match.id, title: match.title };
+  }
   const watch = await watchData(token, videos);
   for (const v of videos) Object.assign(v, (watch && watch.perVideo[v.id]) || { watchHours: 0, avgPct: 0 });
   if (watch) delete watch.perVideo;
