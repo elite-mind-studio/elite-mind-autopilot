@@ -1,5 +1,5 @@
 # Generates one video from topics.txt and uploads it to YouTube.
-# Two Shorts a day (a series part + an explainer) and a long video on Fridays.
+# Two Shorts a day (an explainer in the morning, a series part in the evening) and a long video on Fridays.
 # Each scheduled run waits a random 0-3 hours first, so posting times differ
 # every day. See docs/autopilot.md.
 name: Autopilot
@@ -8,8 +8,8 @@ on:
   schedule:
     # Times are UTC (West Africa Time = UTC+1); each run adds a random 0-3 h delay.
     # Odd minutes on purpose: GitHub delays or drops runs scheduled at :00.
-    - cron: "17 6 * * *"    # series Short (Part N/M), 07:17-10:17 WAT
-    - cron: "43 14 * * *"   # explainer Short, 15:43-18:43 WAT
+    - cron: "17 6 * * *"    # explainer Short, 07:17-10:17 WAT
+    - cron: "43 14 * * *"   # series Short (Part N/M), 15:43-18:43 WAT (evening = most viewers)
     - cron: "29 11 * * 5"   # long video, Fridays 12:29-15:29 WAT
   workflow_dispatch:
     inputs:
@@ -162,7 +162,7 @@ jobs:
             [ "${{ inputs.series }}" = "true" ] && args="$args --series"
           elif [ "${{ github.event.schedule }}" = "29 11 * * 5" ]; then
             args="--long"
-          elif [ "${{ github.event.schedule }}" = "17 6 * * *" ]; then
+          elif [ "${{ github.event.schedule }}" = "43 14 * * *" ]; then
             args="--series"
           fi
           uv run python Backend/autopilot.py run $args

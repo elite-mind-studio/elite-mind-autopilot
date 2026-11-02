@@ -169,7 +169,7 @@ async function load() {
   // Coming next
   const list = (title, items) => items.length ? `<div><b>${title}</b><ol>${items.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>` : "";
   document.getElementById("next").innerHTML =
-    list("Series (morning Short)", data.next.series || []) + list("Explainers (afternoon Short)", data.next.explainers || []) + list("Long videos (Fridays)", data.next.long || []);
+    list("Explainers (morning Short)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || []);
 
   // Community ideas with copy buttons
   document.getElementById("ideas").innerHTML = (data.community.ideas || []).map((t, i) =>
