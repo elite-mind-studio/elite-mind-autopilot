@@ -80,6 +80,7 @@ jobs:
       AUTOPILOT_LONG_SCENE_SECONDS: "5"
       VIDEO_LAYOUT: "letterbox"
       SCRIPT_STYLE: "listicle"
+      SCRIPT_EXTRA_RULES: "Frame every tip as practical, ethical leverage the viewer can use with confidence (or to protect themselves from manipulation), never as a way to manipulate or harm others. Keep it relatable and realistic."
       KOKORO_SPEED: "1.1"
       IMAGE_STYLE: "flat 2D vector cartoon illustration, explainer animation style, clean simple shapes, bold dark outlines, plain light cream background, bright friendly colors, minimal detail, 16:9 composition"
       IMAGE_PROMPT_KIND: "Flat 2D cartoon illustration"

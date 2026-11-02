@@ -5,12 +5,14 @@
 
 const env = name => (process.env[name] || "").trim();
 
-// slot -> workflow file + inputs (random_delay spreads posting times like a human)
+// slot -> workflow file + inputs. Vercel Hobby cron fires anywhere within the hour,
+// which already varies posting times, so no extra random delay.
+// Slots follow the channel's best launch windows (YouTube Studio): ~10:00 and ~22:30 WAT.
 const JOBS = {
-  "elite-morning": ["autopilot.yml", { format: "short", series: "false", random_delay: "true" }],
-  "elite-midday": ["autopilot.yml", { format: "short", series: "false", random_delay: "true" }],
-  "elite-evening": ["autopilot.yml", { format: "short", series: "true", random_delay: "true" }],
-  "elite-long": ["autopilot.yml", { format: "long", series: "false", random_delay: "true" }],
+  "elite-morning": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
+  "elite-midday": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
+  "elite-evening": ["autopilot.yml", { format: "short", series: "true", random_delay: "false" }],
+  "elite-long": ["autopilot.yml", { format: "long", series: "false", random_delay: "false" }],
   "headline-full": ["headline.yml", { mode: "full" }],
   "headline-short": ["headline.yml", { mode: "short" }],
   "research": ["research.yml", {}],

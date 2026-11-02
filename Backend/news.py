@@ -217,11 +217,12 @@ STRICT RULES:
 
 LONG script: 1000-1150 words, 11-13 paragraphs separated by blank lines. Paragraph 1 is a hook (the most
 striking fact), then context/history, what happened, impact on ordinary people, the latest, what could happen
-next, and a closing paragraph asking viewers to subscribe and comment where they are watching from.
+next, and a closing paragraph asking viewers to subscribe and to tell us in the comments which story
+in the news we should explain next.
 
 SHORT script: 90-110 words, 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."),
 each sentence a consequence of the last, then end with: "This is the story of <subject>. For the full
-documentary, like, subscribe, and check the description for the full video."
+documentary, like, subscribe, and check the description for the full video. Which story should we explain next? Tell us in the comments."
 
 GRAPHICS for the long video: 2-4 animated cards placed on long-script paragraphs (0-based index), using
 only numbers from the sources:
@@ -250,7 +251,7 @@ STRICT RULES:
 - Neutral tone, never take sides; attribute claims when the sources do. Numbers written in words.
 - 90-110 words, 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
   consequence of the last, the most surprising fact early. End with exactly:
-  "Follow Headline Tales for the stories behind the headlines."
+  "Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines."
 
 SOURCES:
 {_sources_block(sources)}

@@ -352,6 +352,11 @@ def generate_script(
             Do not end with a call to action such as "like and subscribe", it is added separately.
         """
 
+    # Channel-level writing rules (e.g. from YouTube Studio insights / comments)
+    extra_rules = os.getenv("SCRIPT_EXTRA_RULES", "").strip()
+    if extra_rules and not customPrompt:
+        prompt += f"\n            Channel rule: {extra_rules}\n"
+
     # Learning loop: what our own analytics say keeps viewers watching
     if not customPrompt:
         from learning import load_lessons
