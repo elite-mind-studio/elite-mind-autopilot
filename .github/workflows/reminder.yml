@@ -1,0 +1,46 @@
+# Community-post reminders for Elite Mind Decoder: opens a GitHub issue that
+# @mentions the owner (push notification in the GitHub app + email) with a
+# ready-to-copy post, shortly before the Short it promotes goes live.
+# Started by Vercel Cron (dashboard/vercel.json -> api/trigger.js).
+name: Community post reminder
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "Which reminder"
+        type: choice
+        options: [poll, series, long, recap]
+        default: poll
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OWNER: bobbiejoe0
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open the reminder
+        run: |
+          next_topic=$(grep -m1 . topics.txt || true)
+          series=$(grep -m1 . topics_series.txt | cut -d'|' -f1 || true)
+          ideas=$(curl -s "https://elite-mind-dashboard.vercel.app/api/data?ch=elite" | jq -r '.community.ideas[]? | "> " + gsub("\n"; "\n> ") + "\n"' || true)
+          case "${{ inputs.kind }}" in
+            poll)   title="Post a poll now (Short goes live ~10:00 WAT)"
+                    post="Today's Short: **$next_topic**. Post a poll that teases it, e.g. \"Be honest... which one gets you every time?\" with 3-4 short options, ending with \"Black is exposing it today 👀\"." ;;
+            series) title="Post a series teaser now (series part goes live ~22:30 WAT)"
+                    post="Tonight: **$series**. Post e.g. \"New part drops tonight 🔥 What do you think happens next? Wrong answers only 😂\"" ;;
+            long)   title="Post a long-video teaser now (Friday long video)"
+                    post="Post a yes/no question about today's long video, e.g. \"Would you take this deal? Yes / No\", then pin a comment with the link once it is up." ;;
+            recap)  title="Post the weekly recap question now"
+                    post="This week's compilation is up. Post: \"Which trick from this week was your favourite? Comment the number 1-5 👇\"" ;;
+          esac
+          body=$(printf '@%s it is time for a community post on **Elite Mind Decoder**.\n\n%s\n\n**More ideas (from the dashboard):**\n%s\n\nYouTube app → **+ Create → Post** (or Studio → Create → Create post). Close this issue when done.' "$OWNER" "$post" "$ideas")
+          gh issue create -R "$GITHUB_REPOSITORY" --title "📣 $title" --body "$body"

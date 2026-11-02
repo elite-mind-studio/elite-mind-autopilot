@@ -15,6 +15,10 @@ const JOBS = {
   "elite-long": ["autopilot.yml", { format: "long", series: "false", random_delay: "false" }],
   "headline-full": ["headline.yml", { mode: "full" }],
   "headline-short": ["headline.yml", { mode: "short" }],
+  "remind-poll": ["reminder.yml", { kind: "poll" }],
+  "remind-series": ["reminder.yml", { kind: "series" }],
+  "remind-long": ["reminder.yml", { kind: "long" }],
+  "remind-recap": ["reminder.yml", { kind: "recap" }],
   "research": ["research.yml", {}],
   "compilation": ["compilation.yml", {}],
 };

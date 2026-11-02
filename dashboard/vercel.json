@@ -8,6 +8,10 @@
     { "path": "/api/trigger?job=elite-evening", "schedule": "0 21 * * *" },
     { "path": "/api/trigger?job=headline-short&slot=evening", "schedule": "23 17 * * *" },
     { "path": "/api/trigger?job=elite-long", "schedule": "29 11 * * 5" },
+    { "path": "/api/trigger?job=remind-poll", "schedule": "0 8 * * 2" },
+    { "path": "/api/trigger?job=remind-series", "schedule": "0 20 * * 3" },
+    { "path": "/api/trigger?job=remind-long", "schedule": "0 11 * * 5" },
+    { "path": "/api/trigger?job=remind-recap", "schedule": "0 17 * * 0" },
     { "path": "/api/trigger?job=research", "schedule": "37 4 * * 0" },
     { "path": "/api/trigger?job=compilation", "schedule": "53 14 * * 0" }
   ]
