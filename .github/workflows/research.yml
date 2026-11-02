@@ -4,7 +4,7 @@ name: Research
 
 on:
   schedule:
-    - cron: "0 5 * * 0"   # Sundays 06:00 West Africa Time
+    - cron: "37 4 * * 0"  # Sundays 05:37 West Africa Time
   workflow_dispatch:
 
 permissions:

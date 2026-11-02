@@ -7,9 +7,10 @@ name: Autopilot
 on:
   schedule:
     # Times are UTC (West Africa Time = UTC+1); each run adds a random 0-3 h delay.
-    - cron: "0 7 * * *"     # series Short (Part N/M), 08:00-11:00 WAT
-    - cron: "0 15 * * *"    # explainer Short, 16:00-19:00 WAT
-    - cron: "0 12 * * 5"    # long video, Fridays 13:00-16:00 WAT
+    # Odd minutes on purpose: GitHub delays or drops runs scheduled at :00.
+    - cron: "17 6 * * *"    # series Short (Part N/M), 07:17-10:17 WAT
+    - cron: "43 14 * * *"   # explainer Short, 15:43-18:43 WAT
+    - cron: "29 11 * * 5"   # long video, Fridays 12:29-15:29 WAT
   workflow_dispatch:
     inputs:
       upload:
@@ -159,9 +160,9 @@ jobs:
             [ "${{ inputs.upload }}" = "false" ] && args="$args --no-upload"
             [ "${{ inputs.format }}" = "long" ] && args="$args --long"
             [ "${{ inputs.series }}" = "true" ] && args="$args --series"
-          elif [ "${{ github.event.schedule }}" = "0 12 * * 5" ]; then
+          elif [ "${{ github.event.schedule }}" = "29 11 * * 5" ]; then
             args="--long"
-          elif [ "${{ github.event.schedule }}" = "0 7 * * *" ]; then
+          elif [ "${{ github.event.schedule }}" = "17 6 * * *" ]; then
             args="--series"
           fi
           uv run python Backend/autopilot.py run $args
