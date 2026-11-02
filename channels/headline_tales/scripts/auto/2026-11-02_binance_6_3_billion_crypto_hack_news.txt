@@ -1,0 +1,13 @@
+FORMAT: short
+SUBJECT: Binance $6.3 billion crypto hack
+TITLE: Crypto Heist Unfolds
+YT_TITLE: Binance Hack: $6.3 bn Theft and the Fight to Recover It
+TAGS: Binance,crypto hack,North Korea,Lazarus Group,cryptocurrency,finance,security
+DESCRIPTION: A record-breaking $6.3 billion hack hits Binance, sparking massive withdrawals, a blame on North Korea, and a race to retrieve the funds.
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cwj34gdmnly4o?at_medium=RSS&at_campaign=rss
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/ckpdg3ql4169o?at_medium=RSS&at_campaign=rss
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/ckpdg3ql4169o?at_medium=RSS&at_campaign=rss
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/cwe8lp7zy07zo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, Binance - https://en.wikipedia.org/wiki/Binance
+
+Binance halted all transactions on November 1 after a breach accessed roughly six point three billion dollars of digital assets, and users withdrew three point six billion dollars within hours. The FBI and several analytics firms attributed the attack to the North Korean Lazarus Group, also known as TraderTraitor, while the regime denies involvement. Binance said it has covered about ninety percent of the loss and set aside more than six point three four billion dollars to absorb the remainder, promising full reimbursement. Law-enforcement agencies, including the US Secret Service and the FBI, are working to freeze, trace and recover the stolen funds, which are being layered across thousands of addresses. Chainalysis reported ongoing laundering activity, noting that the hackers are moving assets through decentralized finance and instant-swap services. Follow Headline Tales for the stories behind the headlines.
