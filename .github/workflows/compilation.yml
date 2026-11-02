@@ -4,8 +4,8 @@
 name: Weekly compilation
 
 on:
-  schedule:
-    - cron: "53 14 * * 0"   # Sundays 15:53 West Africa Time
+  # Started by Vercel Cron (dashboard/vercel.json -> api/trigger.js): GitHub's own
+  # schedule trigger dropped most runs, so it is not used.
   workflow_dispatch:
     inputs:
       dry_run:

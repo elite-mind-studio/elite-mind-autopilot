@@ -25,6 +25,14 @@ $headlineFile = Join-Path $ProjectRoot "Backend\youtube-oauth2-headline_tales.js
 $headline = if (Test-Path $headlineFile) { (Get-Content $headlineFile -Raw | ConvertFrom-Json).refresh_token } else { "" }
 $groq = (Get-Content (Join-Path $ProjectRoot ".env") | Where-Object { $_ -match '^GROQ_API_KEY=' }) -replace '^GROQ_API_KEY="?(.*?)"?$', '$1'
 
+# Vercel Cron starts the GitHub workflows (dashboard/api/trigger.js). The GitHub token is a
+# fine-grained token with only "Actions: Read and write" on the repo, saved in Backend\github_dispatch_token.txt.
+$dispatchFile = Join-Path $ProjectRoot "Backend\github_dispatch_token.txt"
+$dispatch = if (Test-Path $dispatchFile) { (Get-Content $dispatchFile -Raw).Trim() } else { "" }
+$cronFile = Join-Path $ProjectRoot "Backend\cron_secret.txt"
+if (-not (Test-Path $cronFile)) { [guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N") | Set-Content -NoNewline -Encoding ascii $cronFile }
+$cronSecret = (Get-Content $cronFile -Raw).Trim()
+
 $values = [ordered]@{
     YT_CLIENT_ID     = $client.client_id
     YT_CLIENT_SECRET = $client.client_secret
@@ -32,12 +40,15 @@ $values = [ordered]@{
     YT_REFRESH_TOKEN_HEADLINE = $headline
     GROQ_API_KEY     = $groq
     GITHUB_REPO      = "elite-mind-studio/elite-mind-autopilot"
+    GITHUB_DISPATCH_TOKEN = $dispatch
+    CRON_SECRET      = $cronSecret
 }
 
 Write-Host "Linking Vercel project 'elite-mind-dashboard'..."
 cmd /c "npx --yes vercel@latest link --yes --project elite-mind-dashboard 2>&1" | Out-Null
 
 foreach ($name in $values.Keys) {
+    if ([string]::IsNullOrWhiteSpace($values[$name])) { Write-Host "skipped $name (empty)"; continue }
     # Replace any old value, then add the new one for production
     cmd /c "npx --yes vercel@latest env rm $name production --yes 2>&1" | Out-Null
     $values[$name] | cmd /c "npx --yes vercel@latest env add $name production 2>&1" | Out-Null

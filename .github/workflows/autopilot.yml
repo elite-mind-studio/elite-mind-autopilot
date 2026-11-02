@@ -5,13 +5,8 @@
 name: Autopilot
 
 on:
-  schedule:
-    # Times are UTC (West Africa Time = UTC+1); each run adds a random 0-3 h delay.
-    # Odd minutes on purpose: GitHub delays or drops runs scheduled at :00.
-    - cron: "17 6 * * *"    # explainer Short, 07:17-10:17 WAT
-    - cron: "31 10 * * *"   # explainer Short, 11:31-14:31 WAT
-    - cron: "43 14 * * *"   # series Short (Part N/M), 15:43-18:43 WAT (evening = most viewers)
-    - cron: "29 11 * * 5"   # long video, Fridays 12:29-15:29 WAT
+  # Started by Vercel Cron (dashboard/vercel.json -> api/trigger.js): GitHub's own
+  # schedule trigger dropped most runs, so it is not used.
   workflow_dispatch:
     inputs:
       upload:
@@ -25,6 +20,10 @@ on:
         default: short
       series:
         description: "Short from the series queue (Part N/M)"
+        type: boolean
+        default: false
+      random_delay:
+        description: "Wait a random 0-3 hours first (scheduled slots)"
         type: boolean
         default: false
       image_providers:
@@ -94,7 +93,7 @@ jobs:
 
     steps:
       - name: Random delay (0-3 hours)
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' || inputs.random_delay
         run: |
           delay=$((RANDOM % 10800))
           echo "Sleeping ${delay}s before posting"

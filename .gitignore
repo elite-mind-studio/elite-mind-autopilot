@@ -39,3 +39,5 @@ motion/*/renders/
 motion/*/.hyperframes/
 motion/test_cards/
 motion/hormuz-test/
+Backend/github_dispatch_token.txt
+Backend/cron_secret.txt
