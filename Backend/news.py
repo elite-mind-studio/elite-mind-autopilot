@@ -74,7 +74,7 @@ def chat_json(prompt: str):
             continue
         text = re.sub(r",\s*([\]}])", r"\1", match.group(0)).replace("“", '"').replace("”", '"')
         try:
-            return json.loads(text)
+            return json.loads(text, strict=False)  # scripts contain raw line breaks
         except json.JSONDecodeError:
             continue
     raise RuntimeError("Text model did not return valid JSON")
