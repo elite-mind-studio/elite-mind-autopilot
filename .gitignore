@@ -31,3 +31,4 @@ dashboard/.vercel
 .vercel
 research/raw.json
 research/report.json
+.last_posted.json

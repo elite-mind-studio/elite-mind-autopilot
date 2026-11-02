@@ -172,10 +172,18 @@ jobs:
 
       - name: Commit topic progress
         run: |
+          [ -f .last_posted.json ] || exit 0
+          cp .last_posted.json "$RUNNER_TEMP/last_posted.json"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add topics.txt topics_used.txt topics_long.txt topics_long_used.txt topics_series.txt topics_series_used.txt 2>/dev/null || true
-          git add topics.txt topics_used.txt
-          git commit -m "autopilot: mark topic as used" || exit 0
-          git pull --rebase
-          git push
+          # Re-apply on top of the newest topic lists so concurrent edits never conflict
+          for attempt in 1 2 3; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            cp "$RUNNER_TEMP/last_posted.json" .last_posted.json
+            uv run python Backend/autopilot.py mark-posted
+            git add topics*.txt
+            git commit -q -m "autopilot: mark topic as used" || exit 0
+            git push -q && exit 0
+            sleep 5
+          done
+          exit 1

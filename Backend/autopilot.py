@@ -388,7 +388,23 @@ def run_video(
     # Test runs don't consume the topic, so it still gets posted for real later
     if allow_upload:
         mark_topic_used(topic, queue)
+        # Lets CI re-apply this after pulling a newer topic list (see mark_posted)
+        (PROJECT_ROOT / ".last_posted.json").write_text(
+            json.dumps({"topic": topic, "queue": queue}), encoding="utf-8"
+        )
     print(f"[+] Done: {topic}")
+
+
+def mark_posted() -> None:
+    """Re-apply the last posted topic to a freshly pulled topic list."""
+    marker = PROJECT_ROOT / ".last_posted.json"
+    if not marker.exists():
+        return
+    posted = json.loads(marker.read_text(encoding="utf-8"))
+    topics_file, _ = _topic_files(posted["queue"])
+    if posted["topic"] in _read_lines(topics_file):
+        mark_topic_used(posted["topic"], posted["queue"])
+        print(f"[+] Marked as posted: {posted['topic']}")
 
 
 def youtube_auth() -> None:
@@ -413,6 +429,8 @@ if __name__ == "__main__":
             video_format=video_format,
             queue="series" if "--series" in sys.argv[2:] else None,
         )
+    elif command == "mark-posted":
+        mark_posted()
     elif command == "auth":
         youtube_auth()
     else:
