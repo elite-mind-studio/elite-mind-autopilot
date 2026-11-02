@@ -25,6 +25,10 @@ on:
         description: "Short from the series queue (Part N/M)"
         type: boolean
         default: false
+      image_providers:
+        description: "Image providers in order (blank = cloudflare,kaggle,pollinations; e.g. kaggle to test it)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -59,7 +63,7 @@ jobs:
       IMAGE_SCENE_SECONDS: "10"
       # Local Stable Diffusion is too heavy for the runner; stock footage is the last fallback
       AI_IMAGES_FALLBACK: "none"
-      IMAGE_PROVIDERS: "cloudflare,kaggle,pollinations"
+      IMAGE_PROVIDERS: ${{ inputs.image_providers || 'cloudflare,kaggle,pollinations' }}
       POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
