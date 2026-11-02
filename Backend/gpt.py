@@ -591,7 +591,9 @@ def groq_chat(prompt: str, timeout: int = 120) -> str:
             # gpt-oss is a reasoning model: keep its thinking short and leave
             # room for long scripts, or the answer can come back empty
             "reasoning_effort": "low",
-            "max_completion_tokens": 8192,
+            # Groq's free tier counts this against ~8K tokens/minute, so long-prompt
+            # callers (e.g. news.py) lower it with GROQ_MAX_TOKENS
+            "max_completion_tokens": int(os.getenv("GROQ_MAX_TOKENS", "8192")),
         },
         timeout=timeout,
     )

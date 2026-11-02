@@ -35,21 +35,35 @@ FEEDS = {
     "DW": "https://rss.dw.com/rdf/rss-en-world",
     "CNBC World": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362",
 }
-MAX_SOURCE_WORDS = 2600  # keeps each prompt inside Groq's free per-minute token limit
+# Groq free tier: ~8K tokens per minute, counting the reserved reply length too.
+# ~1800 source words (~2.5K tokens) + instructions + a 3.5K reply fits in one minute.
+MAX_SOURCE_WORDS = 1800
+REPLY_TOKENS = "3500"
+CALL_GAP_SECONDS = 62
+
+
+_last_call = 0.0
 
 
 def chat(prompt: str) -> str:
     """Hosted text model with patience for free-tier rate limits."""
+    import os
     from gpt import hosted_chat
 
+    os.environ["GROQ_MAX_TOKENS"] = REPLY_TOKENS
+    global _last_call
+    wait = CALL_GAP_SECONDS - (time.time() - _last_call)
+    if wait > 0:  # one big request per minute keeps us inside the free per-minute budget
+        time.sleep(wait)
     for attempt in range(6):
         try:
+            _last_call = time.time()
             return hosted_chat(prompt)
         except Exception as err:
             if attempt == 5:
                 raise
-            print(f"[-] Text model busy ({str(err)[:80]}), retrying in 40s", flush=True)
-            time.sleep(40)
+            print(f"[-] Text model busy ({str(err)[:220]}), retrying in 65s", flush=True)
+            time.sleep(65)
 
 
 def chat_json(prompt: str):
@@ -272,7 +286,6 @@ def remove_sentences(text: str, sentences: List[str]) -> str:
 def _checked(text: str, sources: List[dict], label: str, rounds: int = 3) -> str:
     """Remove unsupported sentences; the last round only verifies, so what is posted passed a clean check."""
     for round_ in range(rounds):
-        time.sleep(20)  # free-tier token budget
         bad = fact_check(text, sources)
         if not bad:
             return text
