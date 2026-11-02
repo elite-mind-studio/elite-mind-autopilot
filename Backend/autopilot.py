@@ -161,12 +161,7 @@ def mark_topic_used(topic: str, video_format: str = "short") -> None:
 
 
 def next_topic(video_format: str = "short") -> str:
-    # The "series" queue holds "Part N/M" Shorts; when it runs dry, fall back
-    # to the regular explainer queue
-    queue = queue or video_format
-    if queue == "series" and not _read_lines(SERIES_TOPICS_FILE):
-        queue = "short"
-    topic = peek_topic(queue)
+    topic = peek_topic(video_format)
     mark_topic_used(topic, video_format)
     return topic
 
@@ -367,7 +362,12 @@ def run_video(
     clean_dir(str(TEMP_DIR))
     clean_dir(str(SUBTITLES_DIR))
 
-    topic = peek_topic(video_format)
+    # The "series" queue holds "Part N/M" Shorts; when it runs dry, fall back
+    # to the regular explainer queue
+    queue = queue or video_format
+    if queue == "series" and not _read_lines(SERIES_TOPICS_FILE):
+        queue = "short"
+    topic = peek_topic(queue)
     upload = allow_upload and (BASE_DIR / "client_secret.json").exists()
     print(f"[+] Generating: {topic} (upload: {upload})")
 
