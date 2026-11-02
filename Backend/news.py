@@ -269,12 +269,15 @@ def remove_sentences(text: str, sentences: List[str]) -> str:
     return re.sub(r"[ \t]{2,}", " ", re.sub(r"\n{3,}", "\n\n", text)).strip()
 
 
-def _checked(text: str, sources: List[dict], label: str) -> str:
-    for round_ in range(2):
+def _checked(text: str, sources: List[dict], label: str, rounds: int = 3) -> str:
+    """Remove unsupported sentences; the last round only verifies, so what is posted passed a clean check."""
+    for round_ in range(rounds):
         time.sleep(20)  # free-tier token budget
         bad = fact_check(text, sources)
         if not bad:
             return text
+        if round_ == rounds - 1:
+            break
         print(f"[-] {label}: removing {len(bad)} unsupported claim(s): {bad}", flush=True)
         text = remove_sentences(text, bad)
     raise RuntimeError(f"{label} still has unsupported claims after fact-check; not posting")
@@ -324,15 +327,7 @@ def prepare() -> tuple:
 
     draft = write_scripts(story, sources)
     for key in ("long_script", "short_script"):
-        for round_ in range(2):
-            time.sleep(20)  # free-tier token budget
-            bad = fact_check(draft[key], sources)
-            if not bad:
-                break
-            print(f"[-] {key}: removing {len(bad)} unsupported claim(s): {bad}", flush=True)
-            draft[key] = remove_sentences(draft[key], bad)
-        else:
-            raise RuntimeError(f"{key} still has unsupported claims after fact-check; not posting")
+        draft[key] = _checked(draft[key], sources, key, rounds=4)
     if len(draft["long_script"].split()) < 700:
         raise RuntimeError("Long script too short after fact-check; not posting")
 
