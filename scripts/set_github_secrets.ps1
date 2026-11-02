@@ -27,7 +27,7 @@ $envValues = @{}
 Get-Content (Join-Path $ProjectRoot ".env") | ForEach-Object {
     if ($_ -match '^\s*([A-Z0-9_]+)\s*=\s*"?(.*?)"?\s*$') { $envValues[$Matches[1]] = $Matches[2] }
 }
-foreach ($name in "PIXABAY_API_KEY", "TIKTOK_SESSION_ID", "POLLINATIONS_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "GROQ_API_KEY") {
+foreach ($name in "PIXABAY_API_KEY", "TIKTOK_SESSION_ID", "POLLINATIONS_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "GROQ_API_KEY", "HF_TOKEN") {
     Set-Secret $name $envValues[$name]
 }
 

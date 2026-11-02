@@ -1,5 +1,5 @@
 """
-Batch image generation on a free Kaggle GPU (SDXL + SDXL-Lightning, ~4 s/image).
+Batch image generation on a free Kaggle GPU (FLUX.1-schnell, ~35-40 s/image).
 
 All prompts of a video are sent in one Kaggle run: the script below is filled
 with the jobs, pushed as a private kernel, polled until it finishes, and its
@@ -51,7 +51,7 @@ def available() -> bool:
     return Path(KAGGLE_CLI).exists() and (token.exists() or os.getenv("KAGGLE_API_TOKEN"))
 
 
-def generate(jobs: List[dict], on_log=None, timeout_minutes: int = 45) -> Dict[str, bytes]:
+def generate(jobs: List[dict], on_log=None, timeout_minutes: int = 60) -> Dict[str, bytes]:
     """
     Generate images on Kaggle.
 
@@ -68,7 +68,15 @@ def generate(jobs: List[dict], on_log=None, timeout_minutes: int = 45) -> Dict[s
     work.mkdir(parents=True, exist_ok=True)
     try:
         kernel_id = f"{_username()}/{KERNEL_SLUG}"
-        script = TEMPLATE.read_text(encoding="utf-8").replace("__JOBS__", json.dumps(jobs))
+        token = os.getenv("HF_TOKEN", "").strip()
+        if not token:
+            raise RuntimeError("HF_TOKEN not set (needed to download FLUX.1-schnell)")
+        # The kernel is private, so the read-only token is only visible to this Kaggle account
+        script = (
+            TEMPLATE.read_text(encoding="utf-8")
+            .replace("__JOBS__", json.dumps(jobs))
+            .replace("__HF_TOKEN__", token)
+        )
         (work / "imagegen.py").write_text(script, encoding="utf-8")
         (work / "kernel-metadata.json").write_text(json.dumps({
             "id": kernel_id,

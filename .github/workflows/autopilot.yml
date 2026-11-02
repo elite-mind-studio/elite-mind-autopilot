@@ -59,11 +59,12 @@ jobs:
       IMAGE_SCENE_SECONDS: "10"
       # Local Stable Diffusion is too heavy for the runner; stock footage is the last fallback
       AI_IMAGES_FALLBACK: "none"
-      IMAGE_PROVIDERS: "cloudflare,pollinations"
+      IMAGE_PROVIDERS: "cloudflare,kaggle,pollinations"
       POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       TEXT_PROVIDERS: "groq,cloudflare,pollinations"
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
       KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

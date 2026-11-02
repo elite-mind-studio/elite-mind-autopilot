@@ -426,9 +426,9 @@ def build_ai_video(
 
             if not kaggle_images.available():
                 return
-            gen_size = (1344, 768) if generator.size[0] >= generator.size[1] else (768, 1344)
+            gen_size = (1024, 576) if generator.size[0] >= generator.size[1] else (576, 1024)
             jobs = [
-                {"id": f"s{i:03d}", "prompt": _sdxl_prompt(prompts[i]), "width": gen_size[0], "height": gen_size[1]}
+                {"id": f"s{i:03d}", "prompt": f"{prompts[i]}. {IMAGE_STYLE}. {NEGATIVE}", "width": gen_size[0], "height": gen_size[1]}
                 for i in indices
             ]
             results = kaggle_images.generate(jobs, on_log=emit)
