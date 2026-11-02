@@ -395,7 +395,7 @@ def run_video(
             "topic": topic,
             "format": video_format,
             "queue": queue or video_format,
-            "hook": re.split(r"(?<=[.!?])\s+", script.strip(), maxsplit=1)[0] if script else "",
+            "hook": re.split(r"(?<=[.!?][\"”])\s+|(?<=[.!?])\s+", script.strip(), maxsplit=1)[0] if script else "",
             "words": len(script.split()),
         }
         _record_history(record)
