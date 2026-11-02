@@ -35,3 +35,7 @@ research/report.json
 dramas/
 channels/*/videos/
 channels/*/images/
+motion/*/renders/
+motion/*/.hyperframes/
+motion/test_cards/
+motion/hormuz-test/

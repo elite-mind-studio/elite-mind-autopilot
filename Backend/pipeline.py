@@ -12,6 +12,7 @@ from moviepy import (
     afx,
     concatenate_audioclips,
 )
+from pathlib import Path
 from uuid import uuid4
 
 from gpt import (
@@ -306,6 +307,16 @@ def run_generation_pipeline(
             )
             if layout == "letterbox":
                 subtitles_position = "center,letterbox"
+            # HyperFrames motion graphics (maps, counters, charts) over chosen paragraphs
+            if data.get("graphics"):
+                from motion import add_graphics
+                import visuals as _vis
+
+                combined_video_path = add_graphics(
+                    combined_video_path, data["graphics"], script, sentences, sentence_durations,
+                    frame_size, Path(TEMP_DIR),
+                    image=(_vis.LAST_SCENE_IMAGES or [None])[0], emit=emit,
+                )
         except Exception as err:
             # AI_IMAGES_FALLBACK=none: never post a lower-quality video; fail the run
             # so the topic is retried at the next slot

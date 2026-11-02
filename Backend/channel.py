@@ -14,6 +14,7 @@ Script file (channels/<name>/scripts/<slug>.txt), header then a blank line:
     TAGS: a, b, c
     DESCRIPTION: one paragraph
     SOURCE: https://...                    (repeatable)
+    GRAPHIC: 0 | {"type": "title", ...}    (repeatable; HyperFrames card over that paragraph)
 
 Usage:
     python Backend/channel.py <name> auth                  # one-time login for that channel
@@ -44,12 +45,15 @@ def load_profile(name: str) -> None:
 
 def parse_script(path: Path) -> dict:
     header, _, body = path.read_text(encoding="utf-8").partition("\n\n")
-    meta = {"source": []}
+    meta = {"source": [], "graphics": []}
     for line in header.splitlines():
         key, _, value = line.partition(":")
         key = key.strip().lower()
         if key == "source":
             meta["source"].append(value.strip())
+        elif key == "graphic":  # GRAPHIC: <paragraph> | <card json>, see Backend/motion.py
+            index, _, card = value.partition("|")
+            meta["graphics"].append({"paragraph": int(index), "card": json.loads(card)})
         elif key:
             meta[key] = value.strip()
     return {**meta, "script": body.strip(), "slug": path.stem}
@@ -110,7 +114,8 @@ def make(name: str, script_path: Path) -> Path:
     spec = parse_script(script_path)
     video_format = spec.get("format", "short")
     data = build_payload(spec["subject"], False, video_format)
-    data.update({"script": spec["script"], "title": spec.get("title") or spec["subject"], "series": None})
+    data.update({"script": spec["script"], "title": spec.get("title") or spec["subject"], "series": None,
+                 "graphics": spec["graphics"]})
 
     output = run_generation_pipeline(data=data, is_cancelled=None, on_log=lambda m, l: print(m, flush=True))
     out_dir = ROOT / "channels" / name / "videos"
