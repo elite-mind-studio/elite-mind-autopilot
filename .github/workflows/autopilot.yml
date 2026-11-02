@@ -173,8 +173,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
-          path: output.mp4
-          retention-days: 5
+          # .last_posted.json carries the YouTube ID; Sunday's compilation uses both
+          path: |
+            output.mp4
+            .last_posted.json
+          include-hidden-files: true
+          retention-days: 9
           if-no-files-found: ignore
 
       - name: Commit topic progress

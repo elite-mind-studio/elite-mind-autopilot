@@ -1,0 +1,68 @@
+# Sunday compilations: each channel's Shorts from the past week stitched into one
+# long 1440p video (intro, numbered chapters, links to every Short). Long videos
+# are what count toward the 4,000 watch hours for monetization.
+name: Weekly compilation
+
+on:
+  schedule:
+    - cron: "53 14 * * 0"   # Sundays 15:53 West Africa Time
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build the videos but post nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: compilation
+  cancel-in-progress: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install Python dependencies
+        run: uv sync --python 3.11
+
+      - name: Write YouTube credentials
+        env:
+          CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
+          OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
+          OAUTH_HEADLINE_JSON: ${{ secrets.YOUTUBE_OAUTH_HEADLINE_JSON }}
+        run: |
+          printf '%s' "$CLIENT_SECRET_JSON" > Backend/client_secret.json
+          printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2.json
+          printf '%s' "$OAUTH_HEADLINE_JSON" > Backend/youtube-oauth2-headline_tales.json
+
+      - name: Download this week's videos
+        run: |
+          since=$(date -u -d '8 days ago' +%Y-%m-%d)
+          for wf in autopilot headline; do
+            for id in $(gh run list -R "$GITHUB_REPOSITORY" --workflow "$wf.yml" --status success --created ">=$since" --limit 60 --json databaseId -q '.[].databaseId'); do
+              gh run download "$id" -R "$GITHUB_REPOSITORY" -D "artifacts/$wf/$id" || true
+            done
+          done
+          find artifacts -name '*.mp4' | wc -l
+
+      - name: Elite Mind Decoder compilation
+        run: uv run python Backend/compilation.py elite artifacts/autopilot ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Headline Tales compilation
+        if: always()
+        run: uv run python Backend/compilation.py headline_tales artifacts/headline ${{ inputs.dry_run && '--dry-run' || '' }}

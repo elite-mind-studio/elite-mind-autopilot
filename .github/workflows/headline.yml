@@ -111,7 +111,7 @@ jobs:
         with:
           name: headline-${{ github.run_number }}
           path: channels/headline_tales/videos/
-          retention-days: 5
+          retention-days: 9
           if-no-files-found: ignore
 
       - name: Record what was posted
