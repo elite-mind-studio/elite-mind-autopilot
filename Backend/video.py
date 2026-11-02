@@ -413,6 +413,29 @@ def combine_videos(
     return str(combined_video_path)
 
 
+def _subscribe_button(path: str, width: int) -> None:
+    """Red YouTube-style SUBSCRIBE button with a bell, as a transparent PNG."""
+    from PIL import ImageFont
+
+    height = int(width * 0.24)
+    image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=height // 4, fill=(230, 33, 23, 255),
+                           outline=(255, 255, 255, 255), width=max(4, height // 18))
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(height * 0.5))
+    text = "SUBSCRIBE"
+    text_width = draw.textlength(text, font=font)
+    bell = int(height * 0.42)
+    x = (width - text_width - bell * 1.4) / 2
+    draw.text((x, height * 0.2), text, font=font, fill="white")
+    # Simple bell to the right of the word
+    bx, by = x + text_width + bell * 0.4, (height - bell) / 2
+    draw.pieslice((bx, by, bx + bell, by + bell * 1.5), 180, 360, fill="white")
+    draw.rectangle((bx, by + bell * 0.72, bx + bell, by + bell * 0.82), fill="white")
+    draw.ellipse((bx + bell * 0.38, by + bell * 0.82, bx + bell * 0.62, by + bell * 1.02), fill="white")
+    image.save(path)
+
+
 def _generate_video_ffmpeg(
     combined_video_path: str,
     tts_path: str,
@@ -428,7 +451,9 @@ def _generate_video_ffmpeg(
     from PIL import ImageFont
 
     with VideoFileClip(str(combined_video_path)) as clip:
-        frame_height = clip.h
+        frame_width, frame_height = clip.w, clip.h
+    with AudioFileClip(str(tts_path)) as narration:
+        duration = narration.duration
 
     font_path = (FONTS_DIR / "bold_font.ttf").resolve()
     font_name = ImageFont.truetype(str(font_path), 20).getname()[0]
@@ -457,15 +482,36 @@ def _generate_video_ffmpeg(
     root = FONTS_DIR.parent
     output_path = TEMP_DIR / "output.mp4"
     rel = lambda path: os.path.relpath(str(path), str(root)).replace("\\", "/")
+    # Light sharpening before the captions restores crisp outlines that zooming
+    # and YouTube's re-compression soften
+    video_filter = (
+        f"[0:v]unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:"
+        f"fontsdir={rel(FONTS_DIR)}:force_style='{style}'[captioned]"
+    )
+    inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
+    output_label = "[captioned]"
+
+    # SUBSCRIBE button for the last seconds, where viewers decide to follow
+    if os.getenv("SUBSCRIBE_BUTTON", "true").strip().lower() not in ("0", "false", "no"):
+        button_width = int(frame_width * (0.62 if frame_height > frame_width else 0.26))
+        button_path = TEMP_DIR / "subscribe_button.png"
+        _subscribe_button(str(button_path), button_width)
+        if frame_height > frame_width:
+            # Shorts: centered in the empty area under the letterbox picture
+            x, y = f"(W-w)/2", f"{int(frame_height * 0.72)}"
+        else:
+            x, y = f"W-w-{int(frame_width * 0.03)}", f"H-h-{int(frame_height * 0.18)}"
+        start = max(0.0, duration - 3.5)
+        inputs += ["-i", rel(button_path)]
+        video_filter += f";[captioned][2:v]overlay=x={x}:y={y}:enable='gte(t,{start:.2f})'[final]"
+        output_label = "[final]"
+
     subprocess.run(
         [
             imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-hide_banner", "-loglevel", "error",
-            "-i", rel(combined_video_path),
-            "-i", rel(tts_path),
-            # Light sharpening before the captions restores crisp outlines that
-            # zooming and YouTube's re-compression soften
-            "-vf", f"unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'",
-            "-map", "0:v", "-map", "1:a",
+            *inputs,
+            "-filter_complex", video_filter,
+            "-map", output_label, "-map", "1:a",
             # Higher quality source gives YouTube more detail to keep
             "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart",

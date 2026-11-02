@@ -154,7 +154,7 @@ def run_generation_pipeline(
     if series and series["part"] < series["parts"]:
         # Series parts end with a reason to follow instead of the generic outro
         call_to_action = (
-            f"Follow Elite Mind Decoder so you don't miss Part {series['part'] + 1}!"
+            f"Follow Elite Mind Decoder so you don't miss Part {series['part'] + 1} tomorrow!"
         )
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"

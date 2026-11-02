@@ -111,7 +111,8 @@ async function load() {
   const likes = data.videos.reduce((a, v) => a + v.likes, 0);
   const cards = [
     ["Subscribers", fmt(data.channel.subscribers)],
-    ["Total views", fmt(data.channel.views)],
+    // YouTube's channel total lags by hours or days; the sum of each video's views is much fresher
+    ["Total views", fmt(Math.max(data.channel.views, data.videos.reduce((a, v) => a + v.views, 0)))],
     ["Videos", fmt(data.videos.length)],
     ["Avg views / Short", fmt(Math.round(shorts.reduce((a, v) => a + v.views, 0) / Math.max(1, shorts.length)))],
     ["Total likes", fmt(likes)],

@@ -47,7 +47,7 @@ jobs:
       ASSEMBLY_AI_API_KEY: ${{ secrets.ASSEMBLY_AI_API_KEY }}
       YOUTUBE_CATEGORY_ID: "27"
       YOUTUBE_PRIVACY_STATUS: public
-      VIDEO_CALL_TO_ACTION: "Like, share and subscribe to Elite Mind Decoder for more!"
+      VIDEO_CALL_TO_ACTION: "Follow Elite Mind Decoder. Black decodes a new mind trick every single day!"
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"
       AUTOPILOT_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
