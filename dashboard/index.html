@@ -100,6 +100,9 @@
     </div>
   </div>
 
+  <h2>Community post schedule <span class="muted">(Elite Mind Decoder · YouTube app → + Create → Post)</span></h2>
+  <div class="card" id="postplan"></div>
+
   <h2>Community post ideas <span class="muted">(copy into YouTube Studio → Create → Post)</span></h2>
   <div id="ideas"></div>
 
@@ -225,6 +228,32 @@ async function load() {
   document.getElementById("next").innerHTML =
     list("Explainers (morning + midday Shorts)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || [])
     || `<div class="muted">Each documentary is picked from the day's news and fact-checked before it is made.</div>`;
+
+  // Community post schedule (WAT = UTC+1): shortly before the Short it promotes goes live
+  const plan = [
+    { day: 2, time: "09:30", what: "Poll teasing the morning Short (it goes live ~10:00)", text: `🛒 Be honest… which one gets you EVERY time?
+• Option 1
+• Option 2
+• Option 3
+
+Black is exposing it today 👀` },
+    { day: 3, time: "22:00", what: "Teaser before tonight's series part (~22:30)", text: "New part drops tonight 🔥 What do you think happens next? Wrong answers only 😂" },
+    { day: 5, time: "12:00", what: "Question about today's long video", text: "Long video today 🎬 Would you take this deal? Yes / No 👇" },
+    { day: 0, time: "18:00", what: "Weekly recap question", text: "This week's compilation is up! Which trick was your favourite? Comment the number 👇" },
+  ];
+  const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const wat = new Date(Date.now() + 3600000);   // shift to West Africa Time
+  const today = wat.getUTCDay(), nowMin = wat.getUTCHours() * 60 + wat.getUTCMinutes();
+  const minutes = p => +p.time.slice(0, 2) * 60 + +p.time.slice(3);
+  const next = plan.map(p => ({ ...p, inDays: (p.day - today + 7) % 7 || (minutes(p) > nowMin ? 0 : 7) }))
+                   .sort((a, b) => a.inDays - b.inDays || minutes(a) - minutes(b))[0];
+  const when = next.inDays === 0 ? "Today" : next.inDays === 1 ? "Tomorrow" : names[next.day];
+  document.getElementById("postplan").innerHTML =
+    `<div class="idea" id="nextpost"><b>Next: ${when} at ${next.time} WAT</b> · ${esc(next.what)}
+
+${esc(next.text)}<button class="copy" id="copynext">Copy</button></div>
+     <ol class="muted">${plan.map(p => `<li>${names[p.day]} ${p.time} WAT: ${esc(p.what)}</li>`).join("")}</ol>`;
+  document.getElementById("copynext").onclick = e => { navigator.clipboard.writeText(next.text); e.target.textContent = "Copied"; };
 
   // Community ideas with copy buttons
   document.getElementById("ideas").innerHTML = (data.community.ideas || []).map((t, i) =>
