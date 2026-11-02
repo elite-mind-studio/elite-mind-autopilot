@@ -1,0 +1,19 @@
+FORMAT: short
+SUBJECT: European supermarket freezer cyber-attack and its wider implications for supply chains and food waste
+TITLE: FREEZER HACK
+YT_TITLE: European Supermarket Freezer Hack Sparks Food Waste Crisis
+TAGS: cyberattack,supermarkets,food waste,cybersecurity,supply chain,Europe
+DESCRIPTION: A coordinated ransomware attack froze European supermarkets, forcing massive food loss and raising questions about cyber-security for retail tech.
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cq1kd1nee80eo?at_medium=RSS&at_campaign=rss
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/ckpqg8lve73go?at_medium=RSS&at_campaign=rss
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/cq1kd1nee80eo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, Marks & Spencer - https://en.wikipedia.org/wiki/Marks_&_Spencer
+
+A coordinated ransomware strike hit supermarket freezers in seven European countries, and temperatures rose to as high as fifty °C, turning food into waste. The attack forced dozens of stores – including around forty Delhaize outlets in Belgium and Luxembourg and several ICA shops in Sweden – to empty units, discarding millions of euros worth of produce, with one Belgian branch reporting losses of about one hundred thousand euros. Sabcobel, the Belgian manufacturer of many affected units, said the evaporators were switched to defrost mode, a method also used in the October French incident, and that physical modifications, not just software patches, were needed.
+
+Supermarket systems are largely internet-connected, allowing remote maintenance, and most retailers switched to secure remote management after the French hack, according to Sabcobel's CEO. Yet researchers have identified over eight hundred refrigeration and building-control interfaces for British retailers exposed on the public internet, highlighting broader vulnerabilities in connected retail hardware.
+
+National cyber-security agencies in Belgium and Sweden are monitoring the incident, while the UK's National Cyber Security Centre is working with international partners to understand the details, though no UK stores were affected. The episode has reignited calls for stricter cyber-security standards for connected devices, a requirement already in UK law since April 2024.
+
+Industry leaders, including the British Retail Consortium, say the attacks underscore a major concern for retailers and stress the need for shared intelligence and stronger defences across the supply chain.
+Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines.
