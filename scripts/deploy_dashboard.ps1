@@ -10,6 +10,15 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Dashboard = Join-Path $ProjectRoot "dashboard"
 Set-Location $Dashboard
 
+# Only ever deploy to the dashboard's own Vercel account (secrets go with it)
+$ExpectedAccount = "testyemma123"
+$account = (cmd /c "npx --yes vercel@latest whoami 2>nul" | Select-Object -Last 1).Trim()
+if ($account -ne $ExpectedAccount) {
+    Write-Host "STOPPED: Vercel is logged in as '$account', not '$ExpectedAccount'."
+    Write-Host "Run: npx vercel logout ; npx vercel login   (sign in as $ExpectedAccount), then try again."
+    exit 1
+}
+
 $client = (Get-Content (Join-Path $ProjectRoot "Backend\client_secret.json") -Raw | ConvertFrom-Json).installed
 $token = Get-Content (Join-Path $ProjectRoot "Backend\youtube-oauth2.json") -Raw | ConvertFrom-Json
 $headlineFile = Join-Path $ProjectRoot "Backend\youtube-oauth2-headline_tales.json"
