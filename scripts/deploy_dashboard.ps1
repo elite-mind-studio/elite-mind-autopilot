@@ -11,7 +11,7 @@ $Dashboard = Join-Path $ProjectRoot "dashboard"
 Set-Location $Dashboard
 
 # Only ever deploy to the dashboard's own Vercel account (secrets go with it)
-$ExpectedAccount = "testyemma123"
+$ExpectedAccount = "testyemma123-1928"
 $account = (cmd /c "npx --yes vercel@latest whoami 2>nul" | Select-Object -Last 1).Trim()
 if ($account -ne $ExpectedAccount) {
     Write-Host "STOPPED: Vercel is logged in as '$account', not '$ExpectedAccount'."
