@@ -138,7 +138,7 @@ def wikipedia(query: str) -> Optional[dict]:
 
 def recent_topics() -> List[str]:
     topics = []
-    for path in sorted(SCRIPTS_DIR.glob("*_long.txt"))[-30:]:
+    for path in sorted(list(SCRIPTS_DIR.glob("*_long.txt")) + list(SCRIPTS_DIR.glob("*_news.txt")))[-40:]:
         match = re.search(r"^SUBJECT: (.+)$", path.read_text(encoding="utf-8"), re.M)
         if match:
             topics.append(match.group(1))
@@ -226,6 +226,26 @@ Return ONLY JSON:
 """)
 
 
+def write_short_only(story: dict, sources: List[dict]) -> dict:
+    return chat_json(f"""
+You write for "Headline Tales": neutral, gripping YouTube Shorts that summarise today's news.
+Subject: {story['subject']}. Angle: {story['angle']}
+
+STRICT RULES:
+- Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
+- Neutral tone, never take sides; attribute claims when the sources do. Numbers written in words.
+- 90-110 words, 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
+  consequence of the last, the most surprising fact early. End with exactly:
+  "Follow Headline Tales for the stories behind the headlines."
+
+SOURCES:
+{_sources_block(sources)}
+
+Return ONLY JSON: {{"short_title": "YouTube Shorts title, max 80 chars", "title_bar": "2-4 WORD HOOK",
+"description": "1-2 sentence description", "tags": "comma separated tags", "short_script": "..."}}
+""")
+
+
 def fact_check(text: str, sources: List[dict]) -> List[str]:
     """Claims in `text` that the sources do not support (empty list = all supported)."""
     result = chat_json(f"""
@@ -247,6 +267,48 @@ def remove_sentences(text: str, sentences: List[str]) -> str:
     for sentence in sentences:
         text = text.replace(sentence.strip(), "")
     return re.sub(r"[ \t]{2,}", " ", re.sub(r"\n{3,}", "\n\n", text)).strip()
+
+
+def _checked(text: str, sources: List[dict], label: str) -> str:
+    for round_ in range(2):
+        time.sleep(20)  # free-tier token budget
+        bad = fact_check(text, sources)
+        if not bad:
+            return text
+        print(f"[-] {label}: removing {len(bad)} unsupported claim(s): {bad}", flush=True)
+        text = remove_sentences(text, bad)
+    raise RuntimeError(f"{label} still has unsupported claims after fact-check; not posting")
+
+
+def _slug(subject: str) -> str:
+    return f"{date.today().isoformat()}_" + re.sub(r"[^a-z0-9]+", "_", subject.lower()).strip("_")[:40]
+
+
+def prepare_short() -> Path:
+    """A standalone news Short on another of today's big stories (no long video)."""
+    items = headlines()
+    if len(items) < 10:
+        raise RuntimeError(f"Only {len(items)} headlines fetched")
+    story = pick_story(items)
+    print(f"[+] Short story: {story['subject']} - {story['angle']}", flush=True)
+    sources = gather(story, items)
+    if len(sources) < 2:
+        raise RuntimeError("Not enough readable sources for this story")
+    draft = write_short_only(story, sources)
+    draft["short_script"] = _checked(draft["short_script"], sources, "news short")
+    if len(draft["short_script"].split()) < 60:
+        raise RuntimeError("Short too short after fact-check; not posting")
+    SCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+    path = SCRIPTS_DIR / f"{_slug(story['subject'])}_news.txt"
+    source_lines = "\n".join(f"SOURCE: {s['source']} - {s['link']}" for s in sources)
+    path.write_text(
+        f"FORMAT: short\nSUBJECT: {story['subject']}\nTITLE: {draft.get('title_bar', story['subject'])}\n"
+        f"YT_TITLE: {draft['short_title']}\nTAGS: {draft.get('tags', '')}\nDESCRIPTION: {draft.get('description', '')}\n"
+        f"{source_lines}\n\n" + draft["short_script"].strip() + "\n",
+        encoding="utf-8",
+    )
+    print(f"[+] Script: {path.name}", flush=True)
+    return path
 
 
 def prepare() -> tuple:

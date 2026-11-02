@@ -8,7 +8,9 @@ name: Headline Tales
 
 on:
   schedule:
-    - cron: "17 11 * * *"   # daily 12:17 West Africa Time (07:17 US Eastern): news documentary + Short
+    - cron: "41 7 * * *"    # 08:41 WAT: standalone news Short
+    - cron: "17 11 * * *"   # 12:17 WAT (07:17 US Eastern): news documentary + its Short
+    - cron: "23 17 * * *"   # 18:23 WAT: standalone news Short
   workflow_dispatch:
     inputs:
       long:
@@ -17,6 +19,11 @@ on:
       short:
         description: "Short script (blank = post only the long video)"
         default: ""
+      mode:
+        description: "full = documentary + its Short, short = one standalone news Short"
+        type: choice
+        options: [full, short]
+        default: full
       dry_run:
         description: "Test: make and check today's videos but post nothing"
         type: boolean
@@ -91,7 +98,11 @@ jobs:
           if [ -n "${{ inputs.long }}" ]; then
             uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}"
           else
-            uv run python Backend/channel.py headline_tales auto ${{ inputs.dry_run && '--dry-run' || '' }}
+            mode=auto
+            if [ "${{ github.event.schedule }}" = "41 7 * * *" ] || [ "${{ github.event.schedule }}" = "23 17 * * *" ] || [ "${{ inputs.mode }}" = "short" ]; then
+              mode=auto-short
+            fi
+            uv run python Backend/channel.py headline_tales $mode ${{ inputs.dry_run && '--dry-run' || '' }}
           fi
 
       - name: Save videos as artifact

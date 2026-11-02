@@ -259,6 +259,14 @@ if __name__ == "__main__":
                 make_checked(profile, script, reuse=False)
         else:
             publish(profile, long_script, short_script)
+    elif command == "auto-short":  # a standalone news Short on another big story of the day
+        from news import prepare_short
+
+        script = prepare_short()
+        if "--dry-run" in sys.argv:
+            make_checked(profile, script, reuse=False)
+        else:
+            post(profile, script, make_checked(profile, script, reuse=False))
     elif command == "publish":
         publish(profile, Path(sys.argv[3]), Path(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None)
     elif command == "post":  # post an already rendered/approved video, e.g. a Short linking to the long one

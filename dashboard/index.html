@@ -202,7 +202,7 @@ async function load() {
   // Coming next
   const list = (title, items) => items.length ? `<div><b>${title}</b><ol>${items.map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>` : "";
   document.getElementById("next").innerHTML =
-    list("Explainers (morning Short)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || [])
+    list("Explainers (morning + midday Shorts)", data.next.explainers || []) + list("Series (evening Short)", data.next.series || []) + list("Long videos (Fridays)", data.next.long || [])
     || `<div class="muted">Each documentary is picked from the day's news and fact-checked before it is made.</div>`;
 
   // Community ideas with copy buttons

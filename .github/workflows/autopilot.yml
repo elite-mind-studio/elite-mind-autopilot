@@ -1,5 +1,5 @@
 # Generates one video from topics.txt and uploads it to YouTube.
-# Two Shorts a day (an explainer in the morning, a series part in the evening) and a long video on Fridays.
+# Three Shorts a day (explainers morning and midday, a series part in the evening) and a long video on Fridays.
 # Each scheduled run waits a random 0-3 hours first, so posting times differ
 # every day. See docs/autopilot.md.
 name: Autopilot
@@ -9,6 +9,7 @@ on:
     # Times are UTC (West Africa Time = UTC+1); each run adds a random 0-3 h delay.
     # Odd minutes on purpose: GitHub delays or drops runs scheduled at :00.
     - cron: "17 6 * * *"    # explainer Short, 07:17-10:17 WAT
+    - cron: "31 10 * * *"   # explainer Short, 11:31-14:31 WAT
     - cron: "43 14 * * *"   # series Short (Part N/M), 15:43-18:43 WAT (evening = most viewers)
     - cron: "29 11 * * 5"   # long video, Fridays 12:29-15:29 WAT
   workflow_dispatch:
