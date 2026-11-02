@@ -297,6 +297,17 @@ def _checked(text: str, sources: List[dict], label: str, rounds: int = 3) -> str
     raise RuntimeError(f"{label} still has unsupported claims after fact-check; not posting")
 
 
+ASK_NEXT = "Which story should we explain next? Tell us in the comments."
+
+
+def _with_ending(text: str, ending: str) -> str:
+    """Every Headline Tales video ends by asking what to explain next (comments = topic ideas)."""
+    text = text.strip()
+    if "explain next" not in text.lower():
+        text = f"{text}\n\n{ending}"
+    return text
+
+
 def _slug(subject: str) -> str:
     return f"{date.today().isoformat()}_" + re.sub(r"[^a-z0-9]+", "_", subject.lower()).strip("_")[:40]
 
@@ -312,7 +323,10 @@ def prepare_short() -> Path:
     if len(sources) < 2:
         raise RuntimeError("Not enough readable sources for this story")
     draft = write_short_only(story, sources)
-    draft["short_script"] = _checked(draft["short_script"], sources, "news short")
+    draft["short_script"] = _with_ending(
+        _checked(draft["short_script"], sources, "news short"),
+        ASK_NEXT + " And follow Headline Tales for the stories behind the headlines.",
+    )
     if len(draft["short_script"].split()) < 60:
         raise RuntimeError("Short too short after fact-check; not posting")
     SCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -341,7 +355,7 @@ def prepare() -> tuple:
 
     draft = write_scripts(story, sources)
     for key in ("long_script", "short_script"):
-        draft[key] = _checked(draft[key], sources, key, rounds=4)
+        draft[key] = _with_ending(_checked(draft[key], sources, key, rounds=4), ASK_NEXT)
     if len(draft["long_script"].split()) < 700:
         raise RuntimeError("Long script too short after fact-check; not posting")
 
