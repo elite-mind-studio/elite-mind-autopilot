@@ -40,6 +40,8 @@ Set-Secret "KAGGLE_USERNAME" $kaggleUser
 # YouTube login files
 Set-Secret "YOUTUBE_CLIENT_SECRET_JSON" (Get-Content (Join-Path $ProjectRoot "Backend\client_secret.json") -Raw)
 Set-Secret "YOUTUBE_OAUTH_JSON" (Get-Content (Join-Path $ProjectRoot "Backend\youtube-oauth2.json") -Raw)
+$headlineToken = Join-Path $ProjectRoot "Backend\youtube-oauth2-headline_tales.json"
+if (Test-Path $headlineToken) { Set-Secret "YOUTUBE_OAUTH_HEADLINE_JSON" (Get-Content $headlineToken -Raw) }
 
 Write-Host ""
 Write-Host "Secrets now in ${Repo}:"

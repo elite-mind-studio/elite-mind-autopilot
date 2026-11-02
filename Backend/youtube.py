@@ -67,9 +67,14 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
+def token_file() -> Path:
+    """Saved login; each channel profile has its own (YOUTUBE_TOKEN_FILE)."""
+    return BASE_DIR / os.getenv("YOUTUBE_TOKEN_FILE", "youtube-oauth2.json")
+
+
 def get_analytics_service():
     """YouTube Analytics API client sharing the same saved login."""
-    storage = Storage(str(BASE_DIR / "youtube-oauth2.json"))
+    storage = Storage(str(token_file()))
     credentials = storage.get()
     if credentials is None or credentials.invalid:
         raise RuntimeError("No YouTube login saved; run `autopilot.py auth` first.")
@@ -88,7 +93,7 @@ def get_authenticated_service():
     )
 
     # Fixed name so the worker and `autopilot.py auth` share the same login
-    oauth_store = BASE_DIR / "youtube-oauth2.json"
+    oauth_store = token_file()
     storage = Storage(str(oauth_store))
     credentials = storage.get()
 

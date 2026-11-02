@@ -442,8 +442,17 @@ def build_ai_video(
             emit(f"[-] Kaggle images failed: {str(err)[:200]}", "warning")
 
     # Kaggle first only if it leads IMAGE_PROVIDERS; otherwise it fills gaps at the end
-    if kaggle_first:
+    if kaggle_first and not os.getenv("IMAGE_REUSE_DIR", "").strip():
         kaggle_batch(list(range(len(prompts))))
+
+    # IMAGE_REUSE_DIR: keep already-approved scene images (scene_00.jpg, ...) and
+    # only generate the ones that are missing
+    reuse_dir = os.getenv("IMAGE_REUSE_DIR", "").strip()
+    if reuse_dir:
+        for i in range(len(prompts)):
+            kept = Path(reuse_dir) / f"scene_{i:02d}.jpg"
+            if kept.exists():
+                image_paths[i] = str(kept)
 
     for i, prompt in enumerate(prompts):
         if image_paths[i]:

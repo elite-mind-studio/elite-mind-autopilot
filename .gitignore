@@ -18,7 +18,7 @@ main.py-oauth2.json
 Backend/output*
 Songs/
 venv/
-youtube-oauth2.json
+youtube-oauth2*.json
 moneyprinter.db
 voice_samples/
 autopilot_state.json
@@ -32,3 +32,6 @@ dashboard/.vercel
 research/raw.json
 research/report.json
 .last_posted.json
+dramas/
+channels/*/videos/
+channels/*/images/

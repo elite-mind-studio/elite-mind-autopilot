@@ -104,7 +104,8 @@ def run_generation_pipeline(
         voice = "en_us_001"
         voice_prefix = voice[:2]
 
-    script = generate_script(
+    # A hand-written script (e.g. fact-checked documentaries) is used as-is
+    script = data.get("script") or generate_script(
         data["videoSubject"],
         paragraph_number,
         ai_model,
@@ -127,7 +128,7 @@ def run_generation_pipeline(
     # Hard length cap: TikTok voices speak ~3 words/second, so trim the script
     # at a sentence boundary once it passes VIDEO_MAX_WORDS
     max_words = int(data.get("maxWords") or os.getenv("VIDEO_MAX_WORDS", "0") or 0)
-    if max_words and len(script.split()) > max_words:
+    if max_words and len(script.split()) > max_words and not data.get("script"):
         original_words = len(script.split())
         # Shorten every paragraph evenly (dropping closing sentences from the
         # longest one first) so numbered list items are never cut off the end

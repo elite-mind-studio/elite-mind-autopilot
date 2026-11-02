@@ -1,0 +1,104 @@
+# Headline Tales: makes a documentary (long) and its Short from hand-written,
+# fact-checked scripts, checks every render for errors (length, sound, black
+# frames, size) and remakes it if needed, then posts the long video first and
+# the Short with a link to it. Approved renders in channels/headline_tales/approved
+# are posted exactly as they are. Runs on GitHub, so the laptop can be off.
+name: Headline Tales
+
+on:
+  workflow_dispatch:
+    inputs:
+      long:
+        description: "Long video script"
+        default: "channels/headline_tales/scripts/hormuz_long.txt"
+      short:
+        description: "Short script (blank = post only the long video)"
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: headline
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      IMAGEMAGICK_BINARY: /usr/bin/convert
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      TIKTOK_SESSION_ID: ${{ secrets.TIKTOK_SESSION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install Python dependencies
+        run: uv sync --python 3.11
+
+      - name: Cache Kokoro voice model
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: kokoro-v1.0
+
+      - name: Download background music
+        run: |
+          mkdir -p Songs
+          : > Songs/credits.txt
+          for t in "Investigations" "Wallpaper"; do
+            curl -sfL -o "Songs/$t.mp3" "https://incompetech.com/music/royalty-free/mp3-royaltyfree/${t// /%20}.mp3" || continue
+            echo "$t.mp3 | Music: \"$t\" Kevin MacLeod (incompetech.com) - Licensed under Creative Commons: By Attribution 4.0 License - http://creativecommons.org/licenses/by/4.0/" >> Songs/credits.txt
+          done
+
+      - name: Write YouTube credentials
+        env:
+          CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
+          OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_HEADLINE_JSON }}
+        run: |
+          [ -n "$OAUTH_JSON" ] || { echo "::error::YOUTUBE_OAUTH_HEADLINE_JSON secret missing"; exit 1; }
+          printf '%s' "$CLIENT_SECRET_JSON" > Backend/client_secret.json
+          printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2-headline_tales.json
+
+      - name: Make, check and post
+        run: uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}"
+
+      - name: Save videos as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: headline-${{ github.run_number }}
+          path: channels/headline_tales/videos/
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Record what was posted
+        if: always()
+        run: |
+          [ -f channels/headline_tales/posted.json ] || exit 0
+          cp channels/headline_tales/posted.json "$RUNNER_TEMP/posted.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            cp "$RUNNER_TEMP/posted.json" channels/headline_tales/posted.json
+            git add channels/headline_tales/posted.json
+            git commit -q -m "headline: record posted videos" || exit 0
+            git push -q && exit 0
+            sleep 5
+          done
+          exit 1
