@@ -477,7 +477,9 @@ def run_generation_pipeline(
     title, description, keywords = generate_metadata(
         data["videoSubject"], script, ai_model
     )
-    if series:
+    if data.get("ytTitle"):
+        title = data["ytTitle"][:100]  # a title fixed in the topic queue
+    elif series:
         # Series parts keep a consistent, numbered title so viewers can binge in order
         title = data["videoSubject"][:100]
     elif video_format == "long" and data["videoSubject"].lower().startswith("pov:"):

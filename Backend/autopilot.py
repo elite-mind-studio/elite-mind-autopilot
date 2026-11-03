@@ -200,11 +200,17 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
             "stockVideos": int(os.getenv("AUTOPILOT_LONG_STOCK_VIDEOS", "40")),
             "subtitlesPosition": "center,bottom",
         }
+    # "Topic details || Title: Exact YouTube title" fixes the title instead of letting the AI write one
+    yt_title = ""
+    if "|| title:" in topic.lower():
+        index = topic.lower().index("|| title:")
+        topic, yt_title = topic[:index].strip(), topic[index + len("|| title:"):].strip()
     series = parse_series(topic)
     if series:
         # The "| Next: ..." hint is for the script, not the title
         topic = topic.split("|")[0].strip()
     return {
+        "ytTitle": yt_title,
         "series": series,
         "format": "short",
         "videoSubject": topic,
