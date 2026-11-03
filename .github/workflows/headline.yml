@@ -67,6 +67,19 @@ jobs:
       - name: Install Python dependencies
         run: uv sync --python 3.11
 
+      - name: Cache Chatterbox voice model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: chatterbox-v1
+
+      - name: Install Chatterbox voice (own Python 3.11 env, CPU)
+        continue-on-error: true   # without it, narration falls back to Kokoro
+        run: |
+          uv venv -q --python 3.11 "$RUNNER_TEMP/cb"
+          uv pip install -q --python "$RUNNER_TEMP/cb/bin/python" --index-strategy unsafe-best-match             --extra-index-url https://download.pytorch.org/whl/cpu chatterbox-tts 'setuptools<81'
+          echo "CHATTERBOX_PYTHON=$RUNNER_TEMP/cb/bin/python" >> "$GITHUB_ENV"
+
       - name: Cache Kokoro voice model
         uses: actions/cache@v4
         with:

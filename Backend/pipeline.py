@@ -59,6 +59,43 @@ class PipelineCancelled(Exception):
     pass
 
 
+def _chatterbox_batch(sentences: list, reference: str, emit) -> "list | None":
+    """
+    Narrate every sentence with Chatterbox (natural, expressive; voice cloned from
+    voices/<reference>.wav). Returns one WAV per sentence, each followed by a short
+    breath of silence, or None when Chatterbox isn't installed or fails.
+    """
+    import json as _json
+
+    python = os.getenv("CHATTERBOX_PYTHON", "").strip()
+    ref = Path(__file__).resolve().parent.parent / "voices" / f"{reference}.wav"
+    if not python or not Path(python).exists() or not ref.exists():
+        return None
+    work = Path(TEMP_DIR) / f"chatterbox_{uuid4().hex[:8]}"
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "sentences.json").write_text(_json.dumps(sentences), encoding="utf-8")
+    emit(f"[+] Narrating {len(sentences)} sentences with Chatterbox ({reference})...", "info")
+    try:
+        subprocess.run(
+            [python, str(Path(__file__).resolve().parent / "chatterbox_tts.py"), str(ref), str(work / "sentences.json"),
+             str(work / "raw"), os.getenv("CHATTERBOX_EXAGGERATION", "0.5"), os.getenv("CHATTERBOX_CFG", "0.5")],
+            check=True, timeout=int(os.getenv("CHATTERBOX_TIMEOUT", "5400")),
+        )
+        import imageio_ffmpeg
+
+        files = []
+        for i in range(len(sentences)):
+            out = work / f"{i:03d}.wav"
+            # A short pause after each sentence, like a narrator taking a breath
+            subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y", "-i", str(work / "raw" / f"{i:03d}.wav"),
+                            "-af", "apad=pad_dur=0.22", "-ar", "24000", str(out)], check=True)
+            files.append(str(out))
+        return files
+    except Exception as err:
+        emit(f"[-] Chatterbox failed: {err}", "warning")
+        return None
+
+
 def run_generation_pipeline(
     data: dict,
     is_cancelled,
@@ -216,8 +253,22 @@ def run_generation_pipeline(
     paths = []
     sentence_durations = []
 
-    for sentence in sentences:
+    # Chatterbox voices ("chatterbox:<reference>") are made for every sentence in one batch
+    chatterbox_files = None
+    if voice.startswith("chatterbox:"):
+        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit)
+        if chatterbox_files is None:
+            voice = os.getenv("CHATTERBOX_FALLBACK_VOICE", "kokoro:am_onyx")
+            voice_prefix = voice[:2]
+            emit(f"[-] Chatterbox unavailable, narrating with {voice}", "warning")
+
+    for index, sentence in enumerate(sentences):
         guard_cancelled()
+        if chatterbox_files:
+            audio_clip = AudioFileClip(chatterbox_files[index])
+            paths.append(audio_clip)
+            sentence_durations.append(audio_clip.duration)
+            continue
         current_tts_path = str(TEMP_DIR / f"{uuid4()}.mp3")
         # The TTS endpoints and network fail intermittently, so retry before giving up
         for attempt in range(5):
