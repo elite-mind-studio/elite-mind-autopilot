@@ -173,7 +173,9 @@ Choose a story that:
 - has enough concrete facts and numbers for an 8-minute documentary;
 - is advertiser-friendly: NOT mainly about mass deaths, terrorism, sexual violence, child harm or graphic crime;
 - is NOT about elections, campaigns, candidates or partisan politics (strict YouTube election rules);
-- is not a near-repeat of these recent topics:
+- is not a near-repeat of these recent topics, UNLESS today's headlines bring a genuinely NEW development
+  in one of them (an investigation report, an arrest, a deal, a new record): then choose it as a follow-up,
+  say "FOLLOW-UP:" at the start of the angle, and describe what is new:
 {done}
 
 Headlines:
@@ -209,6 +211,7 @@ def write_scripts(story: dict, sources: List[dict]) -> dict:
     return chat_json(f"""
 You write for "Headline Tales": neutral, gripping YouTube documentaries about current events.
 Subject: {story['subject']}. Angle: {story['angle']}
+{"This is a FOLLOW-UP to a story we covered before: open with 'Remember the ...? Here is what happened next.' and focus on what is new." if "FOLLOW-UP" in story.get("angle", "") else ""}
 
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
@@ -250,6 +253,7 @@ def write_short_only(story: dict, sources: List[dict]) -> dict:
     return chat_json(f"""
 You write for "Headline Tales": neutral, gripping YouTube Shorts that summarise today's news.
 Subject: {story['subject']}. Angle: {story['angle']}
+{"This is a FOLLOW-UP to a story we covered before: open with 'Remember the ...? Here is what happened next.' and focus on what is new." if "FOLLOW-UP" in story.get("angle", "") else ""}
 
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
