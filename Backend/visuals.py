@@ -40,6 +40,7 @@ NEGATIVE = "no text, no words, no letters, no watermark, no logo"
 _local_pipe = None
 # Scene images of the most recent AI video (used to build its thumbnail)
 LAST_SCENE_IMAGES: List[str] = []
+LAST_SCENE_CUTS: List[float] = []
 
 
 class ProviderError(Exception):
@@ -282,10 +283,12 @@ def _ken_burns_segment(
     frames = max(1, round(duration * FPS))
     zoom_step = 0.08 / frames
     # Alternate zoom in / zoom out and drift direction for variety
+    # A quick zoom punch in the first frames of every scene after the first
+    punch = "+if(lt(on,6),0.06*(6-on)/6,0)" if index and os.getenv("SCENE_PUNCH", "true") != "false" else ""
     if index % 2 == 0:
-        zoom = f"min(1+{zoom_step}*on,1.08)"
+        zoom = f"min(1+{zoom_step}*on,1.08){punch}"
     else:
-        zoom = f"max(1.08-{zoom_step}*on,1)"
+        zoom = f"max(1.08-{zoom_step}*on,1){punch}"
     x = "iw/2-(iw/zoom/2)" if index % 3 == 0 else (
         "(iw-iw/zoom)*on/{f}".format(f=frames) if index % 3 == 1 else "(iw-iw/zoom)*(1-on/{f})".format(f=frames)
     )
@@ -294,7 +297,9 @@ def _ken_burns_segment(
         # Lanczos supersampling keeps the slow zoom sharp
         f"scale={size[0] * 2}:{size[1] * 2}:flags=lanczos,"
         f"zoompan=z='{zoom}':x='{x}':y='{y}':d={frames}:s={size[0]}x{size[1]}:fps={FPS},"
-        "format=yuv420p"
+        # and a short white flash on the cut
+        + (f"fade=t=in:st=0:d=0.12:color=white," if index and os.getenv("SCENE_PUNCH", "true") != "false" else "")
+        + "format=yuv420p"
     )
     subprocess.run(
         [
@@ -495,8 +500,15 @@ def build_ai_video(
 
     emit("[+] Animating images...", "info")
     segment_list = work_dir / "segments.txt"
+    # Scene-change times, for the whoosh sound effects
+    global LAST_SCENE_CUTS
+    LAST_SCENE_CUTS = []
+    clock = 0.0
     with open(segment_list, "w", encoding="utf-8") as f:
         for i, ((_, duration), image_path) in enumerate(zip(scenes, image_paths)):
+            if i:
+                LAST_SCENE_CUTS.append(clock)
+            clock += duration
             segment = str(work_dir / f"segment_{i:02d}.mp4")
             _ken_burns_segment(image_path, duration, i, segment, picture_size)
             f.write(f"file '{Path(segment).as_posix()}'\n")

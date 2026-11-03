@@ -258,6 +258,65 @@ def __generate_subtitles_locally(
     return "\n".join(subtitles)
 
 
+# Word timings of the most recent aligned captions: [[(word, start, end), ...], ...]
+LAST_CAPTION_CHUNKS: list = []
+
+# Always highlighted: numbers, money and high-emotion words
+EMPHASIS = re.compile(
+    r"(\d|\$|%|million|billion|trillion|never|secret|killed|dead|died|crash|war|broke|rich|free|"
+    r"warning|danger|lie|lies|truth|shocking|nobody|everyone|biggest|worst|first|last|only|trapped|"
+    r"thousand|hundred|dollars?|percent|"
+    r"^(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b)",
+    re.IGNORECASE,
+)
+
+
+def _ass_time(seconds: float) -> str:
+    cs = int(round(max(0.0, seconds) * 100))
+    h, rem = divmod(cs, 360000)
+    m, rem = divmod(rem, 6000)
+    sec, cs = divmod(rem, 100)
+    return f"{h}:{m:02d}:{sec:02d}.{cs:02d}"
+
+
+def _highlight_ass(chunks: list, path: str, width: int, height: int, font: str, size: int,
+                   margin_v: int, accent_hex: str) -> None:
+    """
+    Karaoke-style captions: each 2-3 word caption pops in, the word being spoken
+    is enlarged in the accent colour, and numbers/power words stay accented.
+    """
+    accent = accent_hex.lstrip("#").rjust(6, "F")
+    accent_ass = f"&H00{accent[4:6]}{accent[2:4]}{accent[0:2]}&"
+    header = (
+        "[Script Info]\nScriptType: v4.00+\n"
+        f"PlayResX: {width}\nPlayResY: {height}\nWrapStyle: 2\n\n"
+        "[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
+        "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, "
+        "MarginL, MarginR, MarginV, Encoding\n"
+        f"Style: Cap,{font},{size},&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,"
+        f"{max(3, size // 12)},{max(1, size // 30)},2,60,60,{margin_v},1\n\n"
+        "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+    )
+    clean = lambda w: w.replace("{", "(").replace("}", ")").replace("\\", "")
+    lines = []
+    for n, chunk in enumerate(chunks):
+        chunk_end = chunks[n + 1][0][1] if n + 1 < len(chunks) else chunk[-1][2] + 0.3
+        for j, (_, start, _) in enumerate(chunk):
+            end = chunk[j + 1][1] if j + 1 < len(chunk) else max(chunk_end, start + 0.15)
+            words = []
+            for k, (word, _, _) in enumerate(chunk):
+                w = clean(word.upper())
+                if k == j:
+                    words.append(f"{{\\c{accent_ass}\\fscx118\\fscy118}}{w}{{\\r}}")
+                elif EMPHASIS.search(word):
+                    words.append(f"{{\\c{accent_ass}}}{w}{{\\r}}")
+                else:
+                    words.append(w)
+            pop = "{\\fscx86\\fscy86\\t(0,90,\\fscx100\\fscy100)}" if j == 0 else ""
+            lines.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Cap,,0,0,0,,{pop}{' '.join(words)}")
+    Path(path).write_text(header + "\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _srt_time(total_seconds: float) -> str:
     ms = int(round(max(0.0, total_seconds) * 1000))
     hours, rem = divmod(ms, 3_600_000)
@@ -320,6 +379,10 @@ def __generate_subtitles_aligned(audio_path: str, sentences: List[str]) -> str:
     if current:
         chunks.append(current)
 
+    global LAST_CAPTION_CHUNKS
+    LAST_CAPTION_CHUNKS = [
+        [(script[k][0], times[k][0], times[k][1]) for k in chunk] for chunk in chunks
+    ]
     entries = []
     for n, chunk in enumerate(chunks):
         start = times[chunk[0]][0]
@@ -359,6 +422,8 @@ def generate_subtitles(
         subtitles = __generate_subtitles_assemblyai(audio_path, voice)
     else:
         aligned = False
+        global LAST_CAPTION_CHUNKS
+        LAST_CAPTION_CHUNKS = []
         try:
             log("[+] Creating word-timed subtitles (Whisper alignment)", "info")
             subtitles = __generate_subtitles_aligned(audio_path, sentences)
@@ -575,12 +640,42 @@ def _generate_video_ffmpeg(
     rel = lambda path: os.path.relpath(str(path), str(root)).replace("\\", "/")
     # Light sharpening before the captions restores crisp outlines that zooming
     # and YouTube's re-compression soften
-    video_filter = (
-        f"[0:v]{scale_filter}unsharp=5:5:0.6:5:5:0.0,subtitles={rel(subtitles_path)}:"
-        f"fontsdir={rel(FONTS_DIR)}:force_style='{style}'[captioned]"
-    )
+    if LAST_CAPTION_CHUNKS and os.getenv("CAPTION_STYLE", "highlight") == "highlight":
+        # Karaoke captions: spoken word pops in the accent colour, power words stay lit
+        ass_path = SUBTITLES_DIR / f"{uuid.uuid4()}.ass"
+        _highlight_ass(
+            LAST_CAPTION_CHUNKS, str(ass_path), frame_width, frame_height, font_name,
+            round(font_size * frame_height / source_height), round(margin * frame_height / 288),
+            text_color or "#FFE600",
+        )
+        captions = f"ass={rel(ass_path)}:fontsdir={rel(FONTS_DIR)}"
+    else:
+        captions = f"subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'"
+    video_filter = f"[0:v]{scale_filter}unsharp=5:5:0.6:5:5:0.0,{captions}[captioned]"
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
     output_label = "[captioned]"
+
+    # Sound design: whoosh on scene changes, boom / hit / riser on power words
+    audio_map = "1:a"
+    if os.getenv("SOUND_EFFECTS", "true").strip().lower() not in ("0", "false", "no"):
+        try:
+            import sfx
+            import visuals as _visuals
+
+            events = sfx.word_events(LAST_CAPTION_CHUNKS) + [
+                (cut, "whoosh") for cut in getattr(_visuals, "LAST_SCENE_CUTS", [])
+            ]
+            if events:
+                track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
+                inputs += ["-i", rel(track)]
+                sfx_index = len([x for x in inputs if x == "-i"]) - 1
+                video_filter += (
+                    f";[1:a]aresample=48000,aformat=channel_layouts=stereo[voice];"
+                    f"[voice][{sfx_index}:a]amix=inputs=2:normalize=0:duration=first[mixed]"
+                )
+                audio_map = "[mixed]"
+        except Exception as sfx_err:
+            log(f"[-] Sound effects skipped: {sfx_err}", "warning")
 
     # SUBSCRIBE button for the last seconds, where viewers decide to follow
     if os.getenv("SUBSCRIBE_BUTTON", "true").strip().lower() not in ("0", "false", "no"):
@@ -594,7 +689,8 @@ def _generate_video_ffmpeg(
             x, y = f"W-w-{int(frame_width * 0.03)}", f"H-h-{int(frame_height * 0.18)}"
         start = max(0.0, duration - 3.5)
         inputs += ["-i", rel(button_path)]
-        video_filter += f";[captioned][2:v]overlay=x={x}:y={y}:enable='gte(t,{start:.2f})'[final]"
+        button_index = len([x for x in inputs if x == "-i"]) - 1
+        video_filter += f";[captioned][{button_index}:v]overlay=x={x}:y={y}:enable='gte(t,{start:.2f})'[final]"
         output_label = "[final]"
 
     subprocess.run(
@@ -602,7 +698,7 @@ def _generate_video_ffmpeg(
             imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-hide_banner", "-loglevel", "error",
             *inputs,
             "-filter_complex", video_filter,
-            "-map", output_label, "-map", "1:a",
+            "-map", output_label, "-map", audio_map,
             # Higher quality source gives YouTube more detail to keep
             "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart",

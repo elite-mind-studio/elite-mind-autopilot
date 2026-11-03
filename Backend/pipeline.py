@@ -335,6 +335,9 @@ def run_generation_pipeline(
         )
 
     combined_video_path = None
+    import visuals as _visuals_state
+
+    _visuals_state.LAST_SCENE_CUTS = []  # set again by the AI-image builder
     if visual_mode == "stock_scenes":
         # One stock clip per scene, matched to what is being said
         scenes = group_scenes(

@@ -212,6 +212,10 @@ Subject: {story['subject']}. Angle: {story['angle']}
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
 - Attribute claims ("according to ...", "officials said") when sources do. Neutral tone, never take sides.
+- Make viewers FEEL the story, using only sourced facts: open with the most gripping fact and what it means
+  for ordinary people; include one human moment from the sources (workers, families, passengers, sailors);
+  add a mini-cliffhanger halfway ("But that was only the beginning."); short, vivid sentences. Never invent
+  emotions, quotes or details that are not in the sources, and never sensationalise deaths.
 - Numbers are written in words for narration (e.g. "two hundred and forty-six").
 - No graphic descriptions of violence.
 
@@ -249,6 +253,8 @@ Subject: {story['subject']}. Angle: {story['angle']}
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
 - Neutral tone, never take sides; attribute claims when the sources do. Numbers written in words.
+- Make it emotional but true: lead with the most gripping fact, show what it means for real people, and keep
+  tension rising sentence by sentence. Never invent details, and never sensationalise deaths.
 - 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
   consequence of the last, the most surprising fact early. End with exactly:
   "Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines."
