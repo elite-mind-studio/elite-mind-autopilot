@@ -172,6 +172,7 @@ Choose a story that:
 - the whole world is talking about, with big stakes (money, power, technology, energy, trade, sport, science);
 - has enough concrete facts and numbers for an 8-minute documentary;
 - is advertiser-friendly: NOT mainly about mass deaths, terrorism, sexual violence, child harm or graphic crime;
+- is NOT about elections, campaigns, candidates or partisan politics (strict YouTube election rules);
 - is not a near-repeat of these recent topics:
 {done}
 

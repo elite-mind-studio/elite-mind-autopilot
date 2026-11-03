@@ -267,7 +267,17 @@ if __name__ == "__main__":
     elif command == "auto":  # daily: pick a news story, write + fact-check, then make, check and post
         from news import prepare
 
-        long_script, short_script = prepare()
+        try:
+            long_script, short_script = prepare()
+        except RuntimeError as err:
+            # The documentary fell through (e.g. too few facts): keep the slot alive with a news Short
+            print(f"[-] Documentary skipped ({err}); posting a news Short instead", flush=True)
+            from news import prepare_short
+
+            script = prepare_short()
+            if "--dry-run" not in sys.argv:
+                post(profile, script, make_checked(profile, script, reuse=False))
+            sys.exit(0)
         if "--dry-run" in sys.argv:  # make and check both videos, post nothing
             for script in (long_script, short_script):
                 make_checked(profile, script, reuse=False)
