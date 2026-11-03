@@ -66,6 +66,9 @@
 
   <section class="stats" id="stats"></section>
 
+  <h2>30-day challenge <span class="muted">(3 Nov - 3 Dec 2026 · weekly targets)</span></h2>
+  <div class="card" id="challenge"></div>
+
   <h2>Monetization progress <span class="muted">(YouTube Partner Program · watch time updates 2-3 days late)</span></h2>
   <div class="card" id="ypp"></div>
 
@@ -145,6 +148,40 @@ async function load() {
   ];
   document.getElementById("stats").innerHTML = cards.map(([l, n]) =>
     `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+
+  // 30-day challenge: weekly targets per channel (end of each week), today's focus
+  const CHALLENGE_START = Date.UTC(2026, 10, 3);
+  const TARGETS = {
+    elite:    [{ subs: 80,  views: 12000,  hours: 15 },  { subs: 200, views: 35000,  hours: 80 },
+               { subs: 350, views: 70000,  hours: 200 }, { subs: 500, views: 120000, hours: 400 }],
+    headline: [{ subs: 40,  views: 8000,   hours: 25 },  { subs: 150, views: 30000,  hours: 120 },
+               { subs: 300, views: 65000,  hours: 300 }, { subs: 500, views: 110000, hours: 600 }],
+  };
+  const FOCUS = [
+    "Week 1: post 7 videos a day without misses; documentaries on the week's biggest stories (Binance, Learjet); first compilations on Sunday.",
+    "Week 2: more long videos (they build the watch hours); title formulas from the research ('How X Lost $6,300,000,000 in One Night'); set Related video on every Short.",
+    "Week 3: double down on the best performers: follow-up stories, more communication-skills content, remake top Shorts as long explainers.",
+    "Week 4: push for 500 subscribers per channel (the first monetization tier), reply to every comment, community posts 3x a week.",
+  ];
+  const day = Math.min(30, Math.max(1, Math.floor((Date.now() - CHALLENGE_START) / 86400000) + 1));
+  const week = Math.min(3, Math.floor((day - 1) / 7));
+  const target = TARGETS[channel][week];
+  const nowViews = Math.max(data.channel.views, data.videos.reduce((a, v) => a + v.views, 0));
+  const nowHours = data.watch ? data.watch.yppLongHours : 0;
+  const row = (label, have, need) => {
+    const pct = Math.min(100, 100 * have / need);
+    return `<div class="goal"><div class="top"><span>${label}</span><span><b>${fmt(Math.round(have))}</b> / ${fmt(need)}
+      <span class="muted">(${Math.floor(pct)}%)</span></span></div><div class="bar"><div style="width:${Math.max(pct, have > 0 ? 0.5 : 0)}%"></div></div></div>`;
+  };
+  document.getElementById("challenge").innerHTML =
+    `<div class="top" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+       <b style="font-size:20px">Day ${day} of 30</b><span class="muted">Week ${week + 1} target (by ${new Date(CHALLENGE_START + (week + 1) * 7 * 86400000).toUTCString().slice(5, 11)})</span></div>
+     <div class="bar" style="margin:10px 0 16px"><div style="width:${(100 * day / 30).toFixed(1)}%"></div></div>
+     ${row("Subscribers", data.channel.subscribers, target.subs)}
+     ${row("Total views", nowViews, target.views)}
+     ${row("Long-video watch hours", nowHours, target.hours)}
+     <div class="muted" style="margin-top:12px">🎯 ${FOCUS[week]}</div>
+     <div class="muted" style="margin-top:6px">Day 30 goal: ${fmt(TARGETS[channel][3].subs)} subscribers (the first monetization tier needs 500), ${fmt(TARGETS[channel][3].hours)} long-video watch hours.</div>`;
 
   // Monetization goals: 1,000 subs + (4,000 long-video watch hours in 365 d OR 10M Shorts views in 90 d)
   const goal = (label, have, need, note) => {
