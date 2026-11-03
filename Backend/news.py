@@ -258,7 +258,7 @@ STRICT RULES:
   tension rising sentence by sentence. Never invent details, and never sensationalise deaths.
 - 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
   consequence of the last, the most surprising fact early. End with exactly:
-  "Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines."
+  "Which story should we explain next? Tell us in the comments, and subscribe to Headline Tales for the stories behind the headlines."
 
 SOURCES:
 {_sources_block(sources)}
@@ -332,7 +332,7 @@ def prepare_short() -> Path:
     draft = write_short_only(story, sources)
     draft["short_script"] = _with_ending(
         _checked(draft["short_script"], sources, "news short"),
-        ASK_NEXT + " And follow Headline Tales for the stories behind the headlines.",
+        ASK_NEXT + " And subscribe to Headline Tales for the stories behind the headlines.",
     )
     if len(draft["short_script"].split()) < 60:
         raise RuntimeError("Short too short after fact-check; not posting")
