@@ -16,6 +16,8 @@ Script file (channels/<name>/scripts/<slug>.txt), header then a blank line:
     SOURCE: https://...                    (repeatable)
     GRAPHIC: 0 | {"type": "title", ...}    (repeatable; HyperFrames card over that paragraph)
     VOICE: calm | emotional                (optional; otherwise chosen from the topic)
+    TONE: tragic | tense | upbeat          (optional; music, pacing, colour, sounds)
+    MEMORIAL: In memory of ...             (tragedies: shown over the last seconds)
 
 Usage:
     python Backend/channel.py <name> auth                  # one-time login for that channel
@@ -118,7 +120,8 @@ def make(name: str, script_path: Path) -> Path:
     video_format = spec.get("format", "short")
     data = build_payload(spec["subject"], False, video_format)
     data.update({"script": spec["script"], "title": spec.get("title") or spec["subject"], "series": None,
-                 "graphics": spec["graphics"], "voiceMood": spec.get("voice")})  # VOICE: calm | emotional
+                 "graphics": spec["graphics"], "voiceMood": spec.get("voice"),  # VOICE: calm | emotional
+                 "tone": spec.get("tone"), "memorial": spec.get("memorial", "")})  # TONE: tragic | tense | upbeat
 
     output = run_generation_pipeline(data=data, is_cancelled=None, on_log=lambda m, l: print(m, flush=True))
     out_dir = ROOT / "channels" / name / "videos"

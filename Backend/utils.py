@@ -50,7 +50,15 @@ def clean_dir(path: str) -> None:
         logger.error(f"Error occurred while cleaning directory {path}: {str(e)}")
 
 
-def choose_random_song() -> Optional[str]:
+# Background music by story tone (Kevin MacLeod, CC BY 4.0; downloaded by the workflows)
+MOOD_SONGS = {
+    "tragic": ("Long Note Four", "Dark Times", "Lightless Dawn", "Sad Trio"),
+    "tense": ("Volatile Reaction", "Ossuary 6 - Air", "Epic Unease", "Investigations"),
+    "upbeat": ("Sneaky Snitch", "Carefree", "Wallpaper", "Fluffing a Duck", "Monkeys Spinning Monkeys"),
+}
+
+
+def choose_random_song(mood: Optional[str] = None) -> Optional[str]:
     """
     Chooses a random MP3 from the Songs/ directory.
 
@@ -70,7 +78,9 @@ def choose_random_song() -> Optional[str]:
         if not songs:
             return None
 
-        song = random.choice(songs)
+        # Prefer a track that fits the story's tone, if one was downloaded
+        fitting = [s for s in songs if s.stem in MOOD_SONGS.get(mood or "", ())]
+        song = random.choice(fitting or songs)
         logger.info(colored(f"Chose song: {song}", "green"))
         return str(song)
     except Exception as e:

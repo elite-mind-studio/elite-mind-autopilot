@@ -76,7 +76,33 @@ def _voice_mood(data: dict) -> str:
     return "calm"
 
 
-def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm") -> "list | None":
+TRAGIC_WORDS = ("killed", "dead", "died", "death", "victims", "crash", "disaster", "tragedy", "mourning", "funeral")
+TENSE_WORDS = ("war", "attack", "hack", "heist", "theft", "secret", "scandal", "betray", "collapse", "crisis", "trapped", "pov")
+
+
+def _tone(data: dict, script: str) -> str:
+    """tragic | tense | upbeat: drives music, pacing, colour and sound design."""
+    if data.get("tone"):
+        return data["tone"]
+    text = f"{data.get('videoSubject', '')} {script}".lower()
+    if any(f" {w}" in text for w in TRAGIC_WORDS):
+        return "tragic"
+    if data.get("series") or any(w in text for w in TENSE_WORDS):
+        return "tense"
+    return "upbeat"
+
+
+def _apply_tone(tone: str, data: dict) -> None:
+    """Tragedies are told slowly and respectfully; everything else keeps the energetic edit."""
+    tragic = tone == "tragic"
+    os.environ["SCENE_PUNCH"] = "false" if tragic else "true"        # no flashes / zoom punches
+    os.environ["SFX_MODE"] = "tragic" if tragic else "full"          # only the dark hit, no booms
+    os.environ["VIDEO_GRADE"] = "somber" if tragic else ""           # darker, desaturated colour
+    os.environ["SUBSCRIBE_BUTTON"] = "false" if tragic else "true"
+    os.environ["MEMORIAL_TEXT"] = data.get("memorial", "") if tragic else ""
+
+
+def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm", pauses: "list | None" = None) -> "list | None":
     """
     Narrate every sentence with Chatterbox (natural, expressive; voice cloned from
     voices/<reference>.wav). Returns one WAV per sentence, each followed by a short
@@ -105,7 +131,8 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm")
             out = work / f"{i:03d}.wav"
             # A short pause after each sentence, like a narrator taking a breath
             subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y", "-i", str(work / "raw" / f"{i:03d}.wav"),
-                            "-af", "apad=pad_dur=0.22", "-ar", "24000", str(out)], check=True)
+                            "-af", f"apad=pad_dur={(pauses or [])[i] if pauses and i < len(pauses) else 0.22}",
+                            "-ar", "24000", str(out)], check=True)
             files.append(str(out))
         return files
     except Exception as err:
@@ -270,12 +297,23 @@ def run_generation_pipeline(
     paths = []
     sentence_durations = []
 
+    # Tone of the story: music, pacing, colour and sound design follow it
+    tone = _tone(data, script)
+    _apply_tone(tone, data)
+    emit(f"[+] Story tone: {tone}", "info")
+
     # Chatterbox voices ("chatterbox:<reference>") are made for every sentence in one batch
     chatterbox_files = None
     if voice.startswith("chatterbox:"):
-        mood = data.get("voiceMood") or _voice_mood(data)
+        mood = data.get("voiceMood") or ("emotional" if tone in ("tragic", "tense") else _voice_mood(data))
         emit(f"[+] Voice delivery: {mood}", "info")
-        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood)
+        # A tragedy gets a moment of silence before its closing line
+        pauses = [
+            1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
+            else 0.22
+            for i in range(len(sentences))
+        ]
+        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood, pauses)
         if chatterbox_files is None:
             voice = os.getenv("CHATTERBOX_FALLBACK_VOICE", "kokoro:am_onyx")
             voice_prefix = voice[:2]
@@ -451,7 +489,7 @@ def run_generation_pipeline(
 
     music_credit = ""
     if use_music:
-        song_path = choose_random_song()
+        song_path = choose_random_song(tone)
 
         if not song_path:
             emit(
@@ -473,7 +511,7 @@ def run_generation_pipeline(
                 song_clip = song_clip.with_effects(
                     [afx.AudioLoop(duration=original_duration)]
                 )
-                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1"))).with_fps(44100)
+                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone == "tragic" else 1.0)).with_fps(44100)
 
                 mixed_audio = CompositeAudioClip(
                     [original_audio, song_clip]
@@ -531,7 +569,7 @@ def run_generation_pipeline(
                     song_clip = song_clip.with_effects(
                         [afx.AudioLoop(duration=original_duration)]
                     )
-                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1"))).with_fps(44100)
+                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone == "tragic" else 1.0)).with_fps(44100)
                     comp_audio = CompositeAudioClip(
                         [original_audio, song_clip]
                     ).with_duration(original_duration)

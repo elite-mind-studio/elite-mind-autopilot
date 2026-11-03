@@ -151,7 +151,7 @@ jobs:
         run: |
           mkdir -p Songs
           : > Songs/credits.txt
-          for t in "Sneaky Snitch" "Fluffing a Duck" "Carefree" "Wallpaper" "Investigations" "Monkeys Spinning Monkeys"; do
+          for t in "Sneaky Snitch" "Fluffing a Duck" "Carefree" "Wallpaper" "Investigations" "Monkeys Spinning Monkeys" "Long Note Four" "Dark Times" "Lightless Dawn" "Sad Trio" "Volatile Reaction" "Ossuary 6 - Air" "Epic Unease"; do
             curl -sfL -o "Songs/$t.mp3" "https://incompetech.com/music/royalty-free/mp3-royaltyfree/${t// /%20}.mp3" || continue
             echo "$t.mp3 | Music: \"$t\" Kevin MacLeod (incompetech.com) - Licensed under Creative Commons: By Attribution 4.0 License - http://creativecommons.org/licenses/by/4.0/" >> Songs/credits.txt
           done

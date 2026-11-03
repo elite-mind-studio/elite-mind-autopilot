@@ -20,18 +20,26 @@ FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 RATE = 48000
 
 SOUNDS = {
-    "whoosh": "anoisesrc=d=0.5:c=pink:a=0.7:r=48000,highpass=f=350,lowpass=f=5000,"
-              "afade=t=in:d=0.28:curve=exp,afade=t=out:st=0.28:d=0.22",
-    "boom": "aevalsrc='0.95*sin(2*PI*(42+70*exp(-7*t))*t)*exp(-3.2*t)':d=1.5:s=48000,lowpass=f=900",
-    "hit": "aevalsrc='0.8*sin(2*PI*68*t)*exp(-4.5*t)+0.35*(random(0)-0.5)*exp(-14*t)':d=1.1:s=48000,lowpass=f=2500",
-    "riser": "aevalsrc='0.4*sin(2*PI*(180+1300*t*t)*t)*(t/0.7)':d=0.7:s=48000,afade=t=out:st=0.6:d=0.1",
-    # Explosion-style blast: a noise burst over a falling sub-bass with a long rumble tail
-    "blast": "aevalsrc='0.9*sin(2*PI*(38+90*exp(-6*t))*t)*exp(-1.6*t)+0.55*(random(0)-0.5)*exp(-5*t)':d=2.4:s=48000,"
-             "lowpass=f=1400,afade=t=out:st=1.8:d=0.6",
+    # Phone speakers can't play much below ~150 Hz, so every impact layers a mid-range
+    # "body" (150-600 Hz) and a short transient click on top of the sub-bass.
+    "whoosh": "anoisesrc=d=0.5:c=pink:a=0.9:r=48000,bandpass=f=1800:width_type=o:w=2.5,"
+              "afade=t=in:d=0.3:curve=exp,afade=t=out:st=0.3:d=0.2",
+    "boom": "aevalsrc='0.7*sin(2*PI*(55+80*exp(-7*t))*t)*exp(-3*t)"
+            "+0.55*sin(2*PI*(180+120*exp(-10*t))*t)*exp(-6*t)"
+            "+0.5*(random(0)-0.5)*exp(-40*t)':d=1.4:s=48000,lowpass=f=4000",
+    "hit": "aevalsrc='0.55*sin(2*PI*(90+60*exp(-8*t))*t)*exp(-4*t)"
+           "+0.8*sin(2*PI*240*t)*exp(-6*t)+0.55*(random(0)-0.5)*exp(-25*t)':d=1.3:s=48000,"
+           "lowpass=f=3000,aecho=0.6:0.4:120:0.35",
+    "riser": "aevalsrc='0.45*sin(2*PI*(300+1600*t*t)*t)*(t/0.7)+0.25*(random(0)-0.5)*(t/0.7)':d=0.7:s=48000,"
+             "highpass=f=250,afade=t=out:st=0.62:d=0.08",
+    # Explosion-style blast: a loud noise burst with body, then a rumble tail
+    "blast": "aevalsrc='0.75*sin(2*PI*(45+110*exp(-6*t))*t)*exp(-1.8*t)"
+             "+0.5*sin(2*PI*(160+200*exp(-9*t))*t)*exp(-4*t)"
+             "+0.75*(random(0)-0.5)*exp(-4*t)':d=2.4:s=48000,lowpass=f=3500,afade=t=out:st=1.8:d=0.6",
 }
 # Where the sound's peak sits relative to its start (the riser builds up to the word)
 LEAD = {"whoosh": 0.22, "boom": 0.0, "hit": 0.0, "riser": 0.62, "blast": 0.0}
-VOLUME = {"whoosh": 0.35, "boom": 0.75, "hit": 0.6, "riser": 0.3, "blast": 0.8}
+VOLUME = {"whoosh": 0.5, "boom": 0.95, "hit": 1.0, "riser": 0.6, "blast": 1.0}
 
 MONEY = re.compile(
     r"(\d|\$|%|dollar|million|billion|trillion|thousand|hundred|percent|"

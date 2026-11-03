@@ -652,7 +652,27 @@ def _generate_video_ffmpeg(
         captions = f"ass={rel(ass_path)}:fontsdir={rel(FONTS_DIR)}"
     else:
         captions = f"subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'"
-    video_filter = f"[0:v]{scale_filter}unsharp=5:5:0.6:5:5:0.0,{captions}[captioned]"
+    # Tragedies: darker, desaturated colour, and a memorial line over the last seconds
+    grade = "eq=saturation=0.72:brightness=-0.04:contrast=1.06," if os.getenv("VIDEO_GRADE") == "somber" else ""
+    memorial = ""
+    if os.getenv("MEMORIAL_TEXT", "").strip():
+        import textwrap
+
+        # Short lines, each centred on its own, so the memorial never runs off the screen
+        width_chars = 20 if frame_height > frame_width else 34
+        lines = textwrap.wrap(os.getenv("MEMORIAL_TEXT").strip(), width_chars)
+        start_memo = max(0.0, duration - 4.5)
+        size = int(frame_height * 0.026)
+        memorial = f",drawbox=x=0:y=0:w=iw:h=ih:color=black@0.55:t=fill:enable='gte(t,{start_memo:.2f})'"
+        for n, line in enumerate(lines):
+            memo_file = SUBTITLES_DIR / f"{uuid.uuid4()}_memorial.txt"
+            memo_file.write_text(line, encoding="utf-8")
+            memorial += (
+                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(memo_file)}:"
+                f"fontcolor=white:fontsize={size}:x=(w-text_w)/2:y=h*0.27+{int(n * size * 1.45)}:"
+                f"alpha='if(lt(t,{start_memo:.2f}),0,min(1,(t-{start_memo:.2f})/0.8))'"
+            )
+    video_filter = f"[0:v]{scale_filter}{grade}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}[captioned]"
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
     output_label = "[captioned]"
 
@@ -666,6 +686,9 @@ def _generate_video_ffmpeg(
             events = sfx.word_events(LAST_CAPTION_CHUNKS) + [
                 (cut, "whoosh") for cut in getattr(_visuals, "LAST_SCENE_CUTS", [])
             ]
+            if os.getenv("SFX_MODE") == "tragic":
+                # Respect: no whooshes, booms or blasts over a tragedy, only the dark hit
+                events = [(t, "hit") for t, kind in events if kind in ("hit", "blast")]
             if events:
                 track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
                 inputs += ["-i", rel(track)]
