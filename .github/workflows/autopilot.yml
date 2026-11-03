@@ -57,7 +57,7 @@ jobs:
       AUTOPILOT_VOICE: "chatterbox:onyx"          # natural voice cloned from voices/onyx.wav
       CHATTERBOX_FALLBACK_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
-      VIDEO_MAX_WORDS: "160"
+      VIDEO_MAX_WORDS: "140"
       VISUAL_MODE: ai_images
       TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"
