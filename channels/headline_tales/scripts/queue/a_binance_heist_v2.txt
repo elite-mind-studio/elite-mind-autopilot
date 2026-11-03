@@ -1,0 +1,31 @@
+FORMAT: short
+SUBJECT: The Binance crypto heist
+TITLE: $6.3 BILLION IN 20 MINUTES
+VOICE: emotional
+TONE: tense
+YT_TITLE: Hackers Stole $6.3 Billion in 20 Minutes. The Biggest Crypto Heist Ever
+TAGS: binance hack, crypto heist, biggest crypto hack, north korea hackers, lazarus group, tradertraitor, bitcoin, crypto news explained
+DESCRIPTION: In about 20 minutes, $6.3 billion in crypto was taken from Binance, the world's biggest crypto exchange. What happened, who investigators blame, and where the money is now.
+SOURCE: Al Jazeera, 30 Oct 2026 - https://www.aljazeera.com/news/2026/10/30/binance-says-6-3bn-stolen-in-biggest-crypto-heist-in-history-what-we-know
+SOURCE: NPR, 2 Nov 2026 - https://www.npr.org/2026/11/02/nx-s1-6023424/fbi-says-north-korean-hackers-are-behind-the-theft-of-6-3b-from-binance
+SOURCE: CNBC - https://www.cnbc.com/2026/10/30/billions-in-crypto-frozen-in-binance-hack-heres-what-happens-next-.html
+SOURCE: BleepingComputer - https://www.bleepingcomputer.com/news/security/fbi-links-63-billion-binance-crypto-heist-to-north-korean-hackers/
+SOURCE: Wikipedia, 2026 Binance hack - https://en.wikipedia.org/wiki/2026_Binance_hack
+GRAPHIC: 2 | {"type": "chart", "title": "Biggest crypto heists", "sub": "BILLIONS OF US DOLLARS STOLEN", "prefix": "$", "suffix": "B", "points": [["BYBIT 2025", 1.5], ["BINANCE 2026", 6.3]]}
+GRAPHIC: 5 | {"type": "stat", "value": 3, "prefix": "$", "suffix": " BILLION", "caption": "Still unaccounted for", "sub": "About 3.3 billion dollars, while about 3 billion is frozen"}
+
+In just twenty minutes, hackers took six point three billion dollars from the world's biggest crypto exchange.
+
+Last week, attackers ordered Binance's own wallets to send their coins to wallets the hackers controlled, across ten different blockchains.
+
+It is the biggest crypto heist in history, more than four times the previous record.
+
+Reports say it began with one hacked laptop, belonging to a Binance engineer.
+
+The FBI blames a North Korean hacking unit known as TraderTraitor. North Korea routinely denies these attacks.
+
+About three billion dollars has been frozen. But more than three billion is still out there.
+
+Binance says the losses will not be passed on to its users. Still, Bitcoin fell to a six-week low.
+
+This is the story of the biggest crypto heist ever. Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines.
