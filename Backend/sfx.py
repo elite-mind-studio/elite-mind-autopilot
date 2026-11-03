@@ -39,7 +39,7 @@ SOUNDS = {
 }
 # Where the sound's peak sits relative to its start (the riser builds up to the word)
 LEAD = {"whoosh": 0.22, "boom": 0.0, "hit": 0.0, "riser": 0.62, "blast": 0.0}
-VOLUME = {"whoosh": 0.5, "boom": 0.95, "hit": 1.0, "riser": 0.6, "blast": 1.0}
+VOLUME = {"whoosh": 0.3, "boom": 0.95, "hit": 1.0, "riser": 0.6, "blast": 1.0}
 
 MONEY = re.compile(
     r"(\d|\$|%|dollar|million|billion|trillion|thousand|hundred|percent|"
@@ -77,6 +77,21 @@ def word_events(chunks: List[list], min_gap: float = 1.6) -> List[Tuple[float, s
                 events.append((start, kind))
                 last = start
     return events
+
+
+# How heavy each sound is: the strongest moments win when sounds are rationed
+WEIGHT = {"blast": 4, "hit": 3, "boom": 2, "riser": 1}
+
+
+def strongest(events: List[Tuple[float, str]], limit: int, min_spacing: float = 4.0) -> List[Tuple[float, str]]:
+    """Keep only the `limit` heaviest power-word sounds, at least `min_spacing` s apart."""
+    chosen = []
+    for t, kind in sorted(events, key=lambda e: (-WEIGHT.get(e[1], 0), e[0])):
+        if len(chosen) >= limit:
+            break
+        if all(abs(t - c) >= min_spacing for c, _ in chosen):
+            chosen.append((t, kind))
+    return sorted(chosen)
 
 
 def build_track(events: List[Tuple[float, str]], duration: float, work: Path) -> Path:

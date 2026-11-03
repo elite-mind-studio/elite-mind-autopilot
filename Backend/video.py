@@ -683,7 +683,9 @@ def _generate_video_ffmpeg(
             import sfx
             import visuals as _visuals
 
-            events = sfx.word_events(LAST_CAPTION_CHUNKS) + [
+            # Rationed: 2-3 heavy hits in a Short (about one per 40 s in long videos), so each one lands
+            limit = int(os.getenv("SFX_WORD_LIMIT", "0")) or (3 if duration <= 180 else max(3, int(duration // 40)))
+            events = sfx.strongest(sfx.word_events(LAST_CAPTION_CHUNKS), limit) + [
                 (cut, "whoosh") for cut in getattr(_visuals, "LAST_SCENE_CUTS", [])
             ]
             if os.getenv("SFX_MODE") == "tragic":
