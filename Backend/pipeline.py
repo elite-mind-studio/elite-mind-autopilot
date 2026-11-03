@@ -133,7 +133,9 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm",
             out = work / f"{i:03d}.wav"
             # A short pause after each sentence, like a narrator taking a breath
             subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y", "-i", str(work / "raw" / f"{i:03d}.wav"),
-                            "-af", f"apad=pad_dur={(pauses or [])[i] if pauses and i < len(pauses) else 0.22}",
+                            # Slightly slower delivery (pitch kept) + a breath after each sentence
+                            "-af", f"atempo={os.getenv('NARRATION_TEMPO', '0.92')},"
+                                   f"apad=pad_dur={(pauses or [])[i] if pauses and i < len(pauses) else 0.4}",
                             "-ar", "24000", str(out)], check=True)
             files.append(str(out))
         return files
@@ -312,7 +314,7 @@ def run_generation_pipeline(
         # A tragedy gets a moment of silence before its closing line
         pauses = [
             1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
-            else 0.22
+            else (0.5 if tone == "tragic" else 0.4)
             for i in range(len(sentences))
         ]
         chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood, pauses)
