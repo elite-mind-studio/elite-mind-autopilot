@@ -52,6 +52,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Remember the script queue
+        run: ls channels/headline_tales/scripts/queue/ 2>/dev/null > "$RUNNER_TEMP/queue_start.txt" || true
+
       - name: Install system packages
         run: |
           sudo apt-get update
@@ -131,16 +134,18 @@ jobs:
           [ -f channels/headline_tales/posted.json ] || exit 0
           cp channels/headline_tales/posted.json "$RUNNER_TEMP/posted.json"
           mkdir -p "$RUNNER_TEMP/auto" && cp -r channels/headline_tales/scripts/auto/. "$RUNNER_TEMP/auto/" 2>/dev/null || true
-          mkdir -p "$RUNNER_TEMP/queue" && cp -r channels/headline_tales/scripts/queue/. "$RUNNER_TEMP/queue/" 2>/dev/null || true
+          ls channels/headline_tales/scripts/queue/ 2>/dev/null > "$RUNNER_TEMP/queue_left.txt" || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
             git fetch -q origin main && git reset -q --hard origin/main
             cp "$RUNNER_TEMP/posted.json" channels/headline_tales/posted.json
             mkdir -p channels/headline_tales/scripts/auto && cp -r "$RUNNER_TEMP/auto/." channels/headline_tales/scripts/auto/ 2>/dev/null || true
-            rm -rf channels/headline_tales/scripts/queue   # replaced by what is left after this run
-            [ -d "$RUNNER_TEMP/queue" ] && mkdir -p channels/headline_tales/scripts/queue && cp -r "$RUNNER_TEMP/queue/." channels/headline_tales/scripts/queue/ 2>/dev/null || true
-            git add -A channels/headline_tales/posted.json channels/headline_tales/scripts/auto channels/headline_tales/scripts/queue
+            # Remove only the queued scripts this run used (scripts queued meanwhile stay)
+            for used in $(comm -23 <(sort "$RUNNER_TEMP/queue_start.txt") <(sort "$RUNNER_TEMP/queue_left.txt")); do
+              git rm -q --ignore-unmatch "channels/headline_tales/scripts/queue/$used"
+            done
+            git add -A channels/headline_tales/posted.json channels/headline_tales/scripts/auto
             git commit -q -m "headline: record posted videos" || exit 0
             git push -q && exit 0
             sleep 5
