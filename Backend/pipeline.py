@@ -111,8 +111,9 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm",
     import json as _json
 
     python = os.getenv("CHATTERBOX_PYTHON", "").strip()
+    # "builtin" = Chatterbox's own voice, made from real human recordings (no cloning)
     ref = Path(__file__).resolve().parent.parent / "voices" / f"{reference}.wav"
-    if not python or not Path(python).exists() or not ref.exists():
+    if not python or not Path(python).exists() or (reference != "builtin" and not ref.exists()):
         return None
     work = Path(TEMP_DIR) / f"chatterbox_{uuid4().hex[:8]}"
     work.mkdir(parents=True, exist_ok=True)
@@ -120,7 +121,8 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm",
     emit(f"[+] Narrating {len(sentences)} sentences with Chatterbox ({reference})...", "info")
     try:
         subprocess.run(
-            [python, str(Path(__file__).resolve().parent / "chatterbox_tts.py"), str(ref), str(work / "sentences.json"),
+            [python, str(Path(__file__).resolve().parent / "chatterbox_tts.py"),
+             "builtin" if reference == "builtin" else str(ref), str(work / "sentences.json"),
              str(work / "raw"), str(VOICE_MOODS.get(mood, VOICE_MOODS["calm"])[0]), str(VOICE_MOODS.get(mood, VOICE_MOODS["calm"])[1])],
             check=True, timeout=int(os.getenv("CHATTERBOX_TIMEOUT", "5400")),
         )

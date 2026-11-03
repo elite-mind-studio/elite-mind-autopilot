@@ -34,7 +34,10 @@ def main() -> None:
     sentences = json.loads(sentences_file.read_text(encoding="utf-8"))
     for i, text in enumerate(sentences):
         started = time.time()
-        wav = model.generate(text, audio_prompt_path=str(reference), exaggeration=exaggeration, cfg_weight=cfg_weight)
+        kwargs = {"exaggeration": exaggeration, "cfg_weight": cfg_weight}
+        if str(reference) != "builtin":  # builtin = Chatterbox's own real-human voice
+            kwargs["audio_prompt_path"] = str(reference)
+        wav = model.generate(text, **kwargs)
         ta.save(str(out_dir / f"{i:03d}.wav"), wav, model.sr)
         print(f"[chatterbox] {i + 1}/{len(sentences)} in {time.time() - started:.1f}s", flush=True)
 
