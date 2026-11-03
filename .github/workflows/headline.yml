@@ -126,7 +126,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Record what was posted
-        if: always()
+        if: always() && !inputs.dry_run   # test runs change nothing in the repo
         run: |
           [ -f channels/headline_tales/posted.json ] || exit 0
           cp channels/headline_tales/posted.json "$RUNNER_TEMP/posted.json"

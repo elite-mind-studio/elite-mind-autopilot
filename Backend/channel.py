@@ -281,7 +281,10 @@ if __name__ == "__main__":
             from datetime import date
 
             script = auto_dir / f"{date.today().isoformat()}_{queue[0].stem}_news.txt"
-            queue[0].replace(script)
+            if "--dry-run" in sys.argv:  # a test leaves the queued script for the real run
+                script.write_bytes(queue[0].read_bytes())
+            else:
+                queue[0].replace(script)
             print(f"[+] Using queued script {queue[0].name}", flush=True)
         else:
             script = prepare_short()
