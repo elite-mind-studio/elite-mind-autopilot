@@ -110,7 +110,7 @@ jobs:
       - name: Make, check and post
         run: |
           if [ -n "${{ inputs.long }}" ]; then
-            uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}"
+            uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}" ${{ inputs.dry_run && '--dry-run' || '' }}
           else
             mode=auto
             if [ "${{ github.event.schedule }}" = "41 7 * * *" ] || [ "${{ github.event.schedule }}" = "23 17 * * *" ] || [ "${{ inputs.mode }}" = "short" ]; then

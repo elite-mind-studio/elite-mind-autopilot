@@ -1,0 +1,44 @@
+FORMAT: long
+SUBJECT: The 2026 Binance hack
+TITLE: How Binance Lost $6,300,000,000 in 20 Minutes
+YT_TITLE: How Binance Lost $6,300,000,000 in 20 Minutes
+THUMB_WORD: STOLEN
+VOICE: emotional
+TONE: tense
+TAGS: binance hack, biggest crypto heist, crypto heist explained, north korea hackers, lazarus group, tradertraitor, bitcoin crash, crypto documentary, news explained
+DESCRIPTION: On Thursday 29 October 2026, about $6.3 billion in crypto was taken from Binance in roughly twenty minutes: the biggest crypto heist in history. Minute by minute: how it happened, the race to freeze the money, the rush of customers, who investigators blame, and where the money is now.
+SOURCE: Wikipedia, 2026 Binance hack - https://en.wikipedia.org/wiki/2026_Binance_hack
+SOURCE: Al Jazeera, 30 Oct 2026 - https://www.aljazeera.com/news/2026/10/30/binance-says-6-3bn-stolen-in-biggest-crypto-heist-in-history-what-we-know
+SOURCE: NPR, 2 Nov 2026 - https://www.npr.org/2026/11/02/nx-s1-6023424/fbi-says-north-korean-hackers-are-behind-the-theft-of-6-3b-from-binance
+SOURCE: BleepingComputer - https://www.bleepingcomputer.com/news/security/fbi-links-63-billion-binance-crypto-heist-to-north-korean-hackers/
+SOURCE: CNBC - https://www.cnbc.com/2026/10/30/billions-in-crypto-frozen-in-binance-hack-heres-what-happens-next-.html
+GRAPHIC: 0 | {"type": "title", "kicker": "HEADLINE TALES", "title": "The Binance<br>Heist", "counter": {"label": "MINUTES", "to": 20}, "stamp": "STOLEN"}
+GRAPHIC: 4 | {"type": "chart", "title": "What was taken", "sub": "BILLIONS OF US DOLLARS, BY BLOCKCHAIN", "prefix": "$", "suffix": "B", "points": [["ETHEREUM", 3.8], ["BITCOIN", 1.5], ["TRON", 0.63], ["XRP", 0.3]]}
+GRAPHIC: 5 | {"type": "stat", "value": 3, "prefix": "$", "suffix": " BILLION", "caption": "Frozen within hours", "sub": "Stablecoins locked by Tether and Circle"}
+GRAPHIC: 6 | {"type": "stat", "value": 4900, "prefix": "$", "suffix": " MILLION", "caption": "Withdrawn by worried customers", "sub": "Net withdrawals by the morning of 2 November"}
+
+On Thursday night, the twenty-ninth of October, someone took control of the wallets of the biggest crypto exchange in the world. In about twenty minutes, roughly six point three billion dollars was gone. It is the biggest crypto heist in history. And the strangest part? It may have started with a single laptop.
+
+Binance is where millions of people buy, sell and store their crypto. When you keep your coins on an exchange, you are trusting it to guard them, the way you would trust a bank. Most of those coins sit in cold storage, offline. But some must stay online, in what is called a hot wallet, so customers can withdraw at any moment. That night, the hot wallet was the target.
+
+The first moves came at around eight o'clock in the evening, universal time, on the XRP Ledger. Minutes later, coins began leaving on Ethereum and Bitcoin. At eight twenty-four, one combined Ethereum transaction, made of sixty-four transfers, moved more than two and a half billion dollars in a single shot. Ten different blockchains were hit, one after another.
+
+How did they get in? According to the reports so far, the attackers got in through the compromised laptop of a Binance software engineer, and other problems were found later. Binance's chief executive, Richard Teng, said the attackers used a newer Ethereum feature called EIP-7702 to run the attack on the hot wallet. Researchers believe the hackers had prepared at least thirty-six hours in advance. The exact way the keys were authorised is still disputed.
+
+By the time it was over, the damage was enormous. About three point eight billion dollars was taken on Ethereum. Eighteen thousand two hundred and seventy Bitcoin, worth about one and a half billion dollars, were gone. Hundreds of millions more vanished on TRON, on the XRP Ledger, on Solana, and on smaller networks.
+
+But not all of it got away. Part of the loot was stablecoins, digital dollars whose issuers can freeze them. At one minute past nine, Tether froze the hackers' wallets. Three minutes later, Circle did the same. Shortly after midnight, Binance removed the attackers' permissions from its hot wallet. About three billion dollars in stablecoins was locked before the hackers could move it. The Bitcoin, though, cannot be frozen. That money is still out there.
+
+Now imagine you are a Binance customer. You wake up, and the news is everywhere. Trading has been halted. Withdrawals are suspended. Your savings are on the platform that was just robbed. When withdrawals reopened on the first of November, customers pulled out four point six five billion dollars in just nine hours. By the next morning, net withdrawals had reached about four point nine billion dollars, around three percent of everything on the exchange.
+
+Binance made a promise: no customer would lose their money. The company said it set aside six billion dollars to cover the losses, using its emergency Secure Asset Fund for Users, its futures insurance fund, its Bitcoin reserve and its own treasury. By the thirty-first of October, it said ninety percent of the losses had already been replenished, with the rest in less liquid tokens.
+
+So who did it? Blockchain intelligence firm TRM Labs linked the attack to TraderTraitor, a North Korean hacking unit tied to the Lazarus Group. Chainalysis reached the same conclusion. On the thirty-first of October, the FBI published wallet addresses used in the attack, and asked the public for help. Its message was blunt: North Korea responsible for six billion dollar plus Binance attack. The US Secret Service says it is working to track and recover the money.
+
+North Korea says it was not them. On the third of November, Kim Yo Jong, a senior official of the ruling party, denied any involvement in a statement carried by state media, and accused the United States of using the hack to attack North Korea's reputation. North Korea has also denied involvement in the Bybit hack of twenty twenty-five, which the FBI blamed on the same unit.
+
+The scale is hard to believe. The previous record, the Bybit hack, was one and a half billion dollars. This is more than four times bigger. The chief scientist of the analytics firm Elliptic said it is almost certainly the single largest-known theft of any kind. The shock hit the whole market. Bitcoin fell about five percent, below eighty thousand dollars, and shares of other crypto companies, like Coinbase and Robinhood, dropped too.
+
+So where is the money now? As of the latest reports, the hackers had not yet turned the stolen crypto into cash. Experts say that can take weeks, or even years, and usually needs middlemen willing to take a cut. Every one of those steps is a chance for investigators to follow the trail. The wallets are public. The whole world is watching them.
+
+One laptop. Twenty minutes. Six point three billion dollars. This story is far from over. If you want to know what happens next, subscribe, because we explain one big story every single day. And tell us in the comments: which story in the news should we explain next?

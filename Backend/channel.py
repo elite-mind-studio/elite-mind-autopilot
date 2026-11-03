@@ -308,7 +308,12 @@ if __name__ == "__main__":
         else:
             post(profile, script, make_checked(profile, script, reuse=False))
     elif command == "publish":
-        publish(profile, Path(sys.argv[3]), Path(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None)
+        if "--dry-run" in sys.argv:  # make and check for review, post nothing
+            for arg in sys.argv[3:5]:
+                if arg and not arg.startswith("--"):
+                    make_checked(profile, Path(arg), reuse=False)
+        else:
+            publish(profile, Path(sys.argv[3]), Path(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None)
     elif command == "post":  # post an already rendered/approved video, e.g. a Short linking to the long one
         script = Path(sys.argv[3])
         post(profile, script, make_checked(profile, script), long_url=sys.argv[4] if len(sys.argv) > 4 else "")
