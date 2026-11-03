@@ -265,7 +265,8 @@ LAST_CAPTION_CHUNKS: list = []
 EMPHASIS = re.compile(
     r"(\d|\$|%|million|billion|trillion|never|secret|killed|dead|died|crash|war|broke|rich|free|"
     r"warning|danger|lie|lies|truth|shocking|nobody|everyone|biggest|worst|first|last|only|trapped|"
-    r"thousand|hundred|dollars?|percent|"
+    r"thousand|hundred|dollars?|percent|emergenc|explo|blast|disaster|attack|crisis|collapse|chaos|panic|"
+    r"catastroph|destroy|hacked|stolen|bomb|invasion|meltdown|missing|"
     r"^(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b)",
     re.IGNORECASE,
 )

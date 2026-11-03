@@ -4,7 +4,8 @@ copyright) placed on the narration timeline.
 
   whoosh : every scene change
   boom   : money / numbers ("$118", "five miles", "a million")
-  hit    : danger words ("killed", "crash", "war", "trapped")
+  blast  : the strongest alarm words ("emergency", "explosion", "war", "crash", "crisis")
+  hit    : death and danger ("killed", "trapped", "warning") - darker and quieter, out of respect
   riser  : twists and secrets ("secret", "nobody", "the truth") - peaks on the word
 """
 
@@ -24,29 +25,39 @@ SOUNDS = {
     "boom": "aevalsrc='0.95*sin(2*PI*(42+70*exp(-7*t))*t)*exp(-3.2*t)':d=1.5:s=48000,lowpass=f=900",
     "hit": "aevalsrc='0.8*sin(2*PI*68*t)*exp(-4.5*t)+0.35*(random(0)-0.5)*exp(-14*t)':d=1.1:s=48000,lowpass=f=2500",
     "riser": "aevalsrc='0.4*sin(2*PI*(180+1300*t*t)*t)*(t/0.7)':d=0.7:s=48000,afade=t=out:st=0.6:d=0.1",
+    # Explosion-style blast: a noise burst over a falling sub-bass with a long rumble tail
+    "blast": "aevalsrc='0.9*sin(2*PI*(38+90*exp(-6*t))*t)*exp(-1.6*t)+0.55*(random(0)-0.5)*exp(-5*t)':d=2.4:s=48000,"
+             "lowpass=f=1400,afade=t=out:st=1.8:d=0.6",
 }
 # Where the sound's peak sits relative to its start (the riser builds up to the word)
-LEAD = {"whoosh": 0.22, "boom": 0.0, "hit": 0.0, "riser": 0.62}
-VOLUME = {"whoosh": 0.35, "boom": 0.75, "hit": 0.6, "riser": 0.3}
+LEAD = {"whoosh": 0.22, "boom": 0.0, "hit": 0.0, "riser": 0.62, "blast": 0.0}
+VOLUME = {"whoosh": 0.35, "boom": 0.75, "hit": 0.6, "riser": 0.3, "blast": 0.8}
 
 MONEY = re.compile(
     r"(\d|\$|%|dollar|million|billion|trillion|thousand|hundred|percent|"
     r"^(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b)",
     re.I,
 )
-DANGER = re.compile(r"^(killed|kill|dead|died|death|crash|crashed|war|attack|attacked|trapped|warning|danger|bomb|explod|fire)", re.I)
+# The strongest alarm words get the big blast
+BLAST = re.compile(
+    r"^(emergenc|explosion|explod|blast|crash|disaster|attack|war$|wars$|crisis|collapse|chaos|panic|"
+    r"catastroph|destroy|hacked|stolen|bomb|invasion|meltdown)", re.I)
+# Death and danger get a darker, quieter hit (never an explosion over a tragedy)
+DANGER = re.compile(r"^(killed|kill|dead|died|death|trapped|warning|danger|fire|missing)", re.I)
 TWIST = re.compile(r"^(secret|secretly|nobody|truth|lie|lies|lied|never|shocking|hidden|real|actually|but)$", re.I)
 
 
 def word_events(chunks: List[list], min_gap: float = 1.6) -> List[Tuple[float, str]]:
     """(time, sound) for power words, at most one every `min_gap` seconds."""
-    priority = {"hit": 0, "riser": 1, "boom": 2}  # a tragedy line gets the dark hit, not a money boom
+    # A line about deaths gets the dark hit first; then blast, twist, money
+    priority = {"hit": 0, "blast": 1, "riser": 2, "boom": 3}
     events, last = [], -10.0
     for chunk in chunks:
         found = []
         for n, (word, start, _) in enumerate(chunk):
             bare = re.sub(r"[^\w$%-]", "", word)
-            kind = "hit" if DANGER.search(bare) else "riser" if TWIST.match(bare) else "boom" if MONEY.search(bare) else None
+            kind = ("hit" if DANGER.search(bare) else "blast" if BLAST.search(bare)
+                    else "riser" if TWIST.match(bare) else "boom" if MONEY.search(bare) else None)
             # "but" only counts at the start of a caption (a turn in the story)
             if kind == "riser" and bare.lower() == "but" and n != 0:
                 kind = None
