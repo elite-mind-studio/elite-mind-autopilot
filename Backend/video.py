@@ -258,6 +258,79 @@ def __generate_subtitles_locally(
     return "\n".join(subtitles)
 
 
+def _srt_time(total_seconds: float) -> str:
+    ms = int(round(max(0.0, total_seconds) * 1000))
+    hours, rem = divmod(ms, 3_600_000)
+    minutes, rem = divmod(rem, 60_000)
+    seconds, ms = divmod(rem, 1000)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{ms:03d}"
+
+
+def __generate_subtitles_aligned(audio_path: str, sentences: List[str]) -> str:
+    """
+    Word-accurate captions: Whisper listens to the finished narration for the
+    moment each word is spoken, and the script's own words (exact spelling) are
+    shown 2-3 at a time on those timings. Pauses no longer push captions late.
+    """
+    import difflib
+    import re as _re
+
+    from faster_whisper import WhisperModel
+
+    model = WhisperModel(os.getenv("WHISPER_MODEL", "base.en"), device="cpu", compute_type="int8")
+    segments, _ = model.transcribe(audio_path, word_timestamps=True, language="en", beam_size=1)
+    heard = [(w.word, w.start, w.end) for seg in segments for w in (seg.words or [])]
+    norm = lambda w: _re.sub(r"[^a-z0-9]", "", w.lower())
+
+    script = [(word, n) for n, sentence in enumerate(sentences) for word in sentence.split()]
+    times = [None] * len(script)
+    matcher = difflib.SequenceMatcher(a=[norm(w) for w, _ in script], b=[norm(w) for w, _, _ in heard], autojunk=False)
+    for a, b, size in matcher.get_matching_blocks():
+        for k in range(size):
+            times[a + k] = (heard[b + k][1], heard[b + k][2])
+    # Words Whisper heard differently (names, numbers) get times between their neighbours
+    known = [i for i, t in enumerate(times) if t]
+    if not known:
+        raise RuntimeError("alignment found no words")
+    for i, t in enumerate(times):
+        if t:
+            continue
+        prev = max((k for k in known if k < i), default=None)
+        nxt = min((k for k in known if k > i), default=None)
+        if prev is None:
+            times[i] = (max(0.0, times[nxt][0] - 0.3), times[nxt][0])
+        elif nxt is None:
+            times[i] = (times[prev][1], times[prev][1] + 0.3)
+        else:
+            span = (times[nxt][0] - times[prev][1]) / (nxt - prev)
+            start = times[prev][1] + span * (i - prev - 1)
+            times[i] = (start, start + span)
+
+    # 2-3 word captions that never span two sentences or a long pause
+    chunks, current = [], []
+    for i, (word, sentence) in enumerate(script):
+        if current:
+            last = current[-1]
+            gap = times[i][0] - times[last][1]
+            text_len = sum(len(script[k][0]) + 1 for k in current) + len(word)
+            if script[last][1] != sentence or len(current) >= 3 or text_len > 16 or gap > 0.35:
+                chunks.append(current)
+                current = []
+        current.append(i)
+    if current:
+        chunks.append(current)
+
+    entries = []
+    for n, chunk in enumerate(chunks):
+        start = times[chunk[0]][0]
+        end = times[chunk[-1]][1] + 0.12
+        if n + 1 < len(chunks):
+            end = min(end, times[chunks[n + 1][0]][0])
+        text = " ".join(script[k][0] for k in chunk)
+        entries.append(f"{n + 1}\n{_srt_time(start)} --> {_srt_time(max(end, start + 0.2))}\n{text}\n")
+    return "\n".join(entries)
+
+
 def generate_subtitles(
     audio_path: str, sentences: List[str], audio_clips: List[AudioFileClip], voice: str
 ) -> str:
@@ -285,8 +358,14 @@ def generate_subtitles(
         log("[+] Creating subtitles using AssemblyAI", "info")
         subtitles = __generate_subtitles_assemblyai(audio_path, voice)
     else:
-        log("[+] Creating subtitles locally", "info")
-        subtitles = __generate_subtitles_locally(sentences, audio_clips)
+        aligned = False
+        try:
+            log("[+] Creating word-timed subtitles (Whisper alignment)", "info")
+            subtitles = __generate_subtitles_aligned(audio_path, sentences)
+            aligned = True
+        except Exception as err:
+            log(f"[-] Word alignment failed, using sentence timing: {err}", "warning")
+            subtitles = __generate_subtitles_locally(sentences, audio_clips)
         # print(colored("[-] Local subtitle generation has been disabled for the time being.", "red"))
         # print(colored("[-] Exiting.", "red"))
         # sys.exit(1)
@@ -294,8 +373,9 @@ def generate_subtitles(
     with open(subtitles_path, "w", encoding="utf-8") as file:
         file.write(subtitles)
 
-    # Equalize subtitles
-    equalize_subtitles(str(subtitles_path))
+    # Aligned captions are already short and word-timed; re-splitting would undo that
+    if not (ASSEMBLY_AI_API_KEY is None or ASSEMBLY_AI_API_KEY == "") or not aligned:
+        equalize_subtitles(str(subtitles_path))
 
     log("[+] Subtitles generated.", "success")
 
