@@ -223,7 +223,7 @@ STRICT RULES:
 LONG script: 1000-1150 words, 11-13 paragraphs separated by blank lines. Paragraph 1 is a hook (the most
 striking fact), then context/history, what happened, impact on ordinary people, the latest, what could happen
 next, and a closing paragraph asking viewers to subscribe and to tell us in the comments which story
-in the news we should explain next.
+in the news we should explain next, and to subscribe because we explain one big story every single day.
 
 SHORT script: 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."),
 each sentence a consequence of the last, then end with: "This is the story of <subject>. For the full
@@ -258,7 +258,7 @@ STRICT RULES:
   tension rising sentence by sentence. Never invent details, and never sensationalise deaths.
 - 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
   consequence of the last, the most surprising fact early. End with exactly:
-  "Which story should we explain next? Tell us in the comments, and subscribe to Headline Tales for the stories behind the headlines."
+  "Which story should we explain next? Tell us in the comments, and subscribe. We explain one big story every single day, so you don't miss tomorrow's."
 
 SOURCES:
 {_sources_block(sources)}
@@ -332,7 +332,7 @@ def prepare_short() -> Path:
     draft = write_short_only(story, sources)
     draft["short_script"] = _with_ending(
         _checked(draft["short_script"], sources, "news short"),
-        ASK_NEXT + " And subscribe to Headline Tales for the stories behind the headlines.",
+        ASK_NEXT + " And subscribe. We explain one big story every single day, so you don't miss tomorrow's.",
     )
     if len(draft["short_script"].split()) < 60:
         raise RuntimeError("Short too short after fact-check; not posting")
