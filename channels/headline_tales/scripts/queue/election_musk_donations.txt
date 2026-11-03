@@ -1,0 +1,27 @@
+FORMAT: short
+SUBJECT: The biggest political donor of the 2026 midterms
+TITLE: $446 MILLION
+VOICE: calm
+TONE: tense
+YT_TITLE: One Man Put $446 Million Into America's Midterm Elections
+TAGS: elon musk, midterm elections 2026, super pac, campaign finance, political donors, us politics explained, news explained
+DESCRIPTION: According to Federal Election Commission data, Elon Musk is the largest individual donor of the 2026 US midterm cycle, with $446 million. Where the money went, who the next biggest donors on both sides are, and how super PACs work.
+SOURCE: Al Jazeera, 27 Oct 2026 - https://www.aljazeera.com/news/2026/10/27/tracking-the-money-the-biggest-donors-in-the-2026-us-midterm-elections
+SOURCE: Public Citizen - https://www.citizen.org/article/millionaires-and-billionaires-fuel-2026-super-pac-spending/
+SOURCE: The Hill - https://thehill.com/homenews/campaign/6167594-elon-musk-midterm-spending/
+SOURCE: Visual Capitalist - https://www.visualcapitalist.com/ranked-the-50-biggest-donors-to-the-2026-u-s-midterm-elections/
+GRAPHIC: 4 | {"type": "chart", "title": "Biggest donors", "sub": "MILLIONS OF US DOLLARS, 2026 CYCLE (FEC DATA)", "prefix": "$", "suffix": "M", "points": [["MUSK", 446], ["UIHLEINS", 150], ["SOROS", 102]]}
+
+One man has put four hundred and forty-six million dollars into America's midterm elections.
+
+That man is Elon Musk, the world's richest person. According to Federal Election Commission data, he is the biggest individual donor of this election cycle.
+
+The money went to super PACs. These groups can raise and spend unlimited amounts, as long as they do not coordinate directly with candidates.
+
+About two hundred and sixteen million went to America PAC, the group Musk set up in twenty twenty-four. Another one hundred and sixty-eight million went to the main super PAC backing Republican Senate candidates.
+
+The next biggest donors? Richard and Elizabeth Uihlein, with about one hundred and fifty million to Republican-aligned groups, and George Soros, with about one hundred and two million to Democratic-aligned groups.
+
+And total political ad spending this year is projected to reach eleven point six billion dollars, the most in American history.
+
+This is the story of the biggest political donor of twenty twenty-six. Which story should we explain next? Tell us in the comments, and follow Headline Tales for the stories behind the headlines.
