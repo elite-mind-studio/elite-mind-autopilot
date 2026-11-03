@@ -1,6 +1,7 @@
 FORMAT: short
 SUBJECT: The Learjet 60 crash in Florida
 TITLE: 5 MILES IN 1 MINUTE
+VOICE: emotional
 YT_TITLE: This Jet Fell 5 Miles in One Minute. Investigators Found a Clue
 TAGS: learjet 60 crash, florida plane crash, palm beach plane crash, ntsb, plane crash explained, aviation, news explained
 DESCRIPTION: On 1 November 2026 a Learjet 60 flying from Austin to the Bahamas fell from 35,000 feet onto a Florida road. What the flight data and the NTSB have said so far. Our thoughts are with the families of the nine people on board.

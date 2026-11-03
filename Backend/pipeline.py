@@ -59,7 +59,24 @@ class PipelineCancelled(Exception):
     pass
 
 
-def _chatterbox_batch(sentences: list, reference: str, emit) -> "list | None":
+# Delivery per topic: (exaggeration, cfg_weight). Higher exaggeration = more feeling;
+# lower cfg = slower, more deliberate pacing.
+VOICE_MOODS = {"calm": (0.5, 0.5), "emotional": (0.78, 0.33)}
+DRAMATIC_WORDS = (
+    "crash", "killed", "dead", "death", "war", "attack", "hack", "heist", "theft", "disaster",
+    "collapse", "scandal", "secret", "betray", "revenge", "shocking", "trapped", "missing", "pov",
+)
+
+
+def _voice_mood(data: dict) -> str:
+    """Stories and dramatic news get an emotional read; lists and explainers stay calm."""
+    subject = data.get("videoSubject", "").lower()
+    if data.get("series") or any(word in subject for word in DRAMATIC_WORDS):
+        return "emotional"
+    return "calm"
+
+
+def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm") -> "list | None":
     """
     Narrate every sentence with Chatterbox (natural, expressive; voice cloned from
     voices/<reference>.wav). Returns one WAV per sentence, each followed by a short
@@ -78,7 +95,7 @@ def _chatterbox_batch(sentences: list, reference: str, emit) -> "list | None":
     try:
         subprocess.run(
             [python, str(Path(__file__).resolve().parent / "chatterbox_tts.py"), str(ref), str(work / "sentences.json"),
-             str(work / "raw"), os.getenv("CHATTERBOX_EXAGGERATION", "0.5"), os.getenv("CHATTERBOX_CFG", "0.5")],
+             str(work / "raw"), str(VOICE_MOODS.get(mood, VOICE_MOODS["calm"])[0]), str(VOICE_MOODS.get(mood, VOICE_MOODS["calm"])[1])],
             check=True, timeout=int(os.getenv("CHATTERBOX_TIMEOUT", "5400")),
         )
         import imageio_ffmpeg
@@ -256,7 +273,9 @@ def run_generation_pipeline(
     # Chatterbox voices ("chatterbox:<reference>") are made for every sentence in one batch
     chatterbox_files = None
     if voice.startswith("chatterbox:"):
-        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit)
+        mood = data.get("voiceMood") or _voice_mood(data)
+        emit(f"[+] Voice delivery: {mood}", "info")
+        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood)
         if chatterbox_files is None:
             voice = os.getenv("CHATTERBOX_FALLBACK_VOICE", "kokoro:am_onyx")
             voice_prefix = voice[:2]
