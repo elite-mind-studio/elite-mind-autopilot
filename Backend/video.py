@@ -672,7 +672,26 @@ def _generate_video_ffmpeg(
                 f"fontcolor=white:fontsize={size}:x=(w-text_w)/2:y=h*0.27+{int(n * size * 1.45)}:"
                 f"alpha='if(lt(t,{start_memo:.2f}),0,min(1,(t-{start_memo:.2f})/0.8))'"
             )
-    video_filter = f"[0:v]{scale_filter}{grade}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}[captioned]"
+    # Hook headline: big bold 2-4 words over the first ~2.2 s (the first frame is the feed cover)
+    hook = ""
+    if os.getenv("HOOK_TEXT", "").strip():
+        import textwrap
+
+        hook_lines = textwrap.wrap(os.getenv("HOOK_TEXT").strip().upper(), 14 if frame_height > frame_width else 24)[:3]
+        hook_size = int(frame_height * (0.062 if frame_height > frame_width else 0.08))
+        accent = (text_color or "#FFE600").lstrip("#")
+        top = 0.14 if frame_height > frame_width else 0.12
+        for n, line in enumerate(hook_lines):
+            hook_file = SUBTITLES_DIR / f"{uuid.uuid4()}_hook.txt"
+            hook_file.write_text(line, encoding="utf-8")
+            colour = f"0x{accent}" if n == len(hook_lines) - 1 else "white"  # last line in the accent colour
+            hook += (
+                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(hook_file)}:"
+                f"fontcolor={colour}:fontsize={hook_size}:borderw={max(4, hook_size // 9)}:bordercolor=black:"
+                f"x=(w-text_w)/2:y=h*{top}+{int(n * hook_size * 1.12)}:enable='lt(t,2.2)':"
+                f"alpha='if(lt(t,1.9),1,max(0,(2.2-t)/0.3))'"
+            )
+    video_filter = f"[0:v]{scale_filter}{grade}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}{hook}[captioned]"
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
     output_label = "[captioned]"
 

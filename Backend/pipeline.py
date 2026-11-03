@@ -450,6 +450,13 @@ def run_generation_pipeline(
         finally:
             temp_audio.close()
 
+    # A big hook headline over the first seconds of a full-screen Short (also its feed cover).
+    # Letterbox Shorts already show their title in the top bar.
+    hook_text = (data.get("hook") or data.get("title") or "").strip()
+    os.environ["HOOK_TEXT"] = (
+        hook_text if video_format == "short" and os.getenv("VIDEO_LAYOUT", "full") != "letterbox" and len(hook_text) <= 40 else ""
+    )
+
     try:
         final_video_path = generate_video(
             combined_video_path,
