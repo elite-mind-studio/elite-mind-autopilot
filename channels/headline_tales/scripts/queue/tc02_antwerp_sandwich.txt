@@ -5,6 +5,7 @@ VOICE: emotional
 TONE: tense
 YT_TITLE: The Sandwich That Solved a $100 Million Heist
 THUMB_WORD: CAUGHT
+LONG_URL: https://youtu.be/pwkyZcqEaQA
 TAGS: antwerp diamond heist, true crime, diamond heist, leonardo notarbartolo, school of turin, biggest heist, real story, true story, headline tales
 DESCRIPTION: In February 2003, thieves emptied the vault under the Antwerp Diamond Centre in Belgium, taking more than $100 million by most estimates. They were caught after dumping their rubbish in a forest. Most of the diamonds have never been found.
 SOURCE: Wikipedia, Antwerp diamond heist - https://en.wikipedia.org/wiki/Antwerp_diamond_heist

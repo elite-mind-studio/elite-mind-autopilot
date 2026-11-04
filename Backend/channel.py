@@ -179,6 +179,8 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
     from youtube import add_to_playlist, set_thumbnail, upload_video
 
     spec = parse_script(script_path)
+    # LONG_URL: <link> in a queued Short's header links it to an already-posted documentary
+    long_url = long_url or spec.get("long_url", "")
     posted = _posted(name)
     if spec["slug"] in posted:
         print(f"[*] {spec['slug']} already posted: {posted[spec['slug']]['url']}", flush=True)
