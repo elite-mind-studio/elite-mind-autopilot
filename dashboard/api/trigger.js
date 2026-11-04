@@ -12,7 +12,6 @@ const JOBS = {
   "elite-morning": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
   "elite-midday": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
   "elite-evening": ["autopilot.yml", { format: "short", series: "true", random_delay: "false" }],
-  "elite-extra": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
   "elite-long": ["autopilot.yml", { format: "long", series: "false", random_delay: "false" }],
   "headline-full": ["headline.yml", { mode: "full" }],
   "headline-short": ["headline.yml", { mode: "short" }],

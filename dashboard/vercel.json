@@ -18,10 +18,6 @@
       "schedule": "17 11 * * *"
     },
     {
-      "path": "/api/trigger?job=elite-extra",
-      "schedule": "0 17 * * *"
-    },
-    {
       "path": "/api/trigger?job=elite-evening",
       "schedule": "0 21 * * *"
     },
