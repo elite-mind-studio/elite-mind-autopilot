@@ -98,7 +98,7 @@ def check_video(path: Path, video_format: str) -> list:
     if p["size"] not in expected:
         problems.append(f"size {p['size']} instead of {expected}")
     # YouTube treats vertical videos up to 3 minutes as Shorts
-    low, high = (20, 175) if video_format == "short" else (300, 1200)
+    low, high = (20, 175) if video_format == "short" else (180, 1200)
     if not low <= p["seconds"] <= high:
         problems.append(f"length {p['seconds']:.0f}s outside {low}-{high}s")
     if not p["has_audio"] or p["mean_db"] < -35:

@@ -205,6 +205,17 @@ def run_generation_pipeline(
         or ("pov" if data["videoSubject"].lower().startswith("pov") else None),
         series=data.get("series"),
     )
+    if not script and not data.get("script"):
+        # The model sometimes refuses when rules clash; retry once with the core rules only
+        emit("[-] Script rejected, retrying with the core rules only", "warning")
+        script = generate_script(
+            data["videoSubject"], paragraph_number, ai_model, voice, data["customPrompt"],
+            video_format=video_format,
+            script_style=data.get("scriptStyle")
+            or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None)
+            or ("pov" if data["videoSubject"].lower().startswith("pov") else None),
+            series=data.get("series"), extra_rules_enabled=False,
+        )
 
     if not script:
         raise RuntimeError(

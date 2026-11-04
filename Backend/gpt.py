@@ -170,6 +170,7 @@ def generate_script(
     video_format: str = "short",
     script_style: Optional[str] = None,
     series: Optional[dict] = None,
+    extra_rules_enabled: bool = True,
 ) -> Optional[str]:
     """
     Generate a script for a video, depending on the subject of the video, the number of paragraphs, and the AI model.
@@ -353,8 +354,11 @@ def generate_script(
         """
 
     # Channel-level writing rules (e.g. from YouTube Studio insights / comments)
-    extra_rules = os.getenv("SCRIPT_EXTRA_RULES", "").strip()
+    extra_rules = os.getenv("SCRIPT_EXTRA_RULES", "").strip() if extra_rules_enabled else ""
     if extra_rules and not customPrompt:
+        if series:
+            # A series part ends on its cliffhanger, so the "loop back" ending doesn't apply
+            extra_rules = extra_rules.replace("End by looping back to the opening line.", "").strip()
         prompt += f"\n            Channel rule: {extra_rules}\n"
 
     # Learning loop: what our own analytics say keeps viewers watching
