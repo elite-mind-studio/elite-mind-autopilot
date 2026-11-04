@@ -484,6 +484,14 @@ def build_ai_video(
         else:
             image_paths[i] = last
 
+    # The closing "subscribe / which story next" scene shows the opening image again,
+    # never a literal drawing of the call to action
+    import re as _re
+
+    for i, (text, _) in enumerate(scenes):
+        if i and _re.search(r"explain next|subscribe|follow headline|follow elite", text, _re.IGNORECASE):
+            image_paths[i] = image_paths[0]
+
     global LAST_SCENE_IMAGES
     LAST_SCENE_IMAGES = [p for p in image_paths if p]
 

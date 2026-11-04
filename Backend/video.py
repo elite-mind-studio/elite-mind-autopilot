@@ -559,6 +559,28 @@ def combine_videos(
     return str(combined_video_path)
 
 
+def _like_badge(path: str, width: int) -> None:
+    """White round badge with a blue thumbs-up and LIKE, as a transparent PNG."""
+    from PIL import ImageFont
+
+    height = int(width * 0.42)
+    image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=height // 2, fill=(255, 255, 255, 245),
+                           outline=(20, 20, 20, 255), width=max(3, height // 20))
+    blue = (6, 95, 212, 255)
+    s = height * 0.62
+    ox, oy = height * 0.28, (height - s) / 2
+    # Thumbs-up: cuff, palm and raised thumb
+    draw.rounded_rectangle((ox, oy + s * 0.42, ox + s * 0.22, oy + s), radius=int(s * 0.05), fill=blue)
+    draw.rounded_rectangle((ox + s * 0.28, oy + s * 0.38, ox + s * 0.95, oy + s), radius=int(s * 0.12), fill=blue)
+    draw.polygon([(ox + s * 0.30, oy + s * 0.42), (ox + s * 0.52, oy), (ox + s * 0.66, oy + s * 0.06),
+                  (ox + s * 0.62, oy + s * 0.42)], fill=blue)
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(height * 0.46))
+    draw.text((ox + s * 1.15, height * 0.22), "LIKE", font=font, fill=(20, 20, 20, 255))
+    image.save(path)
+
+
 def _subscribe_button(path: str, width: int) -> None:
     """Red YouTube-style SUBSCRIBE button with a bell, as a transparent PNG."""
     from PIL import ImageFont
@@ -722,6 +744,28 @@ def _generate_video_ffmpeg(
         except Exception as sfx_err:
             log(f"[-] Sound effects skipped: {sfx_err}", "warning")
 
+    # Silent LIKE badge right after the Short's heaviest moment (skipped for tragedies)
+    if frame_height > frame_width and os.getenv("SFX_MODE") != "tragic" and os.getenv("LIKE_BADGE", "true") != "false":
+        try:
+            import sfx
+
+            moments = [(t, k) for t, k in sfx.strongest(sfx.word_events(LAST_CAPTION_CHUNKS), 1)
+                       if 0.2 * duration <= t <= 0.8 * duration]
+            like_at = (moments[0][0] + 0.9) if moments else 0.55 * duration
+            badge = TEMP_DIR / "like_badge.png"
+            _like_badge(str(badge), int(frame_width * 0.34))
+            inputs += ["-loop", "1", "-t", "1.6", "-i", rel(badge)]
+            like_index = len([x for x in inputs if x == "-i"]) - 1
+            video_filter += (
+                f";[{like_index}:v]format=rgba,fade=t=in:st=0:d=0.15:alpha=1,fade=t=out:st=1.25:d=0.35:alpha=1,"
+                f"setpts=PTS+{like_at:.2f}/TB[like];"
+                f"{output_label}[like]overlay=x=W-w-{int(frame_width * 0.05)}:y={int(frame_height * 0.58)}:"
+                f"eof_action=pass:enable='between(t,{like_at:.2f},{like_at + 1.6:.2f})'[liked]"
+            )
+            output_label = "[liked]"
+        except Exception as like_err:
+            log(f"[-] Like badge skipped: {like_err}", "warning")
+
     # SUBSCRIBE button for the last seconds, where viewers decide to follow
     if os.getenv("SUBSCRIBE_BUTTON", "true").strip().lower() not in ("0", "false", "no"):
         button_width = int(frame_width * (0.62 if frame_height > frame_width else 0.26))
@@ -735,7 +779,7 @@ def _generate_video_ffmpeg(
         start = max(0.0, duration - 3.5)
         inputs += ["-i", rel(button_path)]
         button_index = len([x for x in inputs if x == "-i"]) - 1
-        video_filter += f";[captioned][{button_index}:v]overlay=x={x}:y={y}:enable='gte(t,{start:.2f})'[final]"
+        video_filter += f";{output_label}[{button_index}:v]overlay=x={x}:y={y}:enable='gte(t,{start:.2f})'[final]"
         output_label = "[final]"
 
     subprocess.run(

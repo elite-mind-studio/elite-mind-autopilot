@@ -75,13 +75,13 @@
       }
 
       if (C.type === "stat") {
-        const n = el("div", "display", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 640 : 300), fontSize: px(portrait ? 240 : 260), color: "var(--amber)" });
+        const n = el("div", "display", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 300 : 300), fontSize: px(portrait ? 200 : 260), color: "var(--amber)" });
         counter(n, C.value, 0.3, Math.min(1.8, D * 0.45), C.prefix || "", C.suffix || "");
-        const c = el("div", "display", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 960 : 600), fontSize: px(portrait ? 76 : 84) }, C.caption || "");
+        const c = el("div", "display", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 560 : 600), fontSize: px(portrait ? 70 : 84) }, C.caption || "");
         tl.from(n, { opacity: 0, scale: 0.8, duration: 0.5, ease: "power3.out" }, 0.2);
         tl.from(c, { opacity: 0, y: 30, duration: 0.5 }, 0.9);
         if (C.sub) {
-          const s = el("div", "muted", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 1090 : 720), fontSize: px(32) }, C.sub);
+          const s = el("div", "muted", { left: 0, width: "100%", textAlign: "center", top: px(portrait ? 680 : 720), fontSize: px(30) }, C.sub);
           tl.from(s, { opacity: 0, duration: 0.5 }, 1.3);
         }
       }
@@ -104,8 +104,8 @@
         C.points.forEach((p, i) => {
           const hot = i === peak;
           svg += `<circle class="dot" cx="${x(i)}" cy="${y(p[1])}" r="${hot ? 16 : 13}" fill="${hot ? "var(--red)" : "var(--amber)"}"/>
-            <text class="val" x="${x(i)}" y="${y(p[1]) - 30}" text-anchor="middle" font-size="${hot ? 62 : 46}" fill="${hot ? "var(--red)" : "var(--ink)"}">${C.prefix || ""}${p[1]}${C.suffix || ""}</text>
-            <text x="${x(i)}" y="${ch}" text-anchor="middle" font-size="26" style="font-family:var(--font-body);font-weight:700;letter-spacing:.1em" fill="var(--muted)">${p[0]}</text>`;
+            <text class="val" x="${x(i)}" y="${y(p[1]) - 30}" text-anchor="${i === 0 ? "start" : i === C.points.length - 1 ? "end" : "middle"}" font-size="${hot ? 62 : 46}" fill="${hot ? "var(--red)" : "var(--ink)"}">${C.prefix || ""}${p[1]}${C.suffix || ""}</text>
+            <text x="${x(i)}" y="${ch}" text-anchor="${i === 0 ? "start" : i === C.points.length - 1 ? "end" : "middle"}" font-size="26" style="font-family:var(--font-body);font-weight:700;letter-spacing:.1em" fill="var(--muted)">${p[0]}</text>`;
         });
         card.insertAdjacentHTML("beforeend", svg + "</svg>");
         const step = Math.min(0.5, (D - 1.5) / C.points.length);
