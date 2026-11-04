@@ -26,6 +26,10 @@
       "schedule": "23 17 * * *"
     },
     {
+      "path": "/api/trigger?job=elite-long",
+      "schedule": "29 11 * * 5"
+    },
+    {
       "path": "/api/trigger?job=research",
       "schedule": "37 4 * * 0"
     },
