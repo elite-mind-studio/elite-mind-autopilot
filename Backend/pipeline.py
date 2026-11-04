@@ -673,16 +673,6 @@ def run_generation_pipeline(
                 )
                 emit(f"Uploaded video ID: {video_response.get('id')}", "success")
 
-                # First comment on a Short links the full video (Shorts -> long-form funnel)
-                if latest:
-                    try:
-                        post_comment(
-                            video_response.get("id"),
-                            f"▶ Watch the full video: https://youtu.be/{latest[0]} ({latest[1]})",
-                        )
-                    except Exception as comment_err:
-                        emit(f"[-] Could not post the link comment: {comment_err}", "warning")
-
                 # Thumbnail failures shouldn't fail an already-uploaded video
                 try:
                     thumb_size = (1280, 720) if video_format == "long" else (1080, 1920)
@@ -707,12 +697,28 @@ def run_generation_pipeline(
                 playlist_titles = [os.getenv("YOUTUBE_PLAYLIST", "").strip()]
                 if series:
                     playlist_titles.append(series["title"].title())
+                if data.get("playlist"):
+                    playlist_titles.append(data["playlist"])
+                binge_link = ""
                 for playlist_title in [t for t in playlist_titles if t]:
                     try:
-                        add_to_playlist(video_response.get("id"), playlist_title)
+                        playlist_id = add_to_playlist(video_response.get("id"), playlist_title)
                         emit(f"[+] Added to playlist: {playlist_title}", "success")
+                        if playlist_title == data.get("playlist"):
+                            binge_link = f"📚 Watch every {playlist_title} episode: https://www.youtube.com/playlist?list={playlist_id}"
                     except Exception as playlist_err:
                         emit(f"[-] Could not add to playlist: {playlist_err}", "warning")
+
+                # First comment: the topic's question, the series playlist and the full video
+                comment_lines = [data.get("commentAsk", ""), binge_link]
+                if latest:
+                    comment_lines.append(f"▶ Watch the full video: https://youtu.be/{latest[0]} ({latest[1]})")
+                comment_text = "\n\n".join(line for line in comment_lines if line)
+                if comment_text:
+                    try:
+                        post_comment(video_response.get("id"), comment_text)
+                    except Exception as comment_err:
+                        emit(f"[-] Could not post the first comment: {comment_err}", "warning")
             except HttpError as err:
                 emit(
                     f"An HTTP error {err.resp.status} occurred:\n{err.content}", "error"
