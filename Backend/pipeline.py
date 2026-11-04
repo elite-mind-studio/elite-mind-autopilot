@@ -200,7 +200,8 @@ def run_generation_pipeline(
         video_format=video_format,
         # Long videos can use their own style (e.g. "pov" stories)
         script_style=data.get("scriptStyle")
-        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None)
+        # The long-video style (e.g. "pov") only fits POV topics; guides get the normal explainer
+        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" and data["videoSubject"].lower().startswith("pov") else None)
         # "POV: You're ..." topics are told as POV stories, Shorts included
         or ("pov" if data["videoSubject"].lower().startswith("pov") else None),
         series=data.get("series"),
@@ -212,7 +213,8 @@ def run_generation_pipeline(
             data["videoSubject"], paragraph_number, ai_model, voice, data["customPrompt"],
             video_format=video_format,
             script_style=data.get("scriptStyle")
-            or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" else None)
+            # The long-video style (e.g. "pov") only fits POV topics; guides get the normal explainer
+        or (os.getenv("LONG_SCRIPT_STYLE") if video_format == "long" and data["videoSubject"].lower().startswith("pov") else None)
             or ("pov" if data["videoSubject"].lower().startswith("pov") else None),
             series=data.get("series"), extra_rules_enabled=False,
         )
