@@ -60,7 +60,9 @@ jobs:
           done
           find artifacts -name '*.mp4' | wc -l
 
+      # Elite Mind long videos (incl. its compilation) are paused for now; Shorts only
       - name: Elite Mind Decoder compilation
+        if: false
         run: uv run python Backend/compilation.py elite artifacts/autopilot ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Headline Tales compilation
