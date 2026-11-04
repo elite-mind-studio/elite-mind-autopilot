@@ -1,0 +1,80 @@
+FORMAT: long
+SUBJECT: The 2003 Antwerp diamond heist, the heist of the century, and how a pile of rubbish brought it down
+TITLE: The Antwerp Diamond Heist Explained
+YT_TITLE: The Antwerp Diamond Heist Explained: The $100 Million Job Ruined by a Sandwich
+THUMB_WORD: ONE SANDWICH?
+VOICE: emotional
+TONE: tense
+TAGS: antwerp diamond heist, heist of the century, leonardo notarbartolo, school of turin, true crime documentary, diamond heist, biggest heist in history, stolen heist of the century, true story, headline tales
+DESCRIPTION: In February 2003, a crew of Italian thieves emptied the "unbreakable" vault under the Antwerp Diamond Centre in Belgium, taking more than $100 million in diamonds, gold and jewellery by most estimates. Days later, it fell apart because of a bag of rubbish in a forest. The full story: the vault, the two years of planning, the night of the heist, the mistake, the trial, and the mystery that is still not solved. Leonardo Notarbartolo's own account (that it was an insurance fraud, and that far less was taken) has never been proven.
+SOURCE: Wikipedia, Antwerp diamond heist - https://en.wikipedia.org/wiki/Antwerp_diamond_heist
+SOURCE: Luxury London, on Netflix's Stolen: Heist of the Century (2025) - https://luxurylondon.co.uk/culture/entertainment/netflix-stolen-heist-of-the-century-antwerp-2003-leonardo-notarbartolo/
+SOURCE: AOL / People, Two Decades Ago, 5 Men Pulled Off the Largest Diamond Heist Ever - https://www.aol.com/news/two-decades-ago-5-men-113000367.html
+SOURCE: All That's Interesting, The Antwerp Diamond Heist - https://allthatsinteresting.com/antwerp-diamond-heist
+GRAPHIC: 0 | {"type": "title", "kicker": "HEADLINE TALES", "title": "The Antwerp<br>Diamond Heist", "counter": {"label": "MILLION DOLLARS", "to": 100}, "stamp": "STOLEN"}
+GRAPHIC: 4 | {"type": "stat", "value": 10, "suffix": " LAYERS", "caption": "Of security around the vault", "sub": "Two floors under the Antwerp Diamond Centre"}
+GRAPHIC: 17 | {"type": "stat", "value": 100, "prefix": "$", "suffix": " MILLION", "caption": "Taken in one weekend", "sub": "Most estimates; most of it never recovered"}
+
+Monday morning, the seventeenth of February, 2003. Two floors under the streets of Antwerp, a guard opens the door to the most secure diamond vault in the world. The floor is covered in diamonds. Gold. Jewellery. Papers. The safe deposit boxes have been ripped open, one after another. More than one hundred million dollars, by most estimates, is gone. There is no sign of a break-in. No alarm went off. And for a few days, it looks like the perfect crime. Until a farmer finds a sandwich. Let me show you how it happened.
+
+Antwerp, in Belgium, is the diamond capital of the world. For generations, a huge share of the world's rough diamonds has passed through a few streets near the central station. Billions of dollars in stones change hands here every year, often with nothing more than a handshake.
+
+At the heart of it sits the Antwerp Diamond Centre. And under the Antwerp Diamond Centre, two floors below ground, sits its vault.
+
+Dealers kept their most valuable stones there, in well over a hundred safe deposit boxes. They trusted it completely. And they had good reason to.
+
+The vault was protected by ten layers of security. Cameras. A combination dial. A huge keyed lock. Infrared heat detectors. A seismic sensor that could feel vibrations. Doppler radar. And a magnetic field sensor on the door itself. If the door opened, even slightly, the alarm would go off.
+
+It was said to be impossible to rob. And one man decided to prove that wrong.
+
+His name was Leonardo Notarbartolo. He was an Italian from Turin, charming, well dressed, and he spoke several languages. To everyone in the building, he was simply another gem importer.
+
+But police later linked him to a loose group of Italian thieves known as the School of Turin. Professionals. People who did not use guns. People who planned.
+
+Around two years before the heist, Notarbartolo rented a small office inside the Antwerp Diamond Centre. And renting an office came with something very valuable. His own safe deposit box, inside the vault.
+
+That meant he could walk past the guards, go down the stairs, and stand in front of the vault door, legally, again and again. For years, he did exactly that. Watching. Learning every routine. Every sensor. Every camera.
+
+But here is the part that still amazes investigators.
+
+He was not alone. According to his own story, told years later, the crew had nicknames. Speedy, his old friend, nervous and paranoid. The Monster, a strong man and an expert with locks. The Genius, a specialist in alarms. And the King of Keys, an older man said to be one of the best key makers in the world. Belgian police later identified three of them as Pietro Tavano, Ferdinando Finotto, and Elio D'Onorio. The King of Keys has never been identified.
+
+On the weekend of the fifteenth of February, 2003, while the city slept, they went in.
+
+Accounts of exactly how they did it differ. But the methods that have been described are almost unbelievable. A shield was placed over the heat and motion sensor. The wires of the alarm system were worked on, so the sensors stayed quiet. Aluminium was used to fool the magnetic sensor on the door. And they had a key. A copy of the real key, made from images of the original.
+
+The great vault door swung open, and the alarm stayed silent.
+
+Then the long night began. Box after box was forced open. More than a hundred of them. Loose diamonds, gold, silver, jewellery and cash were poured into bags. It took hours. And then, before sunrise, they were gone.
+
+On Monday morning, the dealers came to work, and found their life savings scattered on the vault floor.
+
+The total was never agreed. But most estimates put it at more than one hundred million dollars, making it one of the biggest robberies in history. It was soon called the heist of the century.
+
+It looked like the thieves had done everything right. But they made one mistake. And it was not in the vault.
+
+After the heist, the crew had bags of evidence to get rid of. Gloves, tape, envelopes, a videotape.
+
+But on the drive away, Speedy, the nervous one, panicked. They stopped by a small forest beside the E19 motorway, near Brussels, and dumped the rubbish there.
+
+That forest belonged to a man named August Van Camp. And he was tired of people dumping rubbish on his land. So he did what any annoyed landowner might do. He called the police.
+
+When officers looked inside the bags, they could not believe what they were seeing. Envelopes from the Antwerp Diamond Centre. A videotape. Rubber gloves. Small diamonds. Documents. Receipts. And a half-eaten salami sandwich.
+
+Investigators worked through all of it. A receipt led them to a supermarket and its security footage. A document carried the name of Elio D'Onorio. And the sandwich carried DNA.
+
+Five days after the heist, on the twenty-first of February, Leonardo Notarbartolo walked back into the Antwerp Diamond Centre. Detectives were waiting for him.
+
+In 2005, a Belgian court sentenced him to ten years in prison as the leader. Tavano, D'Onorio and Finotto received five years each. The King of Keys was never caught.
+
+But the story did not end in the courtroom.
+
+Years later, Notarbartolo told a very different version. He claimed that a diamond dealer had hired him, and that the whole thing was an insurance scam. He also claimed the real haul was only about twenty million dollars, far less than the official estimate. None of this has ever been proven, and investigators have disputed his account.
+
+He was released on parole in 2009, arrested again in 2013, and released in 2017. He has always refused to say where the diamonds went.
+
+And that is the biggest mystery of all. Most of the diamonds from the heist of the century have never been found. Somewhere out there, a fortune in stones is still hidden. Or it was quietly sold, one diamond at a time.
+
+The most secure vault in the world was beaten by planning, patience and nerve. And the perfect crime was undone by a bag of rubbish and a forgotten lunch.
+
+Which case should we tell next? Tell us in the comments, and subscribe. We tell one real story every single day, so you don't miss tomorrow's.
