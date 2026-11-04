@@ -196,6 +196,20 @@ def _cover(image: Image.Image, size=(WIDTH, HEIGHT)) -> Image.Image:
     return image
 
 
+def _fill(image: Image.Image, size=(WIDTH, HEIGHT), bias: float = 0.4) -> Image.Image:
+    """Fill the whole frame (no blurred sides); `bias` keeps more of the bottom, where the subject is."""
+    width, height = size
+    image = image.convert("RGB")
+    scale = max(width / image.width, height / image.height)
+    image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    left = (image.width - width) // 2
+    top = round((image.height - height) * bias)
+    image = image.crop((left, top, left + width, top + height))
+    if scale > 1.05:
+        image = image.filter(ImageFilter.UnsharpMask(radius=2, percent=70, threshold=2))
+    return image
+
+
 class ImageGenerator:
     def __init__(self, on_log=None, size=(WIDTH, HEIGHT)) -> None:
         self.size = size
@@ -204,7 +218,7 @@ class ImageGenerator:
         self.failures = {p: 0 for p in self.providers}
         self.on_log = on_log or (lambda message, level: log(message, level))
 
-    def generate(self, prompt: str, path: str) -> Optional[str]:
+    def generate(self, prompt: str, path: str, fill: bool = False) -> Optional[str]:
         """Create one image at `path`. Returns the provider used, or None."""
         full_prompt = f"{prompt}. {IMAGE_STYLE}. {NEGATIVE}"
         for provider in self.providers:
@@ -213,7 +227,8 @@ class ImageGenerator:
             started = time.time()
             try:
                 data = PROVIDERS[provider](full_prompt, self.size)
-                _cover(Image.open(io.BytesIO(data)), self.size).save(path, "JPEG", quality=92)
+                picture = Image.open(io.BytesIO(data))
+                (_fill(picture, self.size) if fill else _cover(picture, self.size)).save(path, "JPEG", quality=92)
                 self.failures[provider] = 0
                 self.on_log(
                     f"   [{provider}] image ready in {time.time() - started:.0f}s", "info"
@@ -226,6 +241,18 @@ class ImageGenerator:
                     self.failures[provider] += 1
                 self.on_log(f"   [{provider}] failed: {message[:200]}", "warning")
         return None
+
+
+def thumbnail_image(scene: str, path: str, on_log=None) -> Optional[str]:
+    """A dedicated 16:9 thumbnail picture: subject big in the lower part, plain top third for text."""
+    prompt = (
+        f"{scene}. YouTube thumbnail composition, wide shot, the characters and key object large "
+        "in the lower two thirds, the top third left completely plain and empty, high contrast, "
+        "bright saturated colours, very clear facial expressions"
+    )
+    if ImageGenerator(on_log=on_log, size=(1280, 720)).generate(prompt, path, fill=True):
+        return path
+    return None
 
 
 def group_scenes(sentences: List[str], durations: List[float], target: float = 3.5):

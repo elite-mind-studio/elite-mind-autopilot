@@ -129,9 +129,10 @@ def make(name: str, script_path: Path) -> Path:
     target = out_dir / f"{spec['slug']}.mp4"
     shutil.copy(output, target)
     if video_format == "long" and visuals.LAST_SCENE_IMAGES:
-        from video import generate_bold_thumbnail
+        from pipeline import designed_thumbnail
 
-        thumb = generate_bold_thumbnail(visuals.LAST_SCENE_IMAGES[0], spec.get("thumb_word", "THE STORY"))
+        thumb = designed_thumbnail(spec.get("yt_title") or data["title"], spec["script"],
+                                   visuals.LAST_SCENE_IMAGES[0], words=spec.get("thumb_word", ""))
         shutil.copy(thumb, out_dir / f"{spec['slug']}_thumb.jpg")
     print(f"[+] Saved {target}", flush=True)
     return target

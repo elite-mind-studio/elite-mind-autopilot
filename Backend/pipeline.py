@@ -80,6 +80,24 @@ TRAGIC_WORDS = ("killed", "dead", "died", "death", "victims", "crash", "disaster
 TENSE_WORDS = ("war", "attack", "hack", "heist", "theft", "secret", "scandal", "betray", "collapse", "crisis", "trapped", "pov")
 
 
+def designed_thumbnail(title: str, script: str, fallback_image: str, words: str = "", emit=None) -> str:
+    """
+    Long-video thumbnail in the curiosity-channel style: a fresh bright scene made for
+    the thumbnail plus 2-3 huge teaser words. Falls back to the first scene image.
+    """
+    import visuals as _visuals
+    from gpt import thumbnail_concept
+    from video import generate_designed_thumbnail
+
+    concept_words, scene = thumbnail_concept(title, script)
+    image = fallback_image
+    if scene:
+        made = _visuals.thumbnail_image(scene, str(Path(TEMP_DIR) / f"thumb_scene_{uuid4().hex[:8]}.jpg"),
+                                        on_log=emit)
+        image = made or fallback_image
+    return generate_designed_thumbnail(image, words or concept_words)
+
+
 def _tone(data: dict, script: str) -> str:
     """tragic | tense | upbeat: drives music, pacing, colour and sound design."""
     if data.get("tone"):
@@ -678,7 +696,9 @@ def run_generation_pipeline(
                     thumb_size = (1280, 720) if video_format == "long" else (1080, 1920)
                     import visuals as _visuals
 
-                    if visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
+                    if video_format == "long" and visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
+                        thumbnail_path = designed_thumbnail(title, script, _visuals.LAST_SCENE_IMAGES[0], emit=emit)
+                    elif visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
                         word = f"PART {series['part']}" if series else thumbnail_word(title)
                         thumbnail_path = generate_bold_thumbnail(
                             _visuals.LAST_SCENE_IMAGES[0], word, size=thumb_size

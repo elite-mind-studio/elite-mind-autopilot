@@ -891,6 +891,34 @@ def generate_metadata(
     return title, description, keywords
 
 
+def thumbnail_concept(title: str, script: str = "") -> Tuple[str, Optional[str]]:
+    """
+    Curiosity-channel thumbnail: 2-3 huge words that tease the answer (not the title)
+    and one simple, bright scene with clear emotions. Returns (words, scene or None).
+    """
+    try:
+        reply = hosted_chat(
+            f'Design a YouTube thumbnail for the video "{title}".\n'
+            f"Story: {script[:1200]}\n\n"
+            'Reply with JSON only: {"words": "...", "scene": "..."}\n'
+            '- words: 2 or 3 words, max 16 characters, that tease the answer or the feeling. '
+            'Never repeat the title. Examples: "FREE ALL DAY", "CAUGHT BY DNA?", "SHE KNEW".\n'
+            "- scene: one simple scene a phone viewer understands in one second. 1 to 3 people "
+            "with big, clear facial expressions (shock, fear, joy, suspicion), the one key object "
+            "of the story, bright saturated colours. The top third of the picture is plain empty "
+            "sky, wall or background. Invented people only, never a real person's likeness."
+        )
+        found = re.search(r"\{.*\}", reply, re.DOTALL)
+        concept = json.loads(found.group(0), strict=False) if found else {}
+        words = re.sub(r"[^A-Za-z0-9 !?$%]", "", str(concept.get("words", ""))).strip().upper()
+        scene = str(concept.get("scene", "")).strip() or None
+        if 0 < len(words) <= 18:
+            return words, scene
+    except Exception:
+        pass
+    return thumbnail_word(title), None
+
+
 def thumbnail_word(title: str) -> str:
     """1-2 punchy words for a thumbnail (e.g. "TRAP", "STOP", "BROKE")."""
     try:

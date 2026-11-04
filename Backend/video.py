@@ -73,6 +73,54 @@ def save_video(video_url: str, directory: str = str(TEMP_DIR)) -> str:
     raise RuntimeError(f"Could not download {video_url}: {last_error}")
 
 
+def generate_designed_thumbnail(image_path: str, words: str, size=(1280, 720), fill: str = "") -> str:
+    """
+    Curiosity-channel thumbnail: a bright, simple scene with 2-3 huge words centred
+    across the top (white or yellow, thick black outline). No arrows, no clutter.
+
+    Args:
+        image_path (str): Thumbnail scene (its top third should be plain).
+        words (str): 2-3 words that tease the answer, e.g. "CAUGHT BY DNA?".
+        size (tuple): Output size.
+        fill (str): Text colour; THUMB_TEXT_COLOR or yellow by default.
+
+    Returns:
+        str: Path to the thumbnail JPEG.
+    """
+    width, height = size
+    image = Image.open(image_path).convert("RGB")
+    scale = max(width / image.width, height / image.height)
+    image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    left, top = (image.width - width) // 2, (image.height - height) // 2
+    image = image.crop((left, top, left + width, top + height))
+    image = ImageEnhance.Brightness(
+        ImageEnhance.Contrast(ImageEnhance.Color(image).enhance(1.35)).enhance(1.12)
+    ).enhance(1.05)
+    draw = ImageDraw.Draw(image)
+
+    text = re.sub(r"[^A-Za-z0-9 !?$%]", "", words).strip().upper()[:18] or "WATCH"
+    font_path = str((FONTS_DIR / "bold_font.ttf").resolve())
+    font_size = int(height * 0.24)
+    while font_size > 30:
+        font = ImageFont.truetype(font_path, font_size)
+        if draw.textlength(text, font=font) <= width * 0.92:
+            break
+        font_size -= 4
+
+    x = (width - draw.textlength(text, font=font)) / 2
+    y = height * 0.04
+    stroke = max(8, font_size // 8)
+    fill = fill or os.getenv("THUMB_TEXT_COLOR", "#FFE600")
+    # Soft drop shadow, then the words with a thick black outline
+    draw.text((x + stroke * 0.6, y + stroke * 0.8), text, font=font, fill="#000000",
+              stroke_width=stroke, stroke_fill="#000000")
+    draw.text((x, y), text, font=font, fill=fill, stroke_width=stroke, stroke_fill="#000000")
+
+    thumbnail_path = Path(image_path).with_name(f"{uuid.uuid4()}_thumbnail.jpg")
+    image.save(thumbnail_path, "JPEG", quality=92, optimize=True)
+    return str(thumbnail_path)
+
+
 def generate_bold_thumbnail(image_path: str, word: str, size=(1280, 720)) -> str:
     """
     Big-channel style thumbnail: a striking scene image, one huge word in red
