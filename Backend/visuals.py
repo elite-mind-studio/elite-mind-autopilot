@@ -419,6 +419,55 @@ def _sdxl_prompt(prompt: str) -> str:
     return f"{prompt}, main character large and centered in frame, medium shot, {style}"
 
 
+def _badge(draw, centre, radius: int, good: bool) -> None:
+    """A red circle with a white X, or a green circle with a white check mark."""
+    x, y = centre
+    draw.ellipse([x - radius, y - radius, x + radius, y + radius], fill="#2BB34A" if good else "#E8323C",
+                 outline="#FFFFFF", width=max(4, radius // 10))
+    w = max(8, radius // 4)
+    if good:
+        draw.line([(x - radius * 0.45, y + radius * 0.02), (x - radius * 0.1, y + radius * 0.38),
+                   (x + radius * 0.5, y - radius * 0.35)], fill="#FFFFFF", width=w, joint="curve")
+    else:
+        d = radius * 0.42
+        draw.line([(x - d, y - d), (x + d, y + d)], fill="#FFFFFF", width=w)
+        draw.line([(x - d, y + d), (x + d, y - d)], fill="#FFFFFF", width=w)
+
+
+def _versus_frames(pairs: list, flat_paths: list, size, work_dir: Path) -> list:
+    """Stack each (wrong, right) pair top/bottom with badges; single pictures fill the frame."""
+    from PIL import ImageDraw
+
+    width, height = size
+    half = height // 2
+    frames, k = [], 0
+    for i, item in enumerate(pairs):
+        path = str(work_dir / f"versus_{i:02d}.jpg")
+        if isinstance(item, tuple):
+            wrong, right = flat_paths[k], flat_paths[k + 1]
+            k += 2
+            canvas = Image.new("RGB", (width, height), "#FFFFFF")
+            canvas.paste(_fill(Image.open(wrong), (width, half), bias=0.5), (0, 0))
+            canvas.paste(_fill(Image.open(right), (width, height - half), bias=0.5), (0, half))
+            draw = ImageDraw.Draw(canvas)
+            draw.rectangle([0, half - 5, width, half + 5], fill="#FFFFFF")
+            # Badges in the top-left corner of each half, clear of faces in the middle
+            radius = width // 15
+            corner = int(radius * 1.35)
+            _badge(draw, (corner, corner), radius, good=False)
+            _badge(draw, (corner, half + corner), radius, good=True)
+        else:
+            # Hook / outro picture (half height): whole, centred over a blurred copy of itself
+            picture = Image.open(flat_paths[k]).convert("RGB")
+            k += 1
+            canvas = picture.resize((width, height), Image.LANCZOS).filter(ImageFilter.GaussianBlur(radius=40))
+            fitted = picture.resize((width, round(picture.height * width / picture.width)), Image.LANCZOS)
+            canvas.paste(fitted, (0, (height - fitted.height) // 2))
+        canvas.save(path, "JPEG", quality=93)
+        frames.append(path)
+    return frames
+
+
 def build_ai_video(
     scenes: List[tuple],
     prompts: List[str],
@@ -441,6 +490,12 @@ def build_ai_video(
     emit = on_log or (lambda message, level: log(message, level))
     picture_size = LETTERBOX_PICTURE if layout == "letterbox" else size
     generator = ImageGenerator(on_log=emit, size=(1920, 1080) if layout == "letterbox" else size)
+    # layout="versus": a (wrong, right) prompt pair becomes two half-height pictures,
+    # stacked later into one split-screen frame with red X / green check badges
+    pairs = list(prompts)
+    if layout == "versus":
+        generator = ImageGenerator(on_log=emit, size=(size[0], size[1] // 2))
+        prompts = [half for item in pairs for half in (item if isinstance(item, tuple) else (item,))]
     work_dir = Path(TEMP_DIR) / f"ai_{uuid.uuid4().hex[:8]}"
     work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -510,6 +565,9 @@ def build_ai_video(
             last = path
         else:
             image_paths[i] = last
+
+    if layout == "versus":
+        image_paths = _versus_frames(pairs, image_paths, size, work_dir)
 
     # The closing "subscribe / which story next" scene shows the opening image again,
     # never a literal drawing of the call to action

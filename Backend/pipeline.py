@@ -17,6 +17,7 @@ from uuid import uuid4
 
 from gpt import (
     generate_image_prompts,
+    generate_versus_prompts,
     generate_stock_queries,
     generate_metadata,
     generate_script,
@@ -429,20 +430,27 @@ def run_generation_pipeline(
             emit(f"[-] Scene stock footage failed, using a stock montage: {err}", "warning")
             video_paths = fetch_stock_videos()
     elif visual_mode == "ai_images":
+        versus = data.get("layout") == "versus" and video_format == "short"
         scenes = group_scenes(
             sentences,
             sentence_durations,
-            target=float(data.get("sceneSeconds") or os.getenv("IMAGE_SCENE_SECONDS", "5")),
+            # Split screen: one tip (sentence) per scene
+            target=0.1 if versus else float(data.get("sceneSeconds") or os.getenv("IMAGE_SCENE_SECONDS", "5")),
         )
         emit(f"[+] Writing image prompts for {len(scenes)} scenes...", "info")
-        prompts = generate_image_prompts(
-            data["videoSubject"], [text for text, _ in scenes], ai_model
-        )
+        if versus:
+            prompts = generate_versus_prompts(data["videoSubject"], [text for text, _ in scenes], ai_model)
+        else:
+            prompts = generate_image_prompts(
+                data["videoSubject"], [text for text, _ in scenes], ai_model
+            )
         # Free the model's RAM before image generation and rendering
         unload_model(ai_model)
         try:
             # Shorts can use the letterbox "explainer" layout with a title bar
             layout = os.getenv("VIDEO_LAYOUT", "full") if video_format == "short" else "full"
+            if versus:
+                layout = "versus"
             combined_video_path = build_ai_video(
                 scenes,
                 prompts,

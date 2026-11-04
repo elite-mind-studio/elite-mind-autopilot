@@ -217,6 +217,7 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
         "ytTitle": yt_title,
         "playlist": options.get("playlist", ""),
         "commentAsk": options.get("ask", ""),
+        "layout": options.get("layout", "").lower(),  # "versus" = do-this-not-that split screen
         "series": series,
         "format": "short",
         "videoSubject": topic,

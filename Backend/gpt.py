@@ -755,6 +755,62 @@ Return ONLY a JSON array with exactly {len(scenes)} objects in the same order:
     return prompts
 
 
+def generate_versus_prompts(video_subject: str, scenes: List[str], ai_model: str) -> List:
+    """
+    "Do this, not that" split screen: for every line that contrasts a wrong and a right
+    way, a (wrong, right) pair of pictures of the same moment; other lines (hook, outro)
+    get one picture. Falls back to the normal prompts for anything unusable.
+    """
+    singles = generate_image_prompts(video_subject, scenes, ai_model)
+    character = os.getenv("STORY_CHARACTER", "").strip()
+    look = os.getenv("STORY_CHARACTER_LOOK", "").strip()
+    who = f"{character} ({look})" if character and look else "the same person"
+    numbered = "\n".join(f"{i + 1}. \"{scene}\"" for i, scene in enumerate(scenes))
+    prompt = f"""
+A split-screen "do this, not that" video about: {video_subject}
+For each line, if it contrasts a wrong way and a right way of doing something, describe two
+pictures of the SAME moment and place, with {who} in both:
+- "wrong": doing it the awkward, weak way the line warns against (clear body language).
+- "right": doing it the confident way the line recommends (clear body language).
+Every line that mentions a mistake (don't, do not, instead, stop, never) MUST get both pictures.
+Only an opening hook or a closing line with no tip returns "wrong": "" and "right": "".
+Start both descriptions with the word CHARACTER for {who}.
+{os.getenv("IMAGE_PROMPT_KIND", "Flat 2D cartoon")}. Max 30 words each. No text or signs in the pictures.
+
+Lines:
+{numbered}
+
+Return ONLY a JSON array with exactly {len(scenes)} objects in the same order:
+[{{"wrong": "...", "right": "..."}}, ...]
+"""
+    items: List = []
+    try:
+        items = _parse_prompt_items(hosted_chat(prompt))
+    except Exception as err:
+        log(f"[-] Could not write split-screen prompts: {err}", "warning")
+    def person(text: str) -> str:
+        # The full look every time keeps the character the same in both halves
+        if not (character and look):
+            return text
+        text = re.sub(r"\bCHARACTER\b", character, text)
+        if re.search(rf"\b{re.escape(character)}\b", text):
+            return re.sub(rf"\b{re.escape(character)}\b", f"{character} ({look})", text, count=1)
+        return f"{character} ({look}): {text}"
+
+    result: List = []
+    for i, single in enumerate(singles):
+        item = items[i] if i < len(items) else None
+        if isinstance(item, dict) and str(item.get("wrong", "")).strip() and str(item.get("right", "")).strip():
+            result.append((person(str(item["wrong"]).strip()), person(str(item["right"]).strip())))
+        elif re.search(r"\b(don't|do not|instead|never|stop)\b", scenes[i], re.IGNORECASE):
+            # A tip the model skipped: same moment, weak body language vs confident body language
+            result.append((f"{single}, shown the wrong way: awkward, nervous, hunched, unsure",
+                           f"{single}, shown the right way: confident, upright, warm smile, calm"))
+        else:
+            result.append(single)
+    return result
+
+
 def generate_stock_queries(video_subject: str, scenes: List[str]) -> List[str]:
     """
     Write one short stock-footage search phrase per narration scene, naming
