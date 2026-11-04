@@ -86,6 +86,6 @@ as a story about that character and he appears in most images with the same desc
 - About 6 am WAT, Vercel Cron starts `headline.yml` with `mode=plan`. It picks and writes the day's documentary
   (`scripts/auto/<date>_planned.json`) and sends the title. The midday run posts that planned script.
 - On Fridays the same alert also gives Elite Mind's next long topic (first line of `topics_long.txt`).
-- Upload `thumbnails/headline_<YYYY-MM-DD>.png` or `thumbnails/elite_<YYYY-MM-DD>.png` before the long video posts
+- Upload on the dashboard page `/thumb` (saves `thumbnails/<channel>_<YYYY-MM-DD>.jpg`; Vercel env `THUMB_UPLOAD_PASSWORD`, and a token with Contents write) before the long video posts
   and it replaces the automatic thumbnail. The run pulls the newest copy just before posting.
 - After posting, `Backend/thumb.py <channel> <video|latest-long> <image> [--title "..."]` swaps a thumbnail or title.

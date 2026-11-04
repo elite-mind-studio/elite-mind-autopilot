@@ -2,8 +2,8 @@
 Phone alerts through ntfy.sh (free app: subscribe to the topic in NTFY_TOPIC), and
 the owner's hand-made thumbnails.
 
-Thumbnails: upload `thumbnails/<channel>_<YYYY-MM-DD>.png` (or .jpg/.jpeg/.webp) to the
-repo before the long video posts; channel is "headline" or "elite". The run pulls the
+Thumbnails: upload on the dashboard's /thumb page (saves `thumbnails/<channel>_<YYYY-MM-DD>.jpg`
+in the repo) before the long video posts; channel is "headline" or "elite". The run pulls the
 newest copy just before posting, so an upload made after the run started still counts.
 """
 import os
@@ -38,7 +38,9 @@ def thumb_name(channel: str, day: Optional[date] = None) -> str:
 
 
 def upload_link(channel: str) -> str:
-    return f"https://github.com/{REPO}/upload/main/thumbnails"
+    """The dashboard's phone upload page, already set to this channel and today."""
+    site = os.getenv("DASHBOARD_URL", "https://elite-mind-dashboard.vercel.app").rstrip("/")
+    return f"{site}/thumb?channel={channel}&date={date.today().isoformat()}"
 
 
 def custom_thumbnail(channel: str) -> Optional[Path]:
@@ -73,14 +75,13 @@ def remind_thumbnail(channel: str, title: str, when: str) -> None:
     notify(
         f"Thumbnail needed: {title}"[:120],
         f"Today's long video ({when}):\n{title}\n\n"
-        f"Paste your thumbnail prompt with this title, then upload the image named\n{name}.png\n"
-        f"Tap this notification to upload. No upload = the automatic thumbnail is used.",
+        "Paste your thumbnail prompt with this title, then tap this notification to upload the image.\n"
+        "No upload = the automatic thumbnail is used.",
         click=upload_link(channel),
     )
 
 
 def posted_alert(channel: str, title: str, url: str, used_custom: bool) -> None:
     extra = ("Your thumbnail is on it." if used_custom else
-             f"Automatic thumbnail used. To swap it: upload {thumb_name(channel)}.png and tell Claude, "
-             "or run Backend/thumb.py.")
+             "Automatic thumbnail used. To swap it, send your thumbnail to Claude or run Backend/thumb.py.")
     notify(f"Posted: {title}"[:120], f"{url}\n\n{extra}", click=url)
