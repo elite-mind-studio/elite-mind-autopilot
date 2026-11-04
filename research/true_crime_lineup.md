@@ -13,7 +13,7 @@ No gore, no real victims' faces. Each fact is checked against at least one solid
 6. Hatton Garden 2015: "The Pensioners Who Pulled Off London's Biggest Burglary"
 
 ## Next to write
-6. Louvre crown jewels (France, Oct 2025, current): "8 Minutes to Rob the Louvre" (check arrests and charges at writing time)
+7. Louvre crown jewels (France, Oct 2025, current): "8 Minutes to Rob the Louvre" (check arrests and charges at writing time)
 8. BTK (USA 2005): "The Floppy Disk Mistake" (no violent detail)
 9. Golden State Killer (USA 2018): "Caught by a Cousin's DNA Test"
 10. Evans (Nigeria 2017): the billionaire kidnapper (court record only)
