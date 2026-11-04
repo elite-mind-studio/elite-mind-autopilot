@@ -12,6 +12,8 @@ No gore, no real victims' faces. Each fact is checked against at least one solid
 5. Unabomber: "The FBI Couldn't Catch Him for 17 Years. His Brother Did"
 6. Hatton Garden 2015: "The Pensioners Who Pulled Off London's Biggest Burglary"
 
+7b. D. B. Cooper (US 1971), Gardner Museum (US 1990), Lufthansa / Goodfellas (US 1978): queued as tc09-tc11
+
 ## Next to write
 7. Louvre crown jewels (France, Oct 2025, current): "8 Minutes to Rob the Louvre" (check arrests and charges at writing time)
 8. BTK (USA 2005): "The Floppy Disk Mistake" (no violent detail)
