@@ -7,7 +7,7 @@ const env = name => (process.env[name] || "").trim();
 
 // slot -> workflow file + inputs. Vercel Hobby cron fires anywhere within the hour,
 // which already varies posting times, so no extra random delay.
-// Slots follow the channel's best launch windows (YouTube Studio): ~10:00 and ~22:30 WAT.
+// Slots follow the audience (about 60% US): posts land in US Eastern prime time, 11 am-8:30 pm ET.
 const JOBS = {
   "elite-morning": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],
   "elite-midday": ["autopilot.yml", { format: "short", series: "false", random_delay: "false" }],

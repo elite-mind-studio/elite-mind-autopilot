@@ -3,35 +3,35 @@
   "crons": [
     {
       "path": "/api/trigger?job=elite-morning",
-      "schedule": "30 8 * * *"
+      "schedule": "30 16 * * *"
     },
     {
       "path": "/api/trigger?job=headline-plan",
-      "schedule": "7 5 * * *"
+      "schedule": "7 11 * * *"
     },
     {
       "path": "/api/trigger?job=headline-short&slot=morning",
-      "schedule": "41 7 * * *"
+      "schedule": "41 15 * * *"
     },
     {
       "path": "/api/trigger?job=elite-midday",
-      "schedule": "0 13 * * *"
+      "schedule": "0 20 * * *"
     },
     {
       "path": "/api/trigger?job=headline-full",
-      "schedule": "17 11 * * *"
+      "schedule": "17 16 * * *"
     },
     {
       "path": "/api/trigger?job=elite-evening",
-      "schedule": "0 21 * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/trigger?job=headline-short&slot=evening",
-      "schedule": "23 17 * * *"
+      "schedule": "23 23 * * *"
     },
     {
       "path": "/api/trigger?job=elite-long",
-      "schedule": "29 11 * * 5"
+      "schedule": "29 15 * * 5"
     },
     {
       "path": "/api/trigger?job=research",

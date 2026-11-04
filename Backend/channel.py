@@ -290,7 +290,7 @@ if __name__ == "__main__":
             (SCRIPTS_DIR / f"{date.today().isoformat()}_planned.json").write_text(
                 json.dumps({"long": long_script.name, "short": short_script.name}), encoding="utf-8")
             spec = parse_script(long_script)
-            remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 12:15-1:15 pm")
+            remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 7-8:30 pm Nigeria time")
         except RuntimeError as err:
             print(f"[-] No documentary planned ({err}); the midday run will try again", flush=True)
             from notify import notify
@@ -302,7 +302,7 @@ if __name__ == "__main__":
             topics = [l.strip() for l in (ROOT / "topics_long.txt").read_text(encoding="utf-8").splitlines() if l.strip()]
             if topics:
                 topic, _, fixed = topics[0].partition("|| Title:")
-                remind_thumbnail("elite", (fixed or topic).strip(), "Elite Mind, posts about 12:30-1:30 pm")
+                remind_thumbnail("elite", (fixed or topic).strip(), "Elite Mind, posts about 6:30-8 pm Nigeria time")
     elif command == "auto":  # daily: pick a news story, write + fact-check, then make, check and post
         from datetime import date
         from news import SCRIPTS_DIR, prepare
