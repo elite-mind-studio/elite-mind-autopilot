@@ -23,6 +23,10 @@ concurrency:
 
 jobs:
   compile:
+    # Paused until the channels are monetized: re-cut compilations can look like
+    # "repetitive / reused" content to the YouTube Partner Program review.
+    # Turn back on with the repo variable COMPILATIONS_ENABLED=true.
+    if: ${{ vars.COMPILATIONS_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     env:
