@@ -215,6 +215,13 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         print(f"[-] First comment failed: {err}", flush=True)
 
     thumb = ROOT / "channels" / name / "videos" / f"{spec['slug']}_thumb.jpg"
+    custom = None
+    if spec.get("format") == "long":
+        # The owner's own design (uploaded to thumbnails/) beats the automatic one
+        from notify import custom_thumbnail
+
+        custom = custom_thumbnail(os.getenv("THUMB_CHANNEL", "headline"))
+        thumb = custom or thumb
     # Shorts and full documentaries each get their own playlist (series)
     playlist = (
         os.getenv("YOUTUBE_PLAYLIST_SHORT") if spec.get("format") == "short" else None
@@ -228,6 +235,10 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         except Exception as err:
             print(f"[-] {err}", flush=True)
 
+    if spec.get("format") == "long":
+        from notify import posted_alert
+
+        posted_alert(os.getenv("THUMB_CHANNEL", "headline"), title, url, bool(custom))
     posted[spec["slug"]] = {"id": video_id, "url": url, "title": title, "format": spec.get("format", "short")}
     _posted_file(name).write_text(json.dumps(posted, indent=2), encoding="utf-8")
     return url
@@ -267,11 +278,36 @@ if __name__ == "__main__":
         make(profile, Path(sys.argv[3]))
     elif command == "check":
         print(check_video(Path(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else "short") or "OK")
-    elif command == "auto":  # daily: pick a news story, write + fact-check, then make, check and post
-        from news import prepare
+    elif command == "plan":  # early morning: pick and write today's documentary, alert the owner for a thumbnail
+        from datetime import date
+        from news import SCRIPTS_DIR, prepare
+        from notify import remind_thumbnail
 
         try:
             long_script, short_script = prepare()
+            (SCRIPTS_DIR / f"{date.today().isoformat()}_planned.json").write_text(
+                json.dumps({"long": long_script.name, "short": short_script.name}), encoding="utf-8")
+            spec = parse_script(long_script)
+            remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 12:15-1:15 pm")
+        except RuntimeError as err:
+            print(f"[-] No documentary planned ({err}); the midday run will try again", flush=True)
+        if date.today().weekday() == 4:  # Friday: Elite Mind's long video
+            topics = [l.strip() for l in (ROOT / "topics_long.txt").read_text(encoding="utf-8").splitlines() if l.strip()]
+            if topics:
+                topic, _, fixed = topics[0].partition("|| Title:")
+                remind_thumbnail("elite", (fixed or topic).strip(), "Elite Mind, posts about 12:30-1:30 pm")
+    elif command == "auto":  # daily: pick a news story, write + fact-check, then make, check and post
+        from datetime import date
+        from news import SCRIPTS_DIR, prepare
+
+        planned = SCRIPTS_DIR / f"{date.today().isoformat()}_planned.json"
+        try:
+            if planned.exists():  # written by this morning's "plan" run (the owner got its title)
+                names = json.loads(planned.read_text(encoding="utf-8"))
+                long_script, short_script = SCRIPTS_DIR / names["long"], SCRIPTS_DIR / names["short"]
+                print(f"[+] Using this morning's planned documentary {long_script.name}", flush=True)
+            else:
+                long_script, short_script = prepare()
         except RuntimeError as err:
             # The documentary fell through (e.g. too few facts): keep the slot alive with a news Short
             print(f"[-] Documentary skipped ({err}); posting a news Short instead", flush=True)

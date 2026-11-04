@@ -18,9 +18,9 @@ on:
         description: "Short script (blank = post only the long video)"
         default: ""
       mode:
-        description: "full = documentary + its Short, short = one standalone news Short"
+        description: "full = documentary + its Short, short = one standalone news Short, plan = write today's documentary early and alert the owner for a thumbnail"
         type: choice
-        options: [full, short]
+        options: [full, short, plan]
         default: full
       dry_run:
         description: "Test: make and check today's videos but post nothing"
@@ -108,6 +108,8 @@ jobs:
           printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2-headline_tales.json
 
       - name: Make, check and post
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           if [ -n "${{ inputs.long }}" ]; then
             uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}" ${{ inputs.dry_run && '--dry-run' || '' }}
@@ -116,6 +118,7 @@ jobs:
             if [ "${{ github.event.schedule }}" = "41 7 * * *" ] || [ "${{ github.event.schedule }}" = "23 17 * * *" ] || [ "${{ inputs.mode }}" = "short" ]; then
               mode=auto-short
             fi
+            [ "${{ inputs.mode }}" = "plan" ] && mode=plan
             uv run python Backend/channel.py headline_tales $mode ${{ inputs.dry_run && '--dry-run' || '' }}
           fi
 

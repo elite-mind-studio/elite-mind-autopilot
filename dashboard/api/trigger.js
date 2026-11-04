@@ -15,6 +15,7 @@ const JOBS = {
   "elite-long": ["autopilot.yml", { format: "long", series: "false", random_delay: "false" }],
   "headline-full": ["headline.yml", { mode: "full" }],
   "headline-short": ["headline.yml", { mode: "short" }],
+  "headline-plan": ["headline.yml", { mode: "plan" }],
   "research": ["research.yml", {}],
   "compilation": ["compilation.yml", {}],
 };

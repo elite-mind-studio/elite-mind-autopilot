@@ -6,6 +6,10 @@
       "schedule": "30 8 * * *"
     },
     {
+      "path": "/api/trigger?job=headline-plan",
+      "schedule": "7 5 * * *"
+    },
+    {
       "path": "/api/trigger?job=headline-short&slot=morning",
       "schedule": "41 7 * * *"
     },

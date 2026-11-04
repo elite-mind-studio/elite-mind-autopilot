@@ -704,7 +704,12 @@ def run_generation_pipeline(
                     thumb_size = (1280, 720) if video_format == "long" else (1080, 1920)
                     import visuals as _visuals
 
-                    if video_format == "long" and visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
+                    from notify import custom_thumbnail
+
+                    custom = custom_thumbnail(os.getenv("THUMB_CHANNEL", "elite")) if video_format == "long" else None
+                    if custom:
+                        thumbnail_path = str(custom)
+                    elif video_format == "long" and visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
                         thumbnail_path = designed_thumbnail(title, script, _visuals.LAST_SCENE_IMAGES[0], emit=emit)
                     elif visual_mode == "ai_images" and _visuals.LAST_SCENE_IMAGES:
                         word = f"PART {series['part']}" if series else thumbnail_word(title)
@@ -715,6 +720,11 @@ def run_generation_pipeline(
                         thumbnail_path = generate_thumbnail(combined_video_path, title, size=thumb_size)
                     set_thumbnail(video_response.get("id"), thumbnail_path)
                     emit("[+] Custom thumbnail set.", "success")
+                    if video_format == "long":
+                        from notify import posted_alert
+
+                        posted_alert(os.getenv("THUMB_CHANNEL", "elite"), title,
+                                     f"https://youtu.be/{video_response.get('id')}", bool(custom))
                 except Exception as thumb_err:
                     emit(
                         f"[-] Could not set thumbnail (is the channel phone-verified?): {thumb_err}",
