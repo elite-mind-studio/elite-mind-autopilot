@@ -291,6 +291,11 @@ if __name__ == "__main__":
             remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 12:15-1:15 pm")
         except RuntimeError as err:
             print(f"[-] No documentary planned ({err}); the midday run will try again", flush=True)
+            from notify import notify
+
+            notify("No documentary title yet today",
+                   "This morning's story didn't pass the fact-check, so the midday run will pick another one "
+                   "and use the automatic thumbnail. You'll get a 'Posted' alert with the link.")
         if date.today().weekday() == 4:  # Friday: Elite Mind's long video
             topics = [l.strip() for l in (ROOT / "topics_long.txt").read_text(encoding="utf-8").splitlines() if l.strip()]
             if topics:
