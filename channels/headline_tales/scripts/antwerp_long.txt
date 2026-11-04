@@ -12,10 +12,12 @@ SOURCE: Luxury London, on Netflix's Stolen: Heist of the Century (2025) - https:
 SOURCE: AOL / People, Two Decades Ago, 5 Men Pulled Off the Largest Diamond Heist Ever - https://www.aol.com/news/two-decades-ago-5-men-113000367.html
 SOURCE: All That's Interesting, The Antwerp Diamond Heist - https://allthatsinteresting.com/antwerp-diamond-heist
 GRAPHIC: 0 | {"type": "title", "kicker": "HEADLINE TALES", "title": "The Antwerp<br>Diamond Heist", "counter": {"label": "MILLION DOLLARS", "to": 100}, "stamp": "STOLEN"}
-GRAPHIC: 4 | {"type": "stat", "value": 10, "suffix": " LAYERS", "caption": "Of security around the vault", "sub": "Two floors under the Antwerp Diamond Centre"}
-GRAPHIC: 17 | {"type": "stat", "value": 100, "prefix": "$", "suffix": " MILLION", "caption": "Taken in one weekend", "sub": "Most estimates; most of it never recovered"}
+GRAPHIC: 5 | {"type": "stat", "value": 10, "suffix": " LAYERS", "caption": "Of security around the vault", "sub": "Two floors under the Antwerp Diamond Centre"}
+GRAPHIC: 18 | {"type": "stat", "value": 100, "prefix": "$", "suffix": " MILLION", "caption": "Taken in one weekend", "sub": "Most estimates; most of it never recovered"}
 
-Monday morning, the seventeenth of February, 2003. Two floors under the streets of Antwerp, a guard opens the door to the most secure diamond vault in the world. The floor is covered in diamonds. Gold. Jewellery. Papers. The safe deposit boxes have been ripped open, one after another. More than one hundred million dollars, by most estimates, is gone. There is no sign of a break-in. No alarm went off. And for a few days, it looks like the perfect crime. Until a farmer finds a sandwich. Let me show you how it happened.
+Can you imagine pulling off a one hundred million dollar heist, beating ten layers of security, and then getting caught because of a sandwich? This really happened. In 2003, a crew of thieves broke into the most secure diamond vault in the world, and walked out without setting off a single alarm. They called it the heist of the century. And it fell apart in five days, because of a bag of rubbish, and a half-eaten salami sandwich. Sit tight. Let's go on a journey.
+
+Monday morning, the seventeenth of February, 2003. Two floors under the streets of Antwerp, a guard opens the door to the vault. The floor is covered in diamonds. Gold. Jewellery. Papers. The safe deposit boxes have been ripped open, one after another. There is no sign of a break-in. No alarm went off. Let me show you how it happened.
 
 Antwerp, in Belgium, is the diamond capital of the world. For generations, a huge share of the world's rough diamonds has passed through a few streets near the central station. Billions of dollars in stones change hands here every year, often with nothing more than a handshake.
 
