@@ -16,8 +16,8 @@ No gore, no real victims' faces. Each fact is checked against at least one solid
 7. Louvre crown jewels (France, Oct 2025, current): "8 Minutes to Rob the Louvre" (check arrests and charges at writing time)
 8. BTK (USA 2005): "The Floppy Disk Mistake" (no violent detail)
 9. Golden State Killer (USA 2018): "Caught by a Cousin's DNA Test"
-10. Evans (Nigeria 2017): the billionaire kidnapper (court record only)
-11. Lawrence Anini (Nigeria 1986): the man Benin feared
+10. Evans (Nigeria 2017): queued as tc08
+11. Lawrence Anini (Nigeria 1986): queued as tc07
 12. More Brazil: check for well-documented, non-graphic cases (heists, cons, rescues)
 
 Current cases also come from the daily news feed when a crime story is big and well sourced.
