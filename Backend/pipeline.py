@@ -62,7 +62,8 @@ class PipelineCancelled(Exception):
 
 # Delivery per topic: (exaggeration, cfg_weight). Higher exaggeration = more feeling;
 # lower cfg = slower, more deliberate pacing.
-VOICE_MOODS = {"calm": (0.5, 0.5), "emotional": (0.78, 0.33)}
+# suspense: intense but slow and deliberate, like a thriller narrator leaning in
+VOICE_MOODS = {"calm": (0.5, 0.5), "emotional": (0.78, 0.33), "suspense": (0.62, 0.22)}
 DRAMATIC_WORDS = (
     "crash", "killed", "dead", "death", "war", "attack", "hack", "heist", "theft", "disaster",
     "collapse", "scandal", "secret", "betray", "revenge", "shocking", "trapped", "missing", "pov",
@@ -125,6 +126,9 @@ def _apply_tone(tone: str, data: dict) -> None:
 
     os.environ["STORY_CUES"] = _json.dumps(data.get("cues", []))
     suspense = tone == "suspense"
+    # Suspense narration: deeper voice, faint echo; the pitch drop already slows it, so less atempo
+    os.environ["NARRATION_FX"] = "asetrate=22800,aresample=24000,aecho=0.8:0.55:55:0.10" if suspense else ""
+    os.environ["NARRATION_TEMPO"] = "0.97" if suspense else "0.92"
     if suspense:
         os.environ["SCENE_PUNCH"] = "false"
         os.environ["SFX_MODE"] = "suspense"
@@ -168,7 +172,9 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm",
             # A short pause after each sentence, like a narrator taking a breath
             subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-y", "-i", str(work / "raw" / f"{i:03d}.wav"),
                             # Slightly slower delivery (pitch kept) + a breath after each sentence
-                            "-af", f"atempo={os.getenv('NARRATION_TEMPO', '0.92')},"
+                            # NARRATION_FX (suspense): a little deeper, with a faint dark-room echo
+                            "-af", (f"{os.getenv('NARRATION_FX')}," if os.getenv("NARRATION_FX") else "")
+                                   + f"atempo={os.getenv('NARRATION_TEMPO', '0.92')},"
                                    f"apad=pad_dur={(pauses or [])[i] if pauses and i < len(pauses) else 0.4}",
                             "-ar", "24000", str(out)], check=True)
             files.append(str(out))

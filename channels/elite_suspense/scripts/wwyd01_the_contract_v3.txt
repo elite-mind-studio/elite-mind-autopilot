@@ -1,7 +1,7 @@
 FORMAT: short
 SUBJECT: What would you do: the richest man in the city offers you a million dollars a year at midnight, but once you sign, you can never leave
 TITLE: WOULD YOU SIGN?
-VOICE: calm
+VOICE: suspense
 TONE: suspense
 CHOICE: Sign the contract | Walk away
 CAST: the billionaire is a tall thin pale man with slicked-back silver hair, a sharp white suit and a thin calm smile; the cleaner is an old bald man with a grey moustache, grey work overalls and a cleaning trolley; the 23 workers on the camera feed are small, still figures sitting at desks
@@ -17,10 +17,10 @@ CUE: Three minutes | 03:00
 SOUND: Your phone lights up | vibrate
 CUE: Thirty seconds | 00:30
 PUBLISH_AT: 2026-11-06T01:00:00Z
-YT_TITLE: He Offered Me $1 Million a Year… The Cleaner Whispered "Don't Sign"
+YT_TITLE: He Offers You $1 Million a Year… Then the Cleaner Whispers "Don't Sign"
 THUMB_WORD: DON'T SIGN
 TAGS: what would you do, would you sign, psychological thriller, suspense story, dilemma, money psychology, freedom vs money, elite mind decoder, story time
-DESCRIPTION: One million dollars a year. One contract. One rule: once you sign, you can never leave. Would you sacrifice your freedom for unlimited wealth? An original "What would you do?" story from Elite Mind Decoder. Tell us your choice in the comments: A or B?
+DESCRIPTION: He offers you one million dollars a year. One contract. One rule: once you sign, you can never leave. Would you sacrifice your freedom for unlimited wealth? An original "What would you do?" story from Elite Mind Decoder. Tell us your choice in the comments: A or B?
 
 Imagine your phone rings at exactly eleven forty seven at night.
 
