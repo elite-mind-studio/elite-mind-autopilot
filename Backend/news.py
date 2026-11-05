@@ -43,8 +43,8 @@ FEEDS = {
 }
 # Groq free tier: ~8K tokens per minute, counting the reserved reply length too.
 # ~1800 source words (~2.5K tokens) + instructions + a 3.5K reply fits in one minute.
-MAX_SOURCE_WORDS = 1800
-REPLY_TOKENS = "3500"
+MAX_SOURCE_WORDS = 1500  # with the reply cap, stays inside the free 8,000 tokens-per-minute budget
+REPLY_TOKENS = "4500"  # a full documentary plus its Short in one JSON reply (3,500 cut some off)
 CALL_GAP_SECONDS = 62
 
 
