@@ -705,14 +705,6 @@ def run_generation_pipeline(
             privacy_status = os.getenv("YOUTUBE_PRIVACY_STATUS", "private")
             # e.g. "Educational content only, not financial advice."
             footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
-            # One-tap subscribe link (?sub_confirmation=1): top of long videos, end of Shorts
-            subscribe_link = os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip()
-            if subscribe_link:
-                subscribe_line = f"🔔 Subscribe for a new video every day: {subscribe_link}"
-                if video_format == "long":
-                    description = f"{subscribe_line}\n\n{description}"
-                else:
-                    footer = f"{subscribe_line}\n\n{footer}".strip()
             # Shorts point viewers to the newest long video (Shorts -> long-form funnel)
             latest = None
             if video_format == "short":
@@ -722,6 +714,10 @@ def run_generation_pipeline(
                         description = f"🎬 Watch the full story: https://youtu.be/{latest[0]}\n\n{description}"
                 except Exception as link_err:
                     emit(f"[-] Could not find a long video to link: {link_err}", "warning")
+            # One-tap subscribe link (?sub_confirmation=1) as the very first line of every description
+            subscribe_link = os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip()
+            if subscribe_link:
+                description = f"🔔 Subscribe for a new video every day: {subscribe_link}\n\n{description}"
             video_metadata = {
                 "video_path": final_output_path,
                 "title": title,

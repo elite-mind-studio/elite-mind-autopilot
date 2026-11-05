@@ -190,14 +190,12 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
 
     subscribe_link = os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip()
     subscribe_line = f"🔔 Subscribe for a new video every day: {subscribe_link}" if subscribe_link else ""
-    # Long videos: subscribe link first (clickable there); Shorts: after the description
-    parts = ([subscribe_line] if spec.get("format") == "long" else []) + [spec.get("description", "")]
+    # The subscribe link is the very first line of every description
+    parts = [subscribe_line, spec.get("description", "")]
     if long_url:
         parts.append(f"▶ Watch the full documentary: {long_url}")
     if spec["source"]:
         parts.append("Sources:\n" + "\n".join(f"- {s}" for s in spec["source"]))
-    if spec.get("format") != "long":
-        parts.append(subscribe_line)
     parts.append(os.getenv("YOUTUBE_DESCRIPTION_FOOTER", ""))
     title = spec.get("yt_title") or spec["subject"]
     if spec.get("format") == "short" and "#shorts" not in title.lower():
