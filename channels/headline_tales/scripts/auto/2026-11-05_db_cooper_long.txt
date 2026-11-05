@@ -1,0 +1,73 @@
+FORMAT: long
+SUBJECT: D. B. Cooper, the man who hijacked Northwest Orient Flight 305 in 1971, jumped with 200,000 dollars and was never found
+TITLE: D. B. Cooper Explained
+YT_TITLE: D.B. Cooper Explained: The Man Who Hijacked a Plane and Vanished Forever
+THUMB_WORD: HE DISAPPEARED!
+VOICE: emotional
+TONE: tense
+TAGS: db cooper, d b cooper, db cooper explained, unsolved mystery, northwest flight 305, hijacking, fbi, norjak, true crime documentary, american mystery, headline tales
+DESCRIPTION: On 24 November 1971, a quiet man calling himself Dan Cooper hijacked Northwest Orient Flight 305, collected 200,000 dollars and four parachutes, and jumped from the back of a Boeing 727 into a stormy night over Washington State. He was never found. The full story: the note, the money, the jump, the clues, the boy who found part of the ransom in 1980, and the FBI's 45-year hunt for the only unsolved airline hijacking in American history.
+SOURCE: Wikipedia, D. B. Cooper - https://en.wikipedia.org/wiki/D._B._Cooper
+SOURCE: FBI, D.B. Cooper Hijacking - https://www.fbi.gov/history/famous-cases/db-cooper-hijacking
+GRAPHIC: 0 | {"type": "title", "kicker": "HEADLINE TALES", "title": "D. B.<br>Cooper", "counter": {"label": "DOLLARS", "to": 200000}, "stamp": "VANISHED"}
+GRAPHIC: 7 | {"type": "stat", "value": 10000, "suffix": " BILLS", "caption": "Twenty dollar bills", "sub": "Every serial number photographed by the FBI"}
+
+Can you imagine hijacking a plane, collecting two hundred thousand dollars, jumping out into the night, and never being seen again? For more than fifty years, the FBI has tried to answer one question. Who was D. B. Cooper? Sit tight. Let's go on a journey.
+
+Portland, Oregon. The twenty fourth of November, 1971. The day before Thanksgiving. A quiet man walks up to the Northwest Orient counter and buys a one way ticket to Seattle. He gives his name as Dan Cooper.
+
+He looks like a businessman. Mid forties. Dark suit, white shirt, a thin black tie, a raincoat. He carries a black briefcase. He takes seat eighteen E, near the back of the Boeing 727, and orders a bourbon and soda.
+
+Then he hands the flight attendant, Florence Schaffner, a note. She thinks he is flirting, and puts it in her pocket. He leans over and says, you'd better look at that note.
+
+It says he has a bomb in his briefcase.
+
+He opens the case, just enough. She sees wires, a large battery, and red cylinders that look like dynamite.
+
+His demands are simple. Two hundred thousand dollars in twenty dollar bills. And four parachutes. Two for the back, two for the front.
+
+The airline agrees to everything. The plane circles over Seattle while the money is collected. Ten thousand twenty dollar bills. Before they are handed over, the FBI photographs every single one, so the serial numbers can be traced.
+
+At Seattle Tacoma airport, the money and the parachutes come on board. Cooper lets all of the passengers go. He keeps a few of the crew.
+
+But here is the part that still puzzles investigators.
+
+He seems to know exactly what he is doing. He orders the crew to fly towards Mexico City, with a stop to refuel in Reno, Nevada. He tells them to fly slow, about one hundred knots, and low, under ten thousand feet. And he wants the stairs at the back of the plane left open.
+
+At around seven forty in the evening, the jet takes off again, into rain and wind.
+
+Somewhere over southwest Washington, a warning light comes on in the cockpit. The rear stairs have been lowered.
+
+At thirteen minutes past eight, the crew feels the tail of the plane suddenly jump upwards.
+
+When the plane lands in Reno, the stairs are still down. The crew search the cabin. Cooper is gone. And so is the money.
+
+He leaves only a few things behind. His black clip on tie, with a mother of pearl clip. And two of the four parachutes. One of them, a reserve, has had some of its cords cut.
+
+The hunt begins at once. It is one of the largest manhunts in American history. The FBI calls the case NORJAK, for Northwest hijacking.
+
+Agents, sheriff's deputies, and later about two hundred soldiers search the forests of Clark and Cowlitz counties. A submarine searches the bottom of a lake. Nothing.
+
+Did he survive? Many investigators doubted it. He jumped at night, in bad weather, into a dark forest, wearing a business suit and a raincoat.
+
+Then, in 1978, a deer hunter finds a plastic sign in the woods. It is the instruction card for lowering the rear stairs of a Boeing 727. It was found under the plane's likely flight path.
+
+And two years later, comes the biggest clue of all.
+
+On the tenth of February, 1980, an eight year old boy named Brian Ingram is on a family trip by the Columbia River. Digging in the sand, he finds three bundles of old, rotting twenty dollar bills, still held together by rubber bands.
+
+Five thousand eight hundred dollars. The serial numbers match. It is part of Cooper's ransom.
+
+But instead of solving the case, it made it stranger. Experts believed the money had arrived there years after the jump. How did it get there? And where was the rest?
+
+Over the years, the FBI looked at hundreds of suspects. Some people even claimed to be him. Some families came forward to say a relative had made a strange confession. But none of them was ever proven to be D. B. Cooper.
+
+Even his famous name was a mistake. He called himself Dan Cooper. A news report got it wrong, and the world has called him D. B. Cooper ever since.
+
+Finally, on the eighth of July, 2016, after forty five years, the FBI announced that it was ending its active investigation.
+
+It remains the only unsolved airline hijacking in American history.
+
+So what really happened that night? Did he die in the forest, with the money scattered by the river? Or did a quiet man in a business suit get away with the perfect crime, and live out his life somewhere, keeping one of the greatest secrets in America?
+
+Which case should we tell next? Tell us in the comments, and subscribe. We tell one real story every single day, so you don't miss tomorrow's.
