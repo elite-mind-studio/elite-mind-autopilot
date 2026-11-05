@@ -34,6 +34,11 @@ FEEDS = {
     "NPR World": "https://feeds.npr.org/1004/rss.xml",
     "DW": "https://rss.dw.com/rdf/rss-en-world",
     "CNBC World": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362",
+    # US stories: most of the audience is American, and the best Short so far was a US event
+    "NPR National": "https://feeds.npr.org/1003/rss.xml",
+    "CBS News US": "https://www.cbsnews.com/latest/rss/us",
+    "ABC News US": "https://abcnews.go.com/abcnews/usheadlines",
+    "NBC News": "https://feeds.nbcnews.com/nbcnews/public/news",
 }
 # Groq free tier: ~8K tokens per minute, counting the reserved reply length too.
 # ~1800 source words (~2.5K tokens) + instructions + a 3.5K reply fits in one minute.
@@ -161,21 +166,34 @@ def recent_topics() -> List[str]:
     return topics
 
 
-def pick_story(items: List[dict]) -> dict:
-    listing = "\n".join(f"{i}. [{it['source']}] {it['title']} - {it['summary'][:140]}" for i, it in enumerate(items[:120]))
+# What made the best Short so far ("This Jet Fell 5 Miles in One Minute. Investigators Found a Clue"):
+# a fresh American event, one staggering number, and an open question investigators are working on
+SHORT_CRITERIA = """- happened in the last 48 hours, preferably in the United States (most viewers are American);
+- has ONE staggering, concrete number or fact that makes people stop scrolling (a fall, a speed, a sum, a distance);
+- has an open question that investigators, scientists or police are working on (a cause, a clue, a missing piece);
+- good examples: a plane or train accident under investigation, a heist or fraud, a rescue, a strange discovery,
+  a record broken, a mystery; avoid long-running geopolitics unless something dramatic just happened;"""
+LONG_CRITERIA = """- the whole world is talking about, with big stakes (money, power, technology, energy, trade, sport, science);
+- has enough concrete facts and numbers for an 8-minute documentary;"""
+NO_REPEAT_LONG = """- is not a near-repeat of these recent topics, UNLESS today's headlines bring a genuinely NEW development
+  in one of them (an investigation report, an arrest, a deal, a new record): then choose it as a follow-up,
+  say "FOLLOW-UP:" at the start of the angle, and describe what is new:"""
+NO_REPEAT_SHORT = """- is a NEW topic: never one of these recent topics, not even as a follow-up (viewers have seen them):"""
+US_SOURCES = ("NPR National", "CBS News US", "ABC News US", "NBC News")
+
+
+def pick_story(items: List[dict], for_short: bool = False) -> dict:
+    listing = "\n".join(f"{i}. [{it['source']}] {it['title']} - {it['summary'][:140]}" for i, it in enumerate(items[:150]))
     done = "\n".join(f"- {t}" for t in recent_topics()) or "- (none yet)"
     return chat_json(f"""
 You choose today's story for "Headline Tales", a YouTube channel of short, neutral, well-sourced
 documentaries about what is happening in the world. Pick ONE story from today's headlines.
 
 Choose a story that:
-- the whole world is talking about, with big stakes (money, power, technology, energy, trade, sport, science);
-- has enough concrete facts and numbers for an 8-minute documentary;
+{SHORT_CRITERIA if for_short else LONG_CRITERIA}
 - is advertiser-friendly: NOT mainly about mass deaths, terrorism, sexual violence, child harm or graphic crime;
 - is NOT about elections, campaigns, candidates or partisan politics (strict YouTube election rules);
-- is not a near-repeat of these recent topics, UNLESS today's headlines bring a genuinely NEW development
-  in one of them (an investigation report, an arrest, a deal, a new record): then choose it as a follow-up,
-  say "FOLLOW-UP:" at the start of the angle, and describe what is new:
+{NO_REPEAT_SHORT if for_short else NO_REPEAT_LONG}
 {done}
 
 Headlines:
@@ -267,6 +285,11 @@ STRICT RULES:
 SOURCES:
 {_sources_block(sources)}
 
+- The FIRST sentence states the most staggering true fact and opens a question, like
+  "This private jet fell about five miles in one minute. And investigators may have found a clue to why."
+- short_title follows the same pattern: the staggering fact, then the open question or clue, e.g.
+  "This Jet Fell 5 Miles in One Minute. Investigators Found a Clue". Digits for numbers, never a false promise.
+
 Return ONLY JSON: {{"short_title": "YouTube Shorts title, max 80 chars", "title_bar": "2-4 WORD HOOK",
 "description": "1-2 sentence description", "tags": "comma separated tags", "short_script": "..."}}
 """)
@@ -328,7 +351,9 @@ def prepare_short() -> Path:
     items = headlines()
     if len(items) < 10:
         raise RuntimeError(f"Only {len(items)} headlines fetched")
-    story = pick_story(items)
+    # US stories first, so the picker sees them within its list
+    items = sorted(items, key=lambda it: it["source"] not in US_SOURCES)
+    story = pick_story(items, for_short=True)
     print(f"[+] Short story: {story['subject']} - {story['angle']}", flush=True)
     sources = gather(story, items)
     if len(sources) < 2:
