@@ -36,7 +36,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: headline
+  # Elite Mind story renders (profile elite_suspense) get their own queue, so they never wait behind Headline Tales
+  group: headline-${{ inputs.profile || 'headline_tales' }}
   cancel-in-progress: false
 
 jobs:
