@@ -55,7 +55,7 @@ jobs:
       THUMB_CHANNEL: elite
       YOUTUBE_SUBSCRIBE_LINK: "https://www.youtube.com/@EliteMindDecoder245?sub_confirmation=1"
       YOUTUBE_PRIVACY_STATUS: public
-      VIDEO_CALL_TO_ACTION: "Follow Elite Mind Decoder. Black decodes a new mind trick every single day!"
+      VIDEO_CALL_TO_ACTION: "Tap the subscribe button right below this video. Black decodes a new mind trick every single day!"
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"
       AUTOPILOT_VOICE: "chatterbox:onyx"          # natural voice cloned from voices/onyx.wav
       CHATTERBOX_FALLBACK_VOICE: "kokoro:am_onyx"
