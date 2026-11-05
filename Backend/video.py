@@ -123,7 +123,12 @@ def generate_designed_thumbnail(image_path: str, words: str, size=(1280, 720), f
 
 def _text_layer(path: str, lines: list, size: int, width: int, border: bool = True) -> None:
     """Centred lines of bold text, each (text, colour), on a transparent PNG as wide as the frame."""
-    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), size)
+    font_path = str((FONTS_DIR / "bold_font.ttf").resolve())
+    font = ImageFont.truetype(font_path, size)
+    # Shrink until the longest line fits inside the frame with a margin
+    while size > 20 and max(font.getlength(text) for text, _ in lines) > width * 0.9:
+        size -= 4
+        font = ImageFont.truetype(font_path, size)
     stroke = max(4, size // 9) if border else 0
     line_h = int(size * 1.12) if border else int(size * 1.45)
     image = Image.new("RGBA", (width, line_h * len(lines) + stroke * 2 + 4), (0, 0, 0, 0))
@@ -138,9 +143,9 @@ def _chat_bubble(path: str, message: str, mine: bool, width: int) -> None:
     """A phone text bubble: theirs grey on the left, yours blue on the right."""
     import textwrap
 
-    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.05))
-    lines = textwrap.wrap(message, 24)
-    pad, line_h = int(width * 0.04), int(width * 0.062)
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.062))
+    lines = textwrap.wrap(message, 20)
+    pad, line_h = int(width * 0.045), int(width * 0.076)
     box_w = int(max(font.getlength(line) for line in lines) + pad * 2)
     box_h = line_h * len(lines) + pad * 2
     image = Image.new("RGBA", (width, box_h + 8), (0, 0, 0, 0))
@@ -837,7 +842,7 @@ def _generate_video_ffmpeg(
             sender, _, message = cue["value"].partition(":")
             layer = TEMP_DIR / f"{uuid.uuid4()}_chat.png"
             _chat_bubble(str(layer), message.strip(), sender.strip().lower() == "me", frame_width)
-            text_layers.append((layer, int(frame_height * 0.13), at, at + 4.0, 0.15, 0.25))
+            text_layers.append((layer, int(frame_height * 0.27), at, at + 4.0, 0.15, 0.25))
         elif cue["kind"] == "cue" and cue.get("value"):
             colour = "#FF3B30" if any(ch.isdigit() for ch in cue["value"]) else "#FFFFFF"
             layer = TEMP_DIR / f"{uuid.uuid4()}_cue.png"
