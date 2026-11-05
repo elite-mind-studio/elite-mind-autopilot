@@ -1,22 +1,28 @@
 FORMAT: short
-SUBJECT: What to do when a stranger texts you "$800 tonight or I send your photos to everyone": a calm, safe way to beat online blackmail
+SUBJECT: What to do when a stranger texts you "$800 tonight or I send your photos to everyone": the fear blackmailers use, and the calm, safe way out
 TITLE: $800 OR ELSE
 VOICE: emotional
 TONE: suspense
-CAST: the blackmailer is never shown, only a phone screen glowing in the dark; Black reads the messages calmly on his phone in a dark room
+CAST: the blackmailer is never shown, only a phone screen glowing in the dark; Black reads the messages on his phone alone in a dark apartment at night, rain on the window
+MUSIC: A stranger texts you | Heartbreaking
+SOUND: A stranger texts you | vibrate
+SOUND: A stranger texts you | rain
 CHAT: I have photos | them: I have photos you really don't want anyone to see.
 CHAT: Eight hundred dollars tonight | them: $800 tonight. Or I send them to everyone.
-SOUND: A stranger texts you | vibrate
-GLITCH: Your heart is pounding
+MUSIC: Your hands are shaking | Ossuary 6 - Air + drone
+MUSIC: You feel completely alone | silence
+SOUND: completely alone | breath
+MUSIC: But listen carefully | Touching Moments Two - Higher
 CUE: Do not pay | DON'T PAY
-CUE: Do not reply | DON'T REPLY
-CUE: Screenshot everything | SCREENSHOT EVERYTHING
-CUE: report it | REPORT IT
+CUE: Save the evidence | SAVE THE EVIDENCE
+CUE: Secure your accounts | SECURE YOUR ACCOUNTS
+CUE: Tell someone you trust | TELL SOMEONE YOU TRUST
+MUSIC: Because a secret does not | Healing
 PUBLISH_AT: 2026-11-05T21:00:00Z
 YT_TITLE: A Stranger Texts You: "$800 Tonight or I Send Your Photos." Do This Instead
 THUMB_WORD: $800 OR ELSE
 TAGS: blackmail, sextortion, online scam, how to stop blackmail, scam texts, fbi, online safety, psychology, elite mind decoder, black
-DESCRIPTION: A stranger says they have your photos and wants $800 tonight. Most people panic, and that is exactly what they want. Here is the calm way out, matching what the FBI tells victims: don't pay, don't reply, save every message, block and report. Report to the FBI at tips.fbi.gov or 1-800-CALL-FBI. Under 18? Tell a trusted adult and use NCMEC's free Take It Down tool: takeitdown.ncmec.org. Adults can use StopNCII.org.
+DESCRIPTION: A stranger says they have your photos and wants $800 tonight. The most dangerous part isn't the secret. It's the fear they put in your head. Here is the calm way out, matching what the FBI tells victims: don't pay, stop replying, save the evidence, secure your accounts, tell someone you trust, and report it. FBI: tips.fbi.gov or 1-800-CALL-FBI. Under 18? NCMEC's free Take It Down tool: takeitdown.ncmec.org. Adults: StopNCII.org.
 SOURCE: FBI, Sextortion - https://www.fbi.gov/how-we-can-help-you/scams-and-safety/common-scams-and-crimes/sextortion
 SOURCE: NCMEC, Take It Down - https://takeitdown.ncmec.org
 
@@ -26,22 +32,38 @@ I have photos you really don't want anyone to see.
 
 Eight hundred dollars tonight. Or I send them to your friends, your family, and the people you work with.
 
-Your heart is pounding. And that is exactly what they want.
+Your hands are shaking. Your heart is pounding.
 
-But look closer. They just put the amount, the threat, and their account in writing. That is evidence.
+You feel completely alone.
 
-So here is what you do.
+[pause]
 
-Do not pay. Paying tells them you are scared, and they almost always come back for more.
+The most dangerous part of blackmail isn't always the secret they know.
 
-Do not reply. Not even to say no. Silence tells them you are not playing.
+It's the fear they put inside your head.
 
-Screenshot everything. The messages, the username, the payment details. Do not delete a thing.
+They want you isolated.
 
-Then block them, and report it. On the app, and to the FBI at tips dot F B I dot gov.
+They want you ashamed.
 
-If you are under eighteen, tell an adult you trust, and use Take It Down to stop the images spreading.
+They want you to believe that paying them is the only way to save your life.
 
-They thought fear gave them control. All they did was hand you the evidence.
+[pause]
+
+But listen carefully. You are not powerless.
+
+Do not pay. Paying almost never makes it stop.
+
+Stop replying. Save the evidence. Every message. Every username.
+
+Secure your accounts.
+
+Tell someone you trust, and report it to the FBI at tips dot F B I dot gov.
+
+If you are under eighteen, use Take It Down to stop the images spreading.
+
+Because a secret does not give another person ownership of your life.
+
+And the moment you stop facing the threat alone, is the moment they begin losing control.
 
 Send this to someone who needs it. And tap the subscribe button right below this video.

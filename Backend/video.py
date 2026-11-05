@@ -873,6 +873,7 @@ def _generate_video_ffmpeg(
             elif os.getenv("SFX_MODE") == "suspense":
                 # Suspense lives on quiet: no whooshes on every cut, only a rare riser
                 events = [(t, kind) for t, kind in events if kind == "riser"]
+            music_track = None
             if os.getenv("SFX_MODE") == "suspense":
                 # Thriller soundscape (drone, ticking clock, heartbeat) with silence after the key line
                 silences = []
@@ -880,21 +881,38 @@ def _generate_video_ffmpeg(
                     if "-" in window:
                         a, b = window.split("-")
                         silences.append((float(a), float(b)))
-                cue_sounds = []
+                cue_sounds, plan = [], []
                 for cue in _json.loads(os.getenv("STORY_CUES", "") or "[]"):
                     at = _phrase_time(cue.get("phrase", ""))
                     if at is not None and cue["kind"] in ("sound", "glitch"):
                         cue_sounds.append((at, cue.get("value") if cue["kind"] == "sound" else "glitch"))
-                track = sfx.suspense_bed(duration, silences, TEMP_DIR / "sfx", cue_sounds)
+                    elif at is not None and cue["kind"] == "music":
+                        plan.append((at, cue.get("value", "")))
+                # MUSIC lines: each section runs until the next one starts (the first from 0 s)
+                plan.sort()
+                segments = [(0.0 if i == 0 else at, plan[i + 1][0] if i + 1 < len(plan) else duration, name)
+                            for i, (at, name) in enumerate(plan)]
+                if segments:
+                    active = [(a, b) for a, b, name in segments if "drone" in name] or [(0.0, 0.0)]
+                else:
+                    active = [(0.0, duration)]
+                track = sfx.suspense_bed(duration, silences, TEMP_DIR / "sfx", cue_sounds, active)
+                if segments:
+                    music_track = sfx.music_plan(segments, duration, FONTS_DIR.parent / "Songs", TEMP_DIR / "sfx")
+                    log(f"[+] Music plan: {[(round(a, 1), round(b, 1), m) for a, b, m in segments]}", "info")
                 events = []
             if events or os.getenv("SFX_MODE") == "suspense":
                 if events:
                     track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
                 inputs += ["-i", rel(track)]
                 sfx_index = len([x for x in inputs if x == "-i"]) - 1
+                music_mix, music_count = "", 0
+                if music_track:
+                    inputs += ["-i", rel(music_track)]
+                    music_mix, music_count = f"[{sfx_index + 1}:a]", 1
                 video_filter += (
                     f";[1:a]aresample=48000,aformat=channel_layouts=stereo[voice];"
-                    f"[voice][{sfx_index}:a]amix=inputs=2:normalize=0:duration=first[mixed]"
+                    f"[voice][{sfx_index}:a]{music_mix}amix=inputs={2 + music_count}:normalize=0:duration=first[mixed]"
                 )
                 audio_map = "[mixed]"
         except Exception as sfx_err:

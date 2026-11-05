@@ -120,7 +120,7 @@ def build_track(events: List[Tuple[float, str]], duration: float, work: Path) ->
 
 
 def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Path,
-                  cues: List[Tuple[float, str]] = ()) -> Path:
+                  cues: List[Tuple[float, str]] = (), active: List[Tuple[float, float]] = ()) -> Path:
     """
     A thriller soundscape instead of music: a dark breathing drone, a clock that ticks
     faster as time runs out, a quiet heartbeat building in the last part, and total
@@ -140,7 +140,7 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
     drone = (np.sin(2 * np.pi * 55 * t) + 0.6 * np.sin(2 * np.pi * 82.4 * t + 1.0)
              + 0.35 * np.sin(2 * np.pi * 110.3 * t + 2.0)) * breath
     rumble = np.convolve(rng.standard_normal(n), np.ones(400) / 400, mode="same") * 6
-    bed = 0.045 * drone + 0.03 * rumble
+    bed = 0.026 * drone + 0.016 * rumble
 
     # A cold high tone that creeps in over the last 40%
     climax = np.clip((t / duration - 0.6) / 0.4, 0, 1)
@@ -161,7 +161,7 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
     tick = np.sin(2 * np.pi * 2400 * k) * np.exp(-k * 260)
     at = duration * 0.22
     while at < duration - 0.5:
-        place(tick, at, 0.08)
+        place(tick, at, 0.05)
         at += 1.0 if at < duration * 0.75 else 0.6
 
     # Heartbeat in the last 40%: a soft "lub-dub", quiet, getting a little faster
@@ -169,11 +169,23 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
     thump = np.sin(2 * np.pi * 48 * h) * np.exp(-h * 28)
     at = duration * 0.6
     while at < duration - 0.8:
-        place(thump, at, 0.22)
-        place(thump, at + 0.22, 0.15)
+        place(thump, at, 0.16)
+        place(thump, at + 0.22, 0.11)
         at += 1.05 - 0.35 * (at - duration * 0.6) / (duration * 0.4)
 
-    # Story sound cues: phone buzz, cash counter, digital glitch
+    # Music plan: drone, ticks and heartbeat only inside the "tension" sections
+    if active:
+        mask = np.zeros(n)
+        edge = int(1.2 * RATE)
+        for start, end in active:
+            a, b = max(0, int(start * RATE)), min(n, int(end * RATE))
+            if b > a:
+                mask[a:b] = 1
+                mask[a:min(b, a + edge)] *= np.linspace(0, 1, min(b, a + edge) - a)
+                mask[max(a, b - edge):b] *= np.linspace(1, 0, b - max(a, b - edge))
+        bed *= mask
+
+    # Story sound cues: phone buzz, cash counter, digital glitch, rain, breathing
     for at, kind in cues:
         if kind == "vibrate":  # three short phone buzzes
             b = np.arange(int(0.32 * RATE)) / RATE
@@ -183,6 +195,19 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
         elif kind == "cash":  # a fast money-counter flutter
             for k in range(16):
                 place(tick * np.sin(2 * np.pi * 3600 * k_time(len(tick))), at + k * 0.05, 0.10)
+        elif kind == "rain":  # soft rain on a window for about 14 s, with a few drips
+            r = np.convolve(rng.standard_normal(int(14 * RATE)), np.ones(30) / 30, mode="same")
+            secs = np.arange(len(r)) / RATE
+            r *= np.minimum(1, secs / 2) * np.minimum(1, (len(r) / RATE - secs) / 3)
+            place(r, at, 0.12)
+            for _ in range(18):
+                place(tick * 0.6, at + rng.random() * 13, 0.05)
+        elif kind == "breath":  # four slow, shaky breaths
+            for k in range(4):
+                length = int(1.7 * RATE)
+                env = np.sin(np.linspace(0, np.pi, length)) ** 2
+                noise = np.convolve(rng.standard_normal(length), np.ones(60) / 60, mode="same")
+                place(noise * env * 3, at + k * 2.1, 0.06)
         elif kind == "glitch":  # a short burst of digital crackle
             g = rng.standard_normal(int(0.3 * RATE)) * (rng.random(int(0.3 * RATE)) > 0.7)
             place(g, at, 0.05)
@@ -205,4 +230,36 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
         w.setsampwidth(2)
         w.setframerate(RATE)
         w.writeframes(np.repeat(pcm[:, None], 2, axis=1).tobytes())
+    return out
+
+
+def music_plan(segments: List[Tuple[float, float, str]], duration: float, songs: Path, work: Path) -> Path:
+    """
+    Different music for each part of a story: (start, end, track) with soft crossfades.
+    track is a file name in Songs/ without .mp3, optionally "+drone"; "silence" means no music.
+    """
+    work.mkdir(parents=True, exist_ok=True)
+    out = work / "music_plan.wav"
+    inputs, chains = [], []
+    for start, end, track in segments:
+        name = track.split("+")[0].strip()
+        path = songs / f"{name}.mp3"
+        if name.lower() == "silence" or not path.exists() or end <= start:
+            continue
+        length = end - start + 1.5
+        k = len(chains)
+        inputs += ["-stream_loop", "-1", "-i", str(path)]
+        # Auto-level each section well under the voice (about -16 LUFS): piano -26, dark tension -29
+        level = "loudnorm=I=-29:LRA=7:TP=-4" if "drone" in track else "loudnorm=I=-26:LRA=7:TP=-4"
+        delay = int(start * 1000)
+        chains.append(f"[{k}:a]atrim=0:{length:.2f},afade=t=in:d=1.2,afade=t=out:st={max(0.0, length - 1.6):.2f}:d=1.6,"
+                      f"{level},aresample={RATE},aformat=channel_layouts=stereo,adelay={delay}|{delay}[m{k}]")
+    if not chains:
+        subprocess.run([FFMPEG, "-v", "error", "-y", "-f", "lavfi", "-i", f"anullsrc=r={RATE}:cl=stereo",
+                        "-t", f"{duration:.2f}", str(out)], check=True)
+        return out
+    mix = "".join(f"[m{k}]" for k in range(len(chains)))
+    graph = ";".join(chains) + f";{mix}amix=inputs={len(chains)}:normalize=0,apad,atrim=0:{duration:.2f}[out]"
+    subprocess.run([FFMPEG, "-v", "error", "-y", *inputs, "-filter_complex", graph, "-map", "[out]", "-ar", str(RATE), str(out)],
+                   check=True)
     return out

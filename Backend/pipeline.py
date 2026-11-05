@@ -585,7 +585,10 @@ def run_generation_pipeline(
         os.environ["SUSPENSE_SILENCE"] = ",".join(windows)
         emit(f"[+] Suspense silence windows: {os.environ['SUSPENSE_SILENCE'] or 'none'} "
              f"(pause after sentences {sorted(long_pause)})", "info")
-        # Owner: the drone alone didn't hit hard enough, so a dark track plays quietly under it
+        # Owner: the drone alone didn't hit hard enough, so a dark track plays quietly under it;
+        # a story with MUSIC lines gets its own music plan (mixed in video.py) instead
+        if any(c.get("kind") == "music" for c in data.get("cues", [])):
+            use_music = False
 
     music_credit = ""
     if use_music:
