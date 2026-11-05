@@ -121,6 +121,19 @@ def generate_designed_thumbnail(image_path: str, words: str, size=(1280, 720), f
     return str(thumbnail_path)
 
 
+def _text_layer(path: str, lines: list, size: int, width: int, border: bool = True) -> None:
+    """Centred lines of bold text, each (text, colour), on a transparent PNG as wide as the frame."""
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), size)
+    stroke = max(4, size // 9) if border else 0
+    line_h = int(size * 1.12) if border else int(size * 1.45)
+    image = Image.new("RGBA", (width, line_h * len(lines) + stroke * 2 + 4), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    for n, (text, colour) in enumerate(lines):
+        draw.text((width // 2, stroke + n * line_h), text, font=font, fill=colour, anchor="ma",
+                  stroke_width=stroke, stroke_fill="#000000")
+    image.save(path)
+
+
 def _phrase_time(phrase: str):
     """When the narrator starts saying `phrase` (from the caption word timings), or None."""
     target = [w for w in re.sub(r"[^a-z0-9' ]", " ", phrase.lower()).split() if w]
@@ -760,6 +773,9 @@ def _generate_video_ffmpeg(
         # Suspense: dark night look, cold blue shadows, a vignette pulling the eye to the middle
         "night": "eq=saturation=0.82:brightness=-0.08:contrast=1.14,colorbalance=bs=0.10:bm=0.04:rh=-0.02,vignette=PI/4.5,",
     }.get(os.getenv("VIDEO_GRADE", ""), "")
+    # On-screen text is drawn as PNG layers and overlaid (GitHub's ffmpeg build has no drawtext):
+    # (png, y, start, end, fade_in, fade_out)
+    text_layers = []
     memorial = ""
     if os.getenv("MEMORIAL_TEXT", "").strip():
         import textwrap
@@ -770,39 +786,27 @@ def _generate_video_ffmpeg(
         start_memo = max(0.0, duration - 4.5)
         size = int(frame_height * 0.026)
         memorial = f",drawbox=x=0:y=0:w=iw:h=ih:color=black@0.55:t=fill:enable='gte(t,{start_memo:.2f})'"
-        for n, line in enumerate(lines):
-            memo_file = SUBTITLES_DIR / f"{uuid.uuid4()}_memorial.txt"
-            memo_file.write_text(line, encoding="utf-8")
-            memorial += (
-                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(memo_file)}:"
-                f"fontcolor=white:fontsize={size}:x=(w-text_w)/2:y=h*0.27+{int(n * size * 1.45)}:"
-                f"alpha='if(lt(t,{start_memo:.2f}),0,min(1,(t-{start_memo:.2f})/0.8))'"
-            )
+        layer = TEMP_DIR / f"{uuid.uuid4()}_memorial.png"
+        _text_layer(str(layer), [(line, "#FFFFFF") for line in lines], size, frame_width, border=False)
+        text_layers.append((layer, int(frame_height * 0.27), start_memo, duration, 0.8, 0))
     # Hook headline: big bold 2-4 words over the first ~2.2 s (the first frame is the feed cover)
-    hook = ""
     if os.getenv("HOOK_TEXT", "").strip():
         import textwrap
 
         hook_lines = textwrap.wrap(os.getenv("HOOK_TEXT").strip().upper(), 14 if frame_height > frame_width else 24)[:3]
         hook_size = int(frame_height * (0.062 if frame_height > frame_width else 0.08))
-        accent = (text_color or "#FFE600").lstrip("#")
+        accent = text_color or "#FFE600"
         top = 0.14 if frame_height > frame_width else 0.12
-        for n, line in enumerate(hook_lines):
-            hook_file = SUBTITLES_DIR / f"{uuid.uuid4()}_hook.txt"
-            hook_file.write_text(line, encoding="utf-8")
-            colour = f"0x{accent}" if n == len(hook_lines) - 1 else "white"  # last line in the accent colour
-            hook += (
-                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(hook_file)}:"
-                f"fontcolor={colour}:fontsize={hook_size}:borderw={max(4, hook_size // 9)}:bordercolor=black:"
-                f"x=(w-text_w)/2:y=h*{top}+{int(n * hook_size * 1.12)}:enable='lt(t,2.2)':"
-                f"alpha='if(lt(t,1.9),1,max(0,(2.2-t)/0.3))'"
-            )
+        layer = TEMP_DIR / f"{uuid.uuid4()}_hook.png"
+        # Last line in the accent colour
+        _text_layer(str(layer), [(line, accent if n == len(hook_lines) - 1 else "#FFFFFF")
+                                 for n, line in enumerate(hook_lines)], hook_size, frame_width)
+        text_layers.append((layer, int(frame_height * top), 0.0, 2.2, 0, 0.3))
     # Story cues (suspense): on-screen text and glitches at the exact spoken words
     import json as _json
 
-    cues = _json.loads(os.getenv("STORY_CUES", "") or "[]")
-    glitch, cue_text = "", ""
-    for cue in cues:
+    glitch = ""
+    for cue in _json.loads(os.getenv("STORY_CUES", "") or "[]"):
         at = _phrase_time(cue.get("phrase", ""))
         if at is None:
             continue
@@ -810,17 +814,11 @@ def _generate_video_ffmpeg(
             window = f"between(t,{at:.2f},{at + 0.35:.2f})"
             glitch += f"rgbashift=rh=14:bh=-14:enable='{window}',noise=alls=45:allf=t:enable='{window}',"
         elif cue["kind"] == "cue" and cue.get("value"):
-            cue_file = SUBTITLES_DIR / f"{uuid.uuid4()}_cue.txt"
-            cue_file.write_text(cue["value"].upper(), encoding="utf-8")
-            size = int(frame_height * 0.07)
-            colour = "0xFF3B30" if any(ch.isdigit() for ch in cue["value"]) else "white"
-            cue_text += (
-                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(cue_file)}:"
-                f"fontcolor={colour}:fontsize={size}:borderw={max(4, size // 10)}:bordercolor=black:"
-                f"x=(w-text_w)/2:y=h*0.24:enable='between(t,{at:.2f},{at + 2.4:.2f})':"
-                f"alpha='min(1,(t-{at:.2f})/0.15)'"
-            )
-    video_filter = f"[0:v]{scale_filter}{grade}{glitch}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}{hook}{cue_text}[captioned]"
+            colour = "#FF3B30" if any(ch.isdigit() for ch in cue["value"]) else "#FFFFFF"
+            layer = TEMP_DIR / f"{uuid.uuid4()}_cue.png"
+            _text_layer(str(layer), [(cue["value"].upper(), colour)], int(frame_height * 0.07), frame_width)
+            text_layers.append((layer, int(frame_height * 0.24), at, at + 2.4, 0.15, 0.25))
+    video_filter = f"[0:v]{scale_filter}{grade}{glitch}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}[captioned]"
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
     output_label = "[captioned]"
 
@@ -871,6 +869,22 @@ def _generate_video_ffmpeg(
                 audio_map = "[mixed]"
         except Exception as sfx_err:
             log(f"[-] Sound effects skipped: {sfx_err}", "warning")
+
+    for layer, y, start, end, fade_in, fade_out in text_layers:
+        length = max(0.1, end - start)
+        inputs += ["-loop", "1", "-t", f"{length:.2f}", "-i", rel(layer)]
+        index = len([x for x in inputs if x == "-i"]) - 1
+        fades = "format=rgba"
+        if fade_in:
+            fades += f",fade=t=in:st=0:d={fade_in}:alpha=1"
+        if fade_out:
+            fades += f",fade=t=out:st={max(0.0, length - fade_out):.2f}:d={fade_out}:alpha=1"
+        video_filter += (
+            f";[{index}:v]{fades},setpts=PTS+{start:.2f}/TB[text{index}];"
+            f"{output_label}[text{index}]overlay=x=(W-w)/2:y={y}:eof_action=pass:"
+            f"enable='between(t,{start:.2f},{end:.2f})'[texted{index}]"
+        )
+        output_label = f"[texted{index}]"
 
     # Silent LIKE badge right after the Short's heaviest moment (skipped for tragedies)
     if frame_height > frame_width and os.getenv("SFX_MODE") != "tragic" and os.getenv("LIKE_BADGE", "true") != "false":
