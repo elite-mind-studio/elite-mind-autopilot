@@ -801,12 +801,15 @@ def _generate_video_ffmpeg(
             events = sfx.strongest(sfx.word_events(LAST_CAPTION_CHUNKS), limit) + [
                 (cut, "whoosh") for cut in getattr(_visuals, "LAST_SCENE_CUTS", [])
             ]
+            # No heavy impacts (boom, blast, hit): the owner found the "gbam" sounds annoying.
+            # Only soft whooshes on scene changes and the odd riser are left.
+            events = [(t, kind) for t, kind in events if kind in ("whoosh", "riser")]
             if os.getenv("SFX_MODE") == "tragic":
-                # Respect: no whooshes, booms or blasts over a tragedy, only the dark hit
-                events = [(t, "hit") for t, kind in events if kind in ("hit", "blast")]
+                # Respect: nothing over a tragedy
+                events = []
             elif os.getenv("SFX_MODE") == "suspense":
-                # Suspense lives on quiet: no whooshes on every cut, only a few dark hits and risers
-                events = [(t, "riser" if kind == "riser" else "hit") for t, kind in events if kind != "whoosh"]
+                # Suspense lives on quiet: no whooshes on every cut, only a rare riser
+                events = [(t, kind) for t, kind in events if kind == "riser"]
             if events:
                 track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
                 inputs += ["-i", rel(track)]
