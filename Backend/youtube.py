@@ -147,6 +147,13 @@ def initialize_upload(youtube: any, options: dict):
         },
     }
 
+    # YOUTUBE_PUBLISH_AT (ISO time, e.g. 2026-11-06T01:00:00Z): upload private now, YouTube makes it
+    # public at that moment, so a video can be reviewed in Studio before it goes live
+    publish_at = os.getenv("YOUTUBE_PUBLISH_AT", "").strip()
+    if publish_at:
+        body["status"]["privacyStatus"] = "private"
+        body["status"]["publishAt"] = publish_at
+
     # "Altered or synthetic content" disclosure, required for realistic AI visuals
     if os.getenv("YOUTUBE_SYNTHETIC_MEDIA", "").strip().lower() in ("1", "true", "yes"):
         body["status"]["containsSyntheticMedia"] = True

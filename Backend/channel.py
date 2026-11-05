@@ -197,6 +197,8 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
     if spec.get("format") == "short" and "#shorts" not in title.lower():
         title = f"{title} #shorts"[:100]
 
+    # PUBLISH_AT: 2026-11-06T01:00:00Z in the header = scheduled premiere (private until then)
+    os.environ["YOUTUBE_PUBLISH_AT"] = spec.get("publish_at", "")
     response = upload_video(
         video_path=str(video), title=title[:100], description="\n\n".join(p for p in parts if p),
         category=os.getenv("YOUTUBE_CATEGORY_ID", "25"),

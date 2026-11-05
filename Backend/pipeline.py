@@ -341,6 +341,17 @@ def run_generation_pipeline(
     # Split on sentence endings (. ! ?) and line breaks, keeping chunks short for TTS
     sentences = [s.strip() for s in re.split(SENTENCE_END + r"|\n+", script)]
     sentences = [s for s in sentences if s]
+    # A "[pause]" line in a hand-written script = a long silence after the line before it
+    long_pause = set()
+    kept = []
+    for s in sentences:
+        if s.lower() == "[pause]":
+            if kept:
+                long_pause.add(len(kept) - 1)
+            continue
+        kept.append(s)
+    sentences = kept
+    script = re.sub(r"\n?\[pause\]", "", script, flags=re.IGNORECASE)
     paths = []
     sentence_durations = []
 
@@ -356,7 +367,8 @@ def run_generation_pipeline(
         emit(f"[+] Voice delivery: {mood}", "info")
         # A tragedy gets a moment of silence before its closing line
         pauses = [
-            1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
+            1.6 if i in long_pause
+            else 1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
             else (0.5 if tone in ("tragic", "suspense") else 0.4)
             for i in range(len(sentences))
         ]
