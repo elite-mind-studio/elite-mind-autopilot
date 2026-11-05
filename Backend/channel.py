@@ -305,7 +305,7 @@ if __name__ == "__main__":
             (SCRIPTS_DIR / f"{date.today().isoformat()}_planned.json").write_text(
                 json.dumps({"long": long_script.name, "short": short_script.name}), encoding="utf-8")
             spec = parse_script(long_script)
-            remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 7-8:30 pm Nigeria time")
+            remind_thumbnail("headline", spec.get("yt_title") or spec["subject"], "Headline Tales, posts about 11 pm-midnight Nigeria time (5-6 pm US Eastern)")
         except RuntimeError as err:
             print(f"[-] No documentary planned ({err}); the midday run will try again", flush=True)
             from notify import notify

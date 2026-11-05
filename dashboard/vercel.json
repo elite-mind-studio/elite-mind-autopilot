@@ -19,7 +19,7 @@
     },
     {
       "path": "/api/trigger?job=headline-full",
-      "schedule": "17 16 * * *"
+      "schedule": "17 20 * * *"
     },
     {
       "path": "/api/trigger?job=elite-evening",
