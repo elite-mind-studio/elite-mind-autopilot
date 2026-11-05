@@ -188,11 +188,16 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         print(f"[*] {spec['slug']} already posted: {posted[spec['slug']]['url']}", flush=True)
         return posted[spec["slug"]]["url"]
 
-    parts = [spec.get("description", "")]
+    subscribe_link = os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip()
+    subscribe_line = f"🔔 Subscribe for a new video every day: {subscribe_link}" if subscribe_link else ""
+    # Long videos: subscribe link first (clickable there); Shorts: after the description
+    parts = ([subscribe_line] if spec.get("format") == "long" else []) + [spec.get("description", "")]
     if long_url:
         parts.append(f"▶ Watch the full documentary: {long_url}")
     if spec["source"]:
         parts.append("Sources:\n" + "\n".join(f"- {s}" for s in spec["source"]))
+    if spec.get("format") != "long":
+        parts.append(subscribe_line)
     parts.append(os.getenv("YOUTUBE_DESCRIPTION_FOOTER", ""))
     title = spec.get("yt_title") or spec["subject"]
     if spec.get("format") == "short" and "#shorts" not in title.lower():
@@ -216,6 +221,8 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
 
         lines = [f"▶ Watch the full documentary: {long_url}"] if long_url else []
         lines.append("👇 Which story should we explain next? We post one big story every single day, so subscribe and don't miss tomorrow's.")
+        if subscribe_link:
+            lines.append(f"🔔 Subscribe: {subscribe_link}")
         post_comment(video_id, "\n\n".join(lines))
     except Exception as err:
         print(f"[-] First comment failed: {err}", flush=True)

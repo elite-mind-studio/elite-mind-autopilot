@@ -287,6 +287,9 @@ def run_generation_pipeline(
         call_to_action = (
             f"Follow Elite Mind Decoder so you don't miss Part {series['part'] + 1} tomorrow!"
         )
+    # Long videos: the description's one-tap subscribe link is clickable there (not in Shorts)
+    if video_format == "long" and os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip():
+        call_to_action = f"{call_to_action} Tap the subscribe link in the description.".strip()
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"
     # Kept for the learning loop (autopilot records the hook of each posted video)
@@ -702,6 +705,14 @@ def run_generation_pipeline(
             privacy_status = os.getenv("YOUTUBE_PRIVACY_STATUS", "private")
             # e.g. "Educational content only, not financial advice."
             footer = os.getenv("YOUTUBE_DESCRIPTION_FOOTER", "").strip()
+            # One-tap subscribe link (?sub_confirmation=1): top of long videos, end of Shorts
+            subscribe_link = os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip()
+            if subscribe_link:
+                subscribe_line = f"🔔 Subscribe for a new video every day: {subscribe_link}"
+                if video_format == "long":
+                    description = f"{subscribe_line}\n\n{description}"
+                else:
+                    footer = f"{subscribe_line}\n\n{footer}".strip()
             # Shorts point viewers to the newest long video (Shorts -> long-form funnel)
             latest = None
             if video_format == "short":
@@ -783,6 +794,8 @@ def run_generation_pipeline(
 
                 # First comment: the topic's question, the series playlist and the full video
                 comment_lines = [data.get("commentAsk", ""), binge_link]
+                if os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip():
+                    comment_lines.append(f"🔔 Subscribe: {os.getenv('YOUTUBE_SUBSCRIBE_LINK').strip()}")
                 if latest:
                     comment_lines.append(f"▶ Watch the full video: https://youtu.be/{latest[0]} ({latest[1]})")
                 comment_text = "\n\n".join(line for line in comment_lines if line)

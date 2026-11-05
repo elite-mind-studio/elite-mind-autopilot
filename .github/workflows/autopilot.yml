@@ -53,6 +53,7 @@ jobs:
       YOUTUBE_CATEGORY_ID: "27"
       NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
       THUMB_CHANNEL: elite
+      YOUTUBE_SUBSCRIBE_LINK: "https://www.youtube.com/@EliteMindDecoder245?sub_confirmation=1"
       YOUTUBE_PRIVACY_STATUS: public
       VIDEO_CALL_TO_ACTION: "Follow Elite Mind Decoder. Black decodes a new mind trick every single day!"
       AUTOPILOT_NICHE: "money psychology, timeless wealth principles, economic laws, pricing and marketing tricks, behavioral finance, and the elite mindset"

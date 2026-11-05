@@ -11,6 +11,7 @@ Usage:
 """
 
 import json
+import os
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -392,6 +393,10 @@ def prepare() -> tuple:
     draft = write_scripts(story, sources)
     for key in ("long_script", "short_script"):
         draft[key] = _with_ending(_checked(draft[key], sources, key, rounds=4), ASK_NEXT)
+    # The documentary's description has a one-tap subscribe link (clickable on long videos)
+    if os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip() and "link in the description" not in draft["long_script"]:
+        draft["long_script"] = draft["long_script"].rstrip() + " Tap the subscribe link in the description, so you never miss a story."
+
     if len(draft["long_script"].split()) < 700:
         raise RuntimeError("Long script too short after fact-check; not posting")
 
