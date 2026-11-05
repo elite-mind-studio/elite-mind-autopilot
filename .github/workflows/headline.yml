@@ -22,6 +22,11 @@ on:
         type: choice
         options: [full, short, plan]
         default: full
+      profile:
+        description: "Channel profile for a hand-written script (channels/<profile>.env)"
+        type: choice
+        options: [headline_tales, elite_suspense]
+        default: headline_tales
       dry_run:
         description: "Test: make and check today's videos but post nothing"
         type: boolean
@@ -102,17 +107,20 @@ jobs:
         env:
           CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
           OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_HEADLINE_JSON }}
+          ELITE_OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
         run: |
           [ -n "$OAUTH_JSON" ] || { echo "::error::YOUTUBE_OAUTH_HEADLINE_JSON secret missing"; exit 1; }
           printf '%s' "$CLIENT_SECRET_JSON" > Backend/client_secret.json
           printf '%s' "$OAUTH_JSON" > Backend/youtube-oauth2-headline_tales.json
+          # Elite Mind login, for hand-written Elite scripts (profile elite_suspense)
+          [ -n "$ELITE_OAUTH_JSON" ] && printf '%s' "$ELITE_OAUTH_JSON" > Backend/youtube-oauth2.json || true
 
       - name: Make, check and post
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           if [ -n "${{ inputs.long }}" ]; then
-            uv run python Backend/channel.py headline_tales publish "${{ inputs.long }}" "${{ inputs.short }}" ${{ inputs.dry_run && '--dry-run' || '' }}
+            uv run python Backend/channel.py ${{ inputs.profile || 'headline_tales' }} publish "${{ inputs.long }}" "${{ inputs.short }}" ${{ inputs.dry_run && '--dry-run' || '' }}
           else
             mode=auto
             if [ "${{ github.event.schedule }}" = "41 7 * * *" ] || [ "${{ github.event.schedule }}" = "23 17 * * *" ] || [ "${{ inputs.mode }}" = "short" ]; then
@@ -127,28 +135,29 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: headline-${{ github.run_number }}
-          path: channels/headline_tales/videos/
+          path: channels/*/videos/
           retention-days: 9
           if-no-files-found: ignore
 
       - name: Record what was posted
         if: always() && !inputs.dry_run   # test runs change nothing in the repo
         run: |
-          [ -f channels/headline_tales/posted.json ] || exit 0
-          cp channels/headline_tales/posted.json "$RUNNER_TEMP/posted.json"
+          P="${{ inputs.profile || 'headline_tales' }}"
+          [ -f "channels/$P/posted.json" ] || exit 0
+          cp "channels/$P/posted.json" "$RUNNER_TEMP/posted.json"
           mkdir -p "$RUNNER_TEMP/auto" && cp -r channels/headline_tales/scripts/auto/. "$RUNNER_TEMP/auto/" 2>/dev/null || true
           ls channels/headline_tales/scripts/queue/ 2>/dev/null > "$RUNNER_TEMP/queue_left.txt" || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
             git fetch -q origin main && git reset -q --hard origin/main
-            cp "$RUNNER_TEMP/posted.json" channels/headline_tales/posted.json
+            mkdir -p "channels/$P" && cp "$RUNNER_TEMP/posted.json" "channels/$P/posted.json"
             mkdir -p channels/headline_tales/scripts/auto && cp -r "$RUNNER_TEMP/auto/." channels/headline_tales/scripts/auto/ 2>/dev/null || true
             # Remove only the queued scripts this run used (scripts queued meanwhile stay)
             for used in $(comm -23 <(sort "$RUNNER_TEMP/queue_start.txt") <(sort "$RUNNER_TEMP/queue_left.txt")); do
               git rm -q --ignore-unmatch "channels/headline_tales/scripts/queue/$used"
             done
-            git add -A channels/headline_tales/posted.json channels/headline_tales/scripts/auto
+            git add -A "channels/$P/posted.json" channels/headline_tales/scripts/auto
             git commit -q -m "headline: record posted videos" || exit 0
             git push -q && exit 0
             sleep 5

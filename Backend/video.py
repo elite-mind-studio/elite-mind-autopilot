@@ -121,6 +121,24 @@ def generate_designed_thumbnail(image_path: str, words: str, size=(1280, 720), f
     return str(thumbnail_path)
 
 
+def _choice_card(path: str, width: int, choice_a: str, choice_b: str) -> None:
+    """Two stacked option pills, A in green and B in red, for the "what would you do?" ending."""
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.075))
+    pill_h, gap = int(width * 0.15), int(width * 0.04)
+    card = Image.new("RGBA", (width, pill_h * 2 + gap), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(card)
+    for n, (letter, label, colour) in enumerate((("A", choice_a, "#2BB34A"), ("B", choice_b, "#E8323C"))):
+        top = n * (pill_h + gap)
+        draw.rounded_rectangle([0, top, width - 1, top + pill_h], radius=pill_h // 2, fill=(12, 14, 20, 225),
+                               outline="#FFFFFF", width=max(3, pill_h // 22))
+        r = int(pill_h * 0.36)
+        cx, cy = pill_h // 2 + 6, top + pill_h // 2
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=colour)
+        draw.text((cx, cy), letter, font=font, fill="#FFFFFF", anchor="mm")
+        draw.text((cx + r + int(width * 0.04), cy), label.strip().upper()[:22], font=font, fill="#FFFFFF", anchor="lm")
+    card.save(path)
+
+
 def generate_bold_thumbnail(image_path: str, word: str, size=(1280, 720)) -> str:
     """
     Big-channel style thumbnail: a striking scene image, one huge word in red
@@ -421,7 +439,9 @@ def __generate_subtitles_aligned(audio_path: str, sentences: List[str]) -> str:
             last = current[-1]
             gap = times[i][0] - times[last][1]
             text_len = sum(len(script[k][0]) + 1 for k in current) + len(word)
-            if script[last][1] != sentence or len(current) >= 3 or text_len > 16 or gap > 0.35:
+            # CAPTION_WORDS / CAPTION_CHARS: suspense stories show only 1-2 words at a time
+            if (script[last][1] != sentence or len(current) >= int(os.getenv("CAPTION_WORDS", "3"))
+                    or text_len > int(os.getenv("CAPTION_CHARS", "16")) or gap > 0.35):
                 chunks.append(current)
                 current = []
         current.append(i)
@@ -723,7 +743,11 @@ def _generate_video_ffmpeg(
     else:
         captions = f"subtitles={rel(subtitles_path)}:fontsdir={rel(FONTS_DIR)}:force_style='{style}'"
     # Tragedies: darker, desaturated colour, and a memorial line over the last seconds
-    grade = "eq=saturation=0.72:brightness=-0.04:contrast=1.06," if os.getenv("VIDEO_GRADE") == "somber" else ""
+    grade = {
+        "somber": "eq=saturation=0.72:brightness=-0.04:contrast=1.06,",
+        # Suspense: dark night look, cold blue shadows, a vignette pulling the eye to the middle
+        "night": "eq=saturation=0.82:brightness=-0.08:contrast=1.14,colorbalance=bs=0.10:ms=0.04:hs=-0.02,vignette=PI/4.5,",
+    }.get(os.getenv("VIDEO_GRADE", ""), "")
     memorial = ""
     if os.getenv("MEMORIAL_TEXT", "").strip():
         import textwrap
@@ -780,6 +804,9 @@ def _generate_video_ffmpeg(
             if os.getenv("SFX_MODE") == "tragic":
                 # Respect: no whooshes, booms or blasts over a tragedy, only the dark hit
                 events = [(t, "hit") for t, kind in events if kind in ("hit", "blast")]
+            elif os.getenv("SFX_MODE") == "suspense":
+                # Suspense lives on quiet: no whooshes on every cut, only a few dark hits and risers
+                events = [(t, "riser" if kind == "riser" else "hit") for t, kind in events if kind != "whoosh"]
             if events:
                 track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
                 inputs += ["-i", rel(track)]
@@ -813,6 +840,23 @@ def _generate_video_ffmpeg(
             output_label = "[liked]"
         except Exception as like_err:
             log(f"[-] Like badge skipped: {like_err}", "warning")
+
+    # "What would you do?" ending: two labelled choices from the moment the dilemma is put
+    if os.getenv("CHOICE_A", "").strip() and os.getenv("CHOICE_B", "").strip():
+        try:
+            words = [(w.lower().strip(".,!?"), s) for chunk in LAST_CAPTION_CHUNKS for w, s, _ in chunk]
+            choice_at = next((s for w, s in words if w in ("choices", "choice", "options")), max(0.0, duration - 12))
+            card = TEMP_DIR / "choice_card.png"
+            _choice_card(str(card), int(frame_width * 0.86), os.getenv("CHOICE_A"), os.getenv("CHOICE_B"))
+            inputs += ["-i", rel(card)]
+            card_index = len([x for x in inputs if x == "-i"]) - 1
+            video_filter += (
+                f";[{card_index}:v]format=rgba[choice];"
+                f"{output_label}[choice]overlay=x=(W-w)/2:y={int(frame_height * 0.12)}:enable='gte(t,{choice_at:.2f})'[chosen]"
+            )
+            output_label = "[chosen]"
+        except Exception as choice_err:
+            log(f"[-] Choice card skipped: {choice_err}", "warning")
 
     # SUBSCRIBE button for the last seconds, where viewers decide to follow
     if os.getenv("SUBSCRIBE_BUTTON", "true").strip().lower() not in ("0", "false", "no"):

@@ -119,6 +119,17 @@ def _apply_tone(tone: str, data: dict) -> None:
     os.environ["VIDEO_GRADE"] = "somber" if tragic else ""           # darker, desaturated colour
     os.environ["SUBSCRIBE_BUTTON"] = "false" if tragic else "true"
     os.environ["MEMORIAL_TEXT"] = data.get("memorial", "") if tragic else ""
+    # Suspense ("what would you do?" stories): night grade, slow drift, short captions, a choice at the end
+    suspense = tone == "suspense"
+    if suspense:
+        os.environ["SCENE_PUNCH"] = "false"
+        os.environ["SFX_MODE"] = "suspense"
+        os.environ["VIDEO_GRADE"] = "night"
+    os.environ["LIKE_BADGE"] = "false" if suspense or tragic else "true"
+    os.environ["CAPTION_WORDS"] = "2" if suspense else "3"
+    os.environ["CAPTION_CHARS"] = "12" if suspense else "16"
+    choice = [c.strip() for c in data.get("choice", "").split("|")] if suspense else []
+    os.environ["CHOICE_A"], os.environ["CHOICE_B"] = (choice + ["", ""])[:2] if len(choice) >= 2 else ("", "")
 
 
 def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm", pauses: "list | None" = None) -> "list | None":
@@ -346,7 +357,7 @@ def run_generation_pipeline(
         # A tragedy gets a moment of silence before its closing line
         pauses = [
             1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
-            else (0.5 if tone == "tragic" else 0.4)
+            else (0.5 if tone in ("tragic", "suspense") else 0.4)
             for i in range(len(sentences))
         ]
         chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood, pauses)
@@ -563,7 +574,7 @@ def run_generation_pipeline(
                 song_clip = song_clip.with_effects(
                     [afx.AudioLoop(duration=original_duration)]
                 )
-                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone == "tragic" else 1.0)).with_fps(44100)
+                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
 
                 mixed_audio = CompositeAudioClip(
                     [original_audio, song_clip]
@@ -621,7 +632,7 @@ def run_generation_pipeline(
                     song_clip = song_clip.with_effects(
                         [afx.AudioLoop(duration=original_duration)]
                     )
-                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone == "tragic" else 1.0)).with_fps(44100)
+                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.1")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
                     comp_audio = CompositeAudioClip(
                         [original_audio, song_clip]
                     ).with_duration(original_duration)
