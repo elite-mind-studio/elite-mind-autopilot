@@ -456,6 +456,23 @@ def youtube_auth() -> None:
     print("[+] YouTube login saved. Scheduled uploads can now run unattended.")
 
 
+def premiere_nearby(hours: float = 4) -> bool:
+    """True when an Elite Mind story Short (elite_suspense) premieres within `hours` of now."""
+    posted = PROJECT_ROOT / "channels" / "elite_suspense" / "posted.json"
+    if not posted.exists():
+        return False
+    from datetime import timezone
+
+    now = datetime.now(timezone.utc)
+    for entry in json.loads(posted.read_text(encoding="utf-8")).values():
+        when = (entry.get("publish_at") or "").strip()
+        if when:
+            at = datetime.fromisoformat(when.replace("Z", "+00:00"))
+            if abs((at - now).total_seconds()) <= hours * 3600:
+                return True
+    return False
+
+
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     video_format = "long" if "--long" in sys.argv[2:] else "short"
@@ -464,6 +481,10 @@ if __name__ == "__main__":
     elif command == "tick":
         tick()
     elif command == "run":
+        if "--series" in sys.argv[2:] and premiere_nearby():
+            # The evening slot belongs to tonight's story premiere: max 3 Elite posts a day
+            print("[*] A story premiere is scheduled around now; the series Short moves to tomorrow.")
+            sys.exit(0)
         run_video(
             allow_upload="--no-upload" not in sys.argv[2:],
             video_format=video_format,

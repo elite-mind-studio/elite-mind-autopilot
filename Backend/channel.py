@@ -244,7 +244,8 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         from notify import posted_alert
 
         posted_alert(os.getenv("THUMB_CHANNEL", "headline"), title, url, bool(custom))
-    posted[spec["slug"]] = {"id": video_id, "url": url, "title": title, "format": spec.get("format", "short")}
+    posted[spec["slug"]] = {"id": video_id, "url": url, "title": title, "format": spec.get("format", "short"),
+                            "publish_at": spec.get("publish_at", "")}
     _posted_file(name).write_text(json.dumps(posted, indent=2), encoding="utf-8")
     return url
 
