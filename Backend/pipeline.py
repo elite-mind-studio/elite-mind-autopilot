@@ -583,6 +583,8 @@ def run_generation_pipeline(
             if i in long_pause:
                 windows.append(f"{max(0.0, clock - 1.6):.2f}-{clock + 0.15:.2f}")
         os.environ["SUSPENSE_SILENCE"] = ",".join(windows)
+        emit(f"[+] Suspense silence windows: {os.environ['SUSPENSE_SILENCE'] or 'none'} "
+             f"(pause after sentences {sorted(long_pause)})", "info")
         use_music = False
 
     music_credit = ""
