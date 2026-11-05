@@ -117,3 +117,74 @@ def build_track(events: List[Tuple[float, str]], duration: float, work: Path) ->
     subprocess.run([FFMPEG, "-v", "error", "-y", *inputs, "-filter_complex", graph, "-map", "[out]", "-ar", str(RATE), str(out)],
                    check=True)
     return out
+
+
+def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Path) -> Path:
+    """
+    A thriller soundscape instead of music: a dark breathing drone, a clock that ticks
+    faster as time runs out, a quiet heartbeat building in the last part, and total
+    silence in the given (start, end) windows. No booms.
+    """
+    import wave
+
+    import numpy as np
+
+    work.mkdir(parents=True, exist_ok=True)
+    n = int(duration * RATE)
+    t = np.arange(n) / RATE
+    rng = np.random.default_rng(7)
+
+    # Drone: low fifths that slowly swell, plus soft rumble (smoothed noise)
+    breath = 0.55 + 0.45 * np.sin(2 * np.pi * 0.07 * t - np.pi / 2)
+    drone = (np.sin(2 * np.pi * 55 * t) + 0.6 * np.sin(2 * np.pi * 82.4 * t + 1.0)
+             + 0.35 * np.sin(2 * np.pi * 110.3 * t + 2.0)) * breath
+    rumble = np.convolve(rng.standard_normal(n), np.ones(400) / 400, mode="same") * 6
+    bed = 0.045 * drone + 0.03 * rumble
+
+    # A cold high tone that creeps in over the last 40%
+    climax = np.clip((t / duration - 0.6) / 0.4, 0, 1)
+    bed += 0.012 * climax * (np.sin(2 * np.pi * 1318.5 * t) + np.sin(2 * np.pi * 1975.5 * t)) \
+        * (0.6 + 0.4 * np.sin(2 * np.pi * 4.5 * t))
+
+    def place(sound: "np.ndarray", at: float, gain: float) -> None:
+        start = int(at * RATE)
+        end = min(n, start + len(sound))
+        if 0 <= start < n:
+            bed[start:end] += gain * sound[: end - start]
+
+    # Clock tick: a tiny bright click, from a quarter of the way in, speeding up near the end
+    k = np.arange(int(0.025 * RATE)) / RATE
+    tick = np.sin(2 * np.pi * 2400 * k) * np.exp(-k * 260)
+    at = duration * 0.22
+    while at < duration - 0.5:
+        place(tick, at, 0.08)
+        at += 1.0 if at < duration * 0.75 else 0.6
+
+    # Heartbeat in the last 40%: a soft "lub-dub", quiet, getting a little faster
+    h = np.arange(int(0.16 * RATE)) / RATE
+    thump = np.sin(2 * np.pi * 48 * h) * np.exp(-h * 28)
+    at = duration * 0.6
+    while at < duration - 0.8:
+        place(thump, at, 0.22)
+        place(thump, at + 0.22, 0.15)
+        at += 1.05 - 0.35 * (at - duration * 0.6) / (duration * 0.4)
+
+    # Silence windows (after the key line): fade everything out and back in
+    gate = np.ones(n)
+    ramp = int(0.08 * RATE)
+    for start, end in silences:
+        a, b = int(start * RATE), int(end * RATE)
+        gate[max(0, a):max(0, b)] = 0
+        gate[max(0, a - ramp):max(0, a)] *= np.linspace(1, 0, max(0, a) - max(0, a - ramp))
+        gate[b:min(n, b + ramp)] *= np.linspace(0, 1, min(n, b + ramp) - b)
+    bed *= gate
+    bed[: int(1.5 * RATE)] *= np.linspace(0, 1, int(1.5 * RATE))  # fade in
+
+    pcm = (np.clip(bed, -1, 1) * 32767).astype(np.int16)
+    out = work / "suspense_bed.wav"
+    with wave.open(str(out), "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(RATE)
+        w.writeframes(np.repeat(pcm[:, None], 2, axis=1).tobytes())
+    return out

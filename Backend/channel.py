@@ -122,7 +122,8 @@ def make(name: str, script_path: Path) -> Path:
     data.update({"script": spec["script"], "title": spec.get("title") or spec["subject"], "series": None,
                  "graphics": spec["graphics"], "voiceMood": spec.get("voice"),  # VOICE: calm | emotional
                  "tone": spec.get("tone"), "memorial": spec.get("memorial", ""),  # TONE: tragic | tense | upbeat | suspense
-                 "choice": spec.get("choice", "")})  # CHOICE: Sign it | Walk away (suspense ending)
+                 "choice": spec.get("choice", ""),  # CHOICE: Sign it | Walk away (suspense ending)
+                 "cast": spec.get("cast", "")})  # CAST: how the story's other people look
 
     output = run_generation_pipeline(data=data, is_cancelled=None, on_log=lambda m, l: print(m, flush=True))
     out_dir = ROOT / "channels" / name / "videos"

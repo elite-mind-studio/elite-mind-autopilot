@@ -120,6 +120,7 @@ def _apply_tone(tone: str, data: dict) -> None:
     os.environ["SUBSCRIBE_BUTTON"] = "false" if tragic else "true"
     os.environ["MEMORIAL_TEXT"] = data.get("memorial", "") if tragic else ""
     # Suspense ("what would you do?" stories): night grade, slow drift, short captions, a choice at the end
+    os.environ["STORY_CAST"] = data.get("cast", "")
     suspense = tone == "suspense"
     if suspense:
         os.environ["SCENE_PUNCH"] = "false"
@@ -561,6 +562,16 @@ def run_generation_pipeline(
     render_threads = n_threads or (os.cpu_count() or 2)
 
     guard_cancelled()
+
+    # Suspense: silence windows after "[pause]" lines, for the soundscape (no music then)
+    if tone == "suspense":
+        windows, clock = [], 0.0
+        for i, length in enumerate(sentence_durations):
+            clock += length
+            if i in long_pause:
+                windows.append(f"{max(0.0, clock - 1.6):.2f}-{clock + 0.15:.2f}")
+        os.environ["SUSPENSE_SILENCE"] = ",".join(windows)
+        use_music = False
 
     music_credit = ""
     if use_music:

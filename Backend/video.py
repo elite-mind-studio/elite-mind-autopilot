@@ -129,7 +129,7 @@ def _choice_card(path: str, width: int, choice_a: str, choice_b: str) -> None:
     draw = ImageDraw.Draw(card)
     for n, (letter, label, colour) in enumerate((("A", choice_a, "#2BB34A"), ("B", choice_b, "#E8323C"))):
         top = n * (pill_h + gap)
-        draw.rounded_rectangle([0, top, width - 1, top + pill_h], radius=pill_h // 2, fill=(12, 14, 20, 225),
+        draw.rounded_rectangle([0, top, width - 1, top + pill_h], radius=pill_h // 2 - 4, fill=(12, 14, 20, 225),
                                outline="#FFFFFF", width=max(3, pill_h // 22))
         r = int(pill_h * 0.36)
         cx, cy = pill_h // 2 + 6, top + pill_h // 2
@@ -746,7 +746,7 @@ def _generate_video_ffmpeg(
     grade = {
         "somber": "eq=saturation=0.72:brightness=-0.04:contrast=1.06,",
         # Suspense: dark night look, cold blue shadows, a vignette pulling the eye to the middle
-        "night": "eq=saturation=0.82:brightness=-0.08:contrast=1.14,colorbalance=bs=0.10:ms=0.04:hs=-0.02,vignette=PI/4.5,",
+        "night": "eq=saturation=0.82:brightness=-0.08:contrast=1.14,colorbalance=bs=0.10:bm=0.04:rh=-0.02,vignette=PI/4.5,",
     }.get(os.getenv("VIDEO_GRADE", ""), "")
     memorial = ""
     if os.getenv("MEMORIAL_TEXT", "").strip():
@@ -810,8 +810,18 @@ def _generate_video_ffmpeg(
             elif os.getenv("SFX_MODE") == "suspense":
                 # Suspense lives on quiet: no whooshes on every cut, only a rare riser
                 events = [(t, kind) for t, kind in events if kind == "riser"]
-            if events:
-                track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
+            if os.getenv("SFX_MODE") == "suspense":
+                # Thriller soundscape (drone, ticking clock, heartbeat) with silence after the key line
+                silences = []
+                for window in os.getenv("SUSPENSE_SILENCE", "").split(","):
+                    if "-" in window:
+                        a, b = window.split("-")
+                        silences.append((float(a), float(b)))
+                track = sfx.suspense_bed(duration, silences, TEMP_DIR / "sfx")
+                events = []
+            if events or os.getenv("SFX_MODE") == "suspense":
+                if events:
+                    track = sfx.build_track(events, duration, TEMP_DIR / "sfx")
                 inputs += ["-i", rel(track)]
                 sfx_index = len([x for x in inputs if x == "-i"]) - 1
                 video_filter += (

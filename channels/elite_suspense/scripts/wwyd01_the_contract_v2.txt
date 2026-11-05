@@ -4,6 +4,7 @@ TITLE: WOULD YOU SIGN?
 VOICE: calm
 TONE: suspense
 CHOICE: Sign the contract | Walk away
+CAST: the billionaire is a tall thin pale man with slicked-back silver hair, a sharp white suit and a thin calm smile; the cleaner is an old bald man with a grey moustache, grey work overalls and a cleaning trolley; the 23 workers on the camera feed are small, still figures sitting at desks
 PUBLISH_AT: 2026-11-06T01:00:00Z
 YT_TITLE: He Offered Me $1 Million a Year… The Cleaner Whispered "Don't Sign"
 THUMB_WORD: DON'T SIGN

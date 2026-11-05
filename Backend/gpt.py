@@ -716,6 +716,18 @@ Return ONLY a JSON array with exactly {len(scenes)} objects in the same order:
             f"thing (e.g. 'CHARACTER pointing at three coffee cups on a cafe counter'). Leave him out only "
             f"when the line is clearly about other people or a place on its own."
         )
+    # STORY_CAST: the other people in a story, so they never get drawn as the main character
+    cast = os.getenv("STORY_CAST", "").strip()
+    if cast:
+        character_rule += (
+            f"\n- The other people in this story must always be drawn exactly like this, and NEVER as "
+            f"{character or 'the main character'}: {cast}. When a line is about one of them, show that person."
+            f"\n- In a story told to 'you', 'you' is {character or 'the main character'}; 'he', 'she' or a role "
+            "(the billionaire, the cleaner...) is the matching cast member, described in full, never "
+            f"{character or 'the main character'}."
+            "\n- Show only real, physical things that could be in the scene: no ghosts, symbols, "
+            "floating icons or impossible numbers on clocks or screens."
+        )
     prompt = prompt.replace("{character_rule}", character_rule)
     prompt = prompt.replace(
         "{image_kind}", os.getenv("IMAGE_PROMPT_KIND", "Realistic, cinematic photo")
