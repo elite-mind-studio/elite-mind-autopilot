@@ -121,6 +121,18 @@ def generate_designed_thumbnail(image_path: str, words: str, size=(1280, 720), f
     return str(thumbnail_path)
 
 
+def _phrase_time(phrase: str):
+    """When the narrator starts saying `phrase` (from the caption word timings), or None."""
+    target = [w for w in re.sub(r"[^a-z0-9' ]", " ", phrase.lower()).split() if w]
+    if not target:
+        return None
+    words = [(re.sub(r"[^a-z0-9']", "", w.lower()), s) for chunk in LAST_CAPTION_CHUNKS for w, s, _ in chunk]
+    for i in range(len(words) - len(target) + 1):
+        if [w for w, _ in words[i:i + len(target)]] == target:
+            return words[i][1]
+    return None
+
+
 def _choice_card(path: str, width: int, choice_a: str, choice_b: str) -> None:
     """Two stacked option pills, A in green and B in red, for the "what would you do?" ending."""
     font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.075))
@@ -785,7 +797,30 @@ def _generate_video_ffmpeg(
                 f"x=(w-text_w)/2:y=h*{top}+{int(n * hook_size * 1.12)}:enable='lt(t,2.2)':"
                 f"alpha='if(lt(t,1.9),1,max(0,(2.2-t)/0.3))'"
             )
-    video_filter = f"[0:v]{scale_filter}{grade}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}{hook}[captioned]"
+    # Story cues (suspense): on-screen text and glitches at the exact spoken words
+    import json as _json
+
+    cues = _json.loads(os.getenv("STORY_CUES", "") or "[]")
+    glitch, cue_text = "", ""
+    for cue in cues:
+        at = _phrase_time(cue.get("phrase", ""))
+        if at is None:
+            continue
+        if cue["kind"] == "glitch":
+            window = f"between(t,{at:.2f},{at + 0.35:.2f})"
+            glitch += f"rgbashift=rh=14:bh=-14:enable='{window}',noise=alls=45:allf=t:enable='{window}',"
+        elif cue["kind"] == "cue" and cue.get("value"):
+            cue_file = SUBTITLES_DIR / f"{uuid.uuid4()}_cue.txt"
+            cue_file.write_text(cue["value"].upper(), encoding="utf-8")
+            size = int(frame_height * 0.07)
+            colour = "0xFF3B30" if any(ch.isdigit() for ch in cue["value"]) else "white"
+            cue_text += (
+                f",drawtext=fontfile={rel(FONTS_DIR / 'bold_font.ttf')}:textfile={rel(cue_file)}:"
+                f"fontcolor={colour}:fontsize={size}:borderw={max(4, size // 10)}:bordercolor=black:"
+                f"x=(w-text_w)/2:y=h*0.24:enable='between(t,{at:.2f},{at + 2.4:.2f})':"
+                f"alpha='min(1,(t-{at:.2f})/0.15)'"
+            )
+    video_filter = f"[0:v]{scale_filter}{grade}{glitch}unsharp=5:5:0.6:5:5:0.0,{captions}{memorial}{hook}{cue_text}[captioned]"
     inputs = ["-i", rel(combined_video_path), "-i", rel(tts_path)]
     output_label = "[captioned]"
 
@@ -817,7 +852,12 @@ def _generate_video_ffmpeg(
                     if "-" in window:
                         a, b = window.split("-")
                         silences.append((float(a), float(b)))
-                track = sfx.suspense_bed(duration, silences, TEMP_DIR / "sfx")
+                cue_sounds = []
+                for cue in _json.loads(os.getenv("STORY_CUES", "") or "[]"):
+                    at = _phrase_time(cue.get("phrase", ""))
+                    if at is not None and cue["kind"] in ("sound", "glitch"):
+                        cue_sounds.append((at, cue.get("value") if cue["kind"] == "sound" else "glitch"))
+                track = sfx.suspense_bed(duration, silences, TEMP_DIR / "sfx", cue_sounds)
                 events = []
             if events or os.getenv("SFX_MODE") == "suspense":
                 if events:

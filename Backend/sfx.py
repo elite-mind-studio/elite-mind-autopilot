@@ -119,7 +119,8 @@ def build_track(events: List[Tuple[float, str]], duration: float, work: Path) ->
     return out
 
 
-def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Path) -> Path:
+def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Path,
+                  cues: List[Tuple[float, str]] = ()) -> Path:
     """
     A thriller soundscape instead of music: a dark breathing drone, a clock that ticks
     faster as time runs out, a quiet heartbeat building in the last part, and total
@@ -146,6 +147,9 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
     bed += 0.012 * climax * (np.sin(2 * np.pi * 1318.5 * t) + np.sin(2 * np.pi * 1975.5 * t)) \
         * (0.6 + 0.4 * np.sin(2 * np.pi * 4.5 * t))
 
+    def k_time(length: int) -> "np.ndarray":
+        return np.arange(length) / RATE
+
     def place(sound: "np.ndarray", at: float, gain: float) -> None:
         start = int(at * RATE)
         end = min(n, start + len(sound))
@@ -168,6 +172,20 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
         place(thump, at, 0.22)
         place(thump, at + 0.22, 0.15)
         at += 1.05 - 0.35 * (at - duration * 0.6) / (duration * 0.4)
+
+    # Story sound cues: phone buzz, cash counter, digital glitch
+    for at, kind in cues:
+        if kind == "vibrate":  # three short phone buzzes
+            b = np.arange(int(0.32 * RATE)) / RATE
+            buzz = np.sign(np.sin(2 * np.pi * 160 * b)) * 0.6 * np.minimum(1, b * 40) * np.minimum(1, (0.32 - b) * 40)
+            for k in range(3):
+                place(buzz, at + k * 0.5, 0.18)
+        elif kind == "cash":  # a fast money-counter flutter
+            for k in range(16):
+                place(tick * np.sin(2 * np.pi * 3600 * k_time(len(tick))), at + k * 0.05, 0.10)
+        elif kind == "glitch":  # a short burst of digital crackle
+            g = rng.standard_normal(int(0.3 * RATE)) * (rng.random(int(0.3 * RATE)) > 0.7)
+            place(g, at, 0.05)
 
     # Silence windows (after the key line): fade everything out and back in
     gate = np.ones(n)

@@ -121,6 +121,9 @@ def _apply_tone(tone: str, data: dict) -> None:
     os.environ["MEMORIAL_TEXT"] = data.get("memorial", "") if tragic else ""
     # Suspense ("what would you do?" stories): night grade, slow drift, short captions, a choice at the end
     os.environ["STORY_CAST"] = data.get("cast", "")
+    import json as _json
+
+    os.environ["STORY_CUES"] = _json.dumps(data.get("cues", []))
     suspense = tone == "suspense"
     if suspense:
         os.environ["SCENE_PUNCH"] = "false"

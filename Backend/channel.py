@@ -55,6 +55,10 @@ def parse_script(path: Path) -> dict:
         key = key.strip().lower()
         if key == "source":
             meta["source"].append(value.strip())
+        elif key in ("cue", "sound", "glitch"):
+            # CUE: <spoken words> | <on-screen text>, SOUND: <spoken words> | vibrate|cash, GLITCH: <spoken words>
+            phrase, _, extra = value.partition("|")
+            meta.setdefault("cues", []).append({"kind": key, "phrase": phrase.strip(), "value": extra.strip()})
         elif key == "graphic":  # GRAPHIC: <paragraph> | <card json>, see Backend/motion.py
             index, _, card = value.partition("|")
             meta["graphics"].append({"paragraph": int(index), "card": json.loads(card)})
@@ -123,7 +127,8 @@ def make(name: str, script_path: Path) -> Path:
                  "graphics": spec["graphics"], "voiceMood": spec.get("voice"),  # VOICE: calm | emotional
                  "tone": spec.get("tone"), "memorial": spec.get("memorial", ""),  # TONE: tragic | tense | upbeat | suspense
                  "choice": spec.get("choice", ""),  # CHOICE: Sign it | Walk away (suspense ending)
-                 "cast": spec.get("cast", "")})  # CAST: how the story's other people look
+                 "cast": spec.get("cast", ""),  # CAST: how the story's other people look
+                 "cues": spec.get("cues", [])})  # CUE / SOUND / GLITCH lines, timed to spoken words
 
     output = run_generation_pipeline(data=data, is_cancelled=None, on_log=lambda m, l: print(m, flush=True))
     out_dir = ROOT / "channels" / name / "videos"
