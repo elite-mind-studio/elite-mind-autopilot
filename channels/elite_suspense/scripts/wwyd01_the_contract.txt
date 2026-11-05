@@ -4,7 +4,7 @@ TITLE: WOULD YOU SIGN?
 VOICE: calm
 TONE: suspense
 CHOICE: Sign the contract | Walk away
-PUBLISH_AT: 2026-11-06T02:00:00Z
+PUBLISH_AT: 2026-11-05T12:30:00Z
 YT_TITLE: He Offered Me $1 Million a Year… The Cleaner Whispered "Don't Sign"
 THUMB_WORD: DON'T SIGN
 TAGS: what would you do, would you sign, psychological thriller, suspense story, dilemma, money psychology, freedom vs money, elite mind decoder, story time
