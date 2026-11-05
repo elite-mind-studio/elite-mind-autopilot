@@ -134,6 +134,25 @@ def _text_layer(path: str, lines: list, size: int, width: int, border: bool = Tr
     image.save(path)
 
 
+def _chat_bubble(path: str, message: str, mine: bool, width: int) -> None:
+    """A phone text bubble: theirs grey on the left, yours blue on the right."""
+    import textwrap
+
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.05))
+    lines = textwrap.wrap(message, 24)
+    pad, line_h = int(width * 0.04), int(width * 0.062)
+    box_w = int(max(font.getlength(line) for line in lines) + pad * 2)
+    box_h = line_h * len(lines) + pad * 2
+    image = Image.new("RGBA", (width, box_h + 8), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    x0 = width - box_w - int(width * 0.06) if mine else int(width * 0.06)
+    draw.rounded_rectangle([x0, 0, x0 + box_w, box_h], radius=int(width * 0.045),
+                           fill=(0, 122, 255, 240) if mine else (58, 58, 62, 240))
+    for n, line in enumerate(lines):
+        draw.text((x0 + pad, pad + n * line_h), line, font=font, fill="#FFFFFF")
+    image.save(path)
+
+
 def _phrase_time(phrase: str):
     """When the narrator starts saying `phrase` (from the caption word timings), or None."""
     target = [w for w in re.sub(r"[^a-z0-9' ]", " ", phrase.lower()).split() if w]
@@ -813,6 +832,12 @@ def _generate_video_ffmpeg(
         if cue["kind"] == "glitch":
             window = f"between(t,{at:.2f},{at + 0.35:.2f})"
             glitch += f"rgbashift=rh=14:bh=-14:enable='{window}',noise=alls=45:allf=t:enable='{window}',"
+        elif cue["kind"] == "chat" and cue.get("value"):
+            # CHAT: <spoken words> | them: <message>  (or me: <message>), a text-message bubble
+            sender, _, message = cue["value"].partition(":")
+            layer = TEMP_DIR / f"{uuid.uuid4()}_chat.png"
+            _chat_bubble(str(layer), message.strip(), sender.strip().lower() == "me", frame_width)
+            text_layers.append((layer, int(frame_height * 0.13), at, at + 4.0, 0.15, 0.25))
         elif cue["kind"] == "cue" and cue.get("value"):
             colour = "#FF3B30" if any(ch.isdigit() for ch in cue["value"]) else "#FFFFFF"
             layer = TEMP_DIR / f"{uuid.uuid4()}_cue.png"

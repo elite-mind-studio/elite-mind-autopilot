@@ -481,9 +481,9 @@ if __name__ == "__main__":
     elif command == "tick":
         tick()
     elif command == "run":
-        if "--series" in sys.argv[2:] and premiere_nearby():
+        if premiere_nearby(4 if "--series" in sys.argv[2:] else 2):
             # The evening slot belongs to tonight's story premiere: max 3 Elite posts a day
-            print("[*] A story premiere is scheduled around now; the series Short moves to tomorrow.")
+            print("[*] A scheduled Elite premiere takes this slot; this Short moves to the next run.")
             sys.exit(0)
         run_video(
             allow_upload="--no-upload" not in sys.argv[2:],
