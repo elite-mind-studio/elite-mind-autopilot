@@ -39,7 +39,7 @@ SOUNDS = {
 }
 # Where the sound's peak sits relative to its start (the riser builds up to the word)
 LEAD = {"whoosh": 0.22, "boom": 0.0, "hit": 0.0, "riser": 0.62, "blast": 0.0}
-VOLUME = {"whoosh": 0.3, "boom": 0.95, "hit": 1.0, "riser": 0.6, "blast": 1.0}
+VOLUME = {"whoosh": 0.18, "boom": 0.95, "hit": 1.0, "riser": 0.6, "blast": 1.0}
 
 MONEY = re.compile(
     r"(\d|\$|%|dollar|million|billion|trillion|thousand|hundred|percent|"
@@ -140,7 +140,7 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
     drone = (np.sin(2 * np.pi * 55 * t) + 0.6 * np.sin(2 * np.pi * 82.4 * t + 1.0)
              + 0.35 * np.sin(2 * np.pi * 110.3 * t + 2.0)) * breath
     rumble = np.convolve(rng.standard_normal(n), np.ones(400) / 400, mode="same") * 6
-    bed = 0.026 * drone + 0.016 * rumble
+    bed = 0.016 * drone + 0.009 * rumble  # owner: background was too loud
 
     # A cold high tone that creeps in over the last 40%
     climax = np.clip((t / duration - 0.6) / 0.4, 0, 1)
@@ -199,7 +199,7 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
             r = np.convolve(rng.standard_normal(int(14 * RATE)), np.ones(30) / 30, mode="same")
             secs = np.arange(len(r)) / RATE
             r *= np.minimum(1, secs / 2) * np.minimum(1, (len(r) / RATE - secs) / 3)
-            place(r, at, 0.12)
+            place(r, at, 0.06)
             for _ in range(18):
                 place(tick * 0.6, at + rng.random() * 13, 0.05)
         elif kind == "breath":  # four slow, shaky breaths
@@ -250,7 +250,7 @@ def music_plan(segments: List[Tuple[float, float, str]], duration: float, songs:
         k = len(chains)
         inputs += ["-stream_loop", "-1", "-i", str(path)]
         # Auto-level each section well under the voice (about -16 LUFS): piano -26, dark tension -29
-        level = "loudnorm=I=-29:LRA=7:TP=-4" if "drone" in track else "loudnorm=I=-26:LRA=7:TP=-4"
+        level = "loudnorm=I=-33:LRA=7:TP=-6" if "drone" in track else "loudnorm=I=-30:LRA=7:TP=-6"
         delay = int(start * 1000)
         chains.append(f"[{k}:a]atrim=0:{length:.2f},afade=t=in:d=1.2,afade=t=out:st={max(0.0, length - 1.6):.2f}:d=1.6,"
                       f"{level},aresample={RATE},aformat=channel_layouts=stereo,adelay={delay}|{delay}[m{k}]")
