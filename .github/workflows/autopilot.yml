@@ -93,7 +93,7 @@ jobs:
       LONG_SCRIPT_STYLE: "pov"
       LONG_VISUAL_MODE: "stock_scenes"
       YOUTUBE_SYNTHETIC_MEDIA: "true"
-      YOUTUBE_DESCRIPTION_FOOTER: "Educational content only - not financial advice. Visuals and narration are AI-generated."
+      YOUTUBE_DESCRIPTION_FOOTER: "Topics chosen and reviewed by the Elite Mind Decoder team; Black is our original character. Produced with AI tools (visuals and narration). Educational content only - not financial advice."
       YOUTUBE_PLAYLIST: "Black's Money Lessons"
 
     steps:
