@@ -32,7 +32,8 @@ run(f"uv pip install -q --python {PY} torch==2.1.2 torchvision==0.16.2 torchaudi
     "--index-url https://download.pytorch.org/whl/cu121")
 run(f"uv pip install -q --python {PY} 'numpy==1.23.5' face_alignment==1.3.5 imageio==2.19.3 imageio-ffmpeg "
     "librosa==0.9.2 numba resampy==0.3.1 pydub scipy==1.10.1 kornia==0.6.8 tqdm yacs==0.1.8 pyyaml joblib "
-    "scikit-image==0.19.3 basicsr==1.4.2 facexlib==0.3.0 gfpgan==1.3.8 av safetensors opencv-python==4.8.1.78")
+    "scikit-image==0.19.3 basicsr==1.4.2 facexlib==0.3.0 gfpgan==1.3.8 av safetensors opencv-python==4.8.1.78 "
+    "'setuptools<70'")  # librosa 0.9 needs pkg_resources
 run("bash scripts/download_models.sh")
 
 for job in JOBS:

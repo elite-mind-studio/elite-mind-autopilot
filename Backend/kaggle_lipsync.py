@@ -64,6 +64,15 @@ def lipsync(jobs: List[dict], on_log=None, timeout_minutes: int = 90) -> Dict[st
             if path.exists():
                 results[job["id"]] = path.read_bytes()
         emit(f"[+] Kaggle returned {len(results)}/{len(jobs)} talking shots.")
+        if len(results) < len(jobs):
+            log = next(out.glob("*.log"), None)
+            if log:  # show why: the end of the GPU job's output, without the noise
+                text = log.read_text(encoding="utf-8", errors="ignore")
+                try:
+                    text = "".join(item.get("data", "") for item in json.loads(text))
+                except ValueError:
+                    pass
+                emit("\n".join(text.splitlines()[-25:]))
         return results
     finally:
         shutil.rmtree(work, ignore_errors=True)
