@@ -169,13 +169,17 @@ def recent_topics() -> List[str]:
 
 # What made the best Short so far ("This Jet Fell 5 Miles in One Minute. Investigators Found a Clue"):
 # a fresh American event, one staggering number, and an open question investigators are working on
-SHORT_CRITERIA = """- happened in the last 48 hours, preferably in the United States (most viewers are American);
+# Headline Tales = real mysteries and true crime, one every day (the channel's winners were all of this kind)
+SHORT_CRITERIA = """- is a REAL MYSTERY, CRIME, HEIST, FRAUD, DISAPPEARANCE, ACCIDENT INVESTIGATION or SURVIVAL story;
+  NOT general politics, economics, diplomacy or business news;
+- happened in the last 48 hours, preferably in the United States (most viewers are American);
 - has ONE staggering, concrete number or fact that makes people stop scrolling (a fall, a speed, a sum, a distance);
 - has an open question that investigators, scientists or police are working on (a cause, a clue, a missing piece);
 - good examples: a plane or train accident under investigation, a heist or fraud, a rescue, a strange discovery,
-  a record broken, a mystery; avoid long-running geopolitics unless something dramatic just happened;"""
-LONG_CRITERIA = """- the whole world is talking about, with big stakes (money, power, technology, energy, trade, sport, science);
-- has enough concrete facts and numbers for an 8-minute documentary;"""
+  a missing person found, a con exposed, a mystery solved;"""
+LONG_CRITERIA = """- is a REAL MYSTERY, CRIME, HEIST, FRAUD, DISAPPEARANCE, ACCIDENT INVESTIGATION or SURVIVAL story in the news,
+  NOT general politics, economics, diplomacy or business news;
+- has enough concrete facts and numbers for an 8-minute documentary (who, what happened, the clues, what is next);"""
 NO_REPEAT_LONG = """- is not a near-repeat of these recent topics, UNLESS today's headlines bring a genuinely NEW development
   in one of them (an investigation report, an arrest, a deal, a new record): then choose it as a follow-up,
   say "FOLLOW-UP:" at the start of the angle, and describe what is new:"""
@@ -187,8 +191,8 @@ def pick_story(items: List[dict], for_short: bool = False) -> dict:
     listing = "\n".join(f"{i}. [{it['source']}] {it['title']} - {it['summary'][:140]}" for i, it in enumerate(items[:150]))
     done = "\n".join(f"- {t}" for t in recent_topics()) or "- (none yet)"
     return chat_json(f"""
-You choose today's story for "Headline Tales", a YouTube channel of short, neutral, well-sourced
-documentaries about what is happening in the world. Pick ONE story from today's headlines.
+You choose today's story for "Headline Tales", a YouTube channel of real mysteries and true crime:
+short, neutral, well-sourced stories, one every day. Pick ONE story from today's headlines.
 
 Choose a story that:
 {SHORT_CRITERIA if for_short else LONG_CRITERIA}

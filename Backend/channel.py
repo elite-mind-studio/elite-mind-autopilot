@@ -360,6 +360,21 @@ if __name__ == "__main__":
             else:
                 queue[0].replace(script)
             print(f"[+] Using queued script {queue[0].name}", flush=True)
+            # End on a specific promise (the next queued story) instead of a generic "subscribe"
+            if len(queue) > 1:
+                upcoming = parse_script(queue[1])
+                teaser = re.split(r"(?<=[.!?…])\s", (upcoming.get("yt_title") or upcoming["subject"]).replace("#shorts", "").strip())[0]
+                teaser = teaser.rstrip(".…!? ")
+                header, _, body = script.read_text(encoding="utf-8").partition("\n\n")
+                paragraphs = body.strip().split("\n\n")
+                if paragraphs and "subscribe" in paragraphs[-1].lower():
+                    # Keep a story question such as "Did they make it?" (comments), drop the generic ask
+                    first = re.split(r"(?<=[?])\s", paragraphs[-1].strip())[0]
+                    keep = f"{first} " if first.endswith("?") and not first.lower().startswith("which") else ""
+                    paragraphs[-1] = (f"{keep}Coming up next: {teaser}. Tap the subscribe button right below this video, "
+                                      "so you don't miss it.")
+                    script.write_text(header + "\n\n" + "\n\n".join(paragraphs) + "\n", encoding="utf-8")
+                    print(f"[+] Ending teases the next story: {teaser}", flush=True)
         else:
             script = prepare_short()
         if "--dry-run" in sys.argv:
