@@ -195,6 +195,9 @@ def suspense_bed(duration: float, silences: List[Tuple[float, float]], work: Pat
         elif kind == "cash":  # a fast money-counter flutter
             for k in range(16):
                 place(tick * np.sin(2 * np.pi * 3600 * k_time(len(tick))), at + k * 0.05, 0.10)
+        elif kind.startswith("countdown"):  # one clear tick per second ("countdown5")
+            for k in range(int(kind[9:] or 5)):
+                place(tick, at + 0.6 + k, 0.12)
         elif kind == "rain":  # soft rain on a window for about 14 s, with a few drips
             r = np.convolve(rng.standard_normal(int(14 * RATE)), np.ones(30) / 30, mode="same")
             secs = np.arange(len(r)) / RATE

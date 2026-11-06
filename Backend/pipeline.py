@@ -151,7 +151,14 @@ def _apply_tone(tone: str, data: dict) -> None:
         os.environ["SCENE_PUNCH"] = "false"
         os.environ["SFX_MODE"] = "suspense"
         os.environ["VIDEO_GRADE"] = "night"
-    os.environ["LIKE_BADGE"] = "false" if suspense or tragic else "true"
+    # Quiz ("test your confidence"): the same cue engine (options, countdown, answer), bright look,
+    # normal voice, no drone; the countdown ticks come from the cues
+    if tone == "quiz":
+        os.environ["SCENE_PUNCH"] = "false"
+        os.environ["SFX_MODE"] = "suspense"
+        os.environ["VIDEO_GRADE"] = ""
+        os.environ["LIKE_BADGE"] = "false"
+    os.environ["LIKE_BADGE"] = "false" if suspense or tragic or tone == "quiz" else "true"
     os.environ["CAPTION_WORDS"] = "2" if suspense else "3"
     os.environ["CAPTION_CHARS"] = "12" if suspense else "16"
     choice = [c.strip() for c in data.get("choice", "").split("|")] if suspense else []
@@ -383,15 +390,19 @@ def run_generation_pipeline(
     sentences = [s for s in sentences if s]
     # A "[pause]" line in a hand-written script = a long silence after the line before it
     long_pause = set()
+    pause_seconds = {}
     kept = []
     for s in sentences:
-        if s.lower() == "[pause]":
+        marker = re.fullmatch(r"\[pause(?:\s+(\d+(?:\.\d+)?))?\]", s.strip().lower())
+        if marker:
             if kept:
+                # "[pause]" = 1.6 s; "[pause 5]" = 5 s (e.g. a quiz countdown)
                 long_pause.add(len(kept) - 1)
+                pause_seconds[len(kept) - 1] = float(marker.group(1) or 1.6)
             continue
         kept.append(s)
     sentences = kept
-    script = re.sub(r"\n?\[pause\]", "", script, flags=re.IGNORECASE)
+    script = re.sub(r"\n?\[pause(?:\s+\d+(?:\.\d+)?)?\]", "", script, flags=re.IGNORECASE)
     paths = []
     sentence_durations = []
 
@@ -407,7 +418,7 @@ def run_generation_pipeline(
         emit(f"[+] Voice delivery: {mood}", "info")
         # A tragedy gets a moment of silence before its closing line
         pauses = [
-            1.6 if i in long_pause
+            pause_seconds.get(i, 1.6) if i in long_pause
             else 1.4 if tone == "tragic" and i + 1 < len(sentences) and sentences[i + 1].lower().startswith("this is the story")
             else (0.5 if tone in ("tragic", "suspense") else 0.4)
             for i in range(len(sentences))
@@ -603,12 +614,12 @@ def run_generation_pipeline(
     guard_cancelled()
 
     # Suspense: silence windows after "[pause]" lines, for the soundscape (no music then)
-    if tone == "suspense":
+    if tone in ("suspense", "quiz"):
         windows, clock = [], 0.0
         for i, length in enumerate(sentence_durations):
             clock += length
             if i in long_pause:
-                windows.append(f"{max(0.0, clock - 1.6):.2f}-{clock + 0.15:.2f}")
+                windows.append(f"{max(0.0, clock - pause_seconds.get(i, 1.6)):.2f}-{clock + 0.15:.2f}")
         os.environ["SUSPENSE_SILENCE"] = ",".join(windows)
         emit(f"[+] Suspense silence windows: {os.environ['SUSPENSE_SILENCE'] or 'none'} "
              f"(pause after sentences {sorted(long_pause)})", "info")

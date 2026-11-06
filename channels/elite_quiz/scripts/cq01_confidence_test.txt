@@ -1,0 +1,54 @@
+FORMAT: short
+SUBJECT: Test your confidence level: three everyday situations, pick A, B or C before the timer runs out, then see the confident answer
+TITLE: TEST YOUR CONFIDENCE
+VOICE: emotional
+TONE: quiz
+CAST: Black is "you" in each situation; the boss is a stern middle-aged white woman in a grey blazer; the party guests are friendly strangers of different backgrounds; the coworker who interrupts is a young man in a blue shirt
+OPTIONS: What do you do | Stay silent, fix it later | Ask to talk after the meeting | Defend yourself right there
+COUNTDOWN: Your five seconds start now | 5
+ANSWER: The confident answer is B | B
+OPTIONS: What is your move | Scroll your phone by the snacks | Introduce yourself to someone alone | Wait for someone to come to you
+COUNTDOWN: Decide in five seconds | 5
+ANSWER: The confident move is B | B
+OPTIONS: How do you respond | Stop talking and let them go | Talk louder over them | Calmly say let me finish
+COUNTDOWN: Five seconds, final answer | 5
+ANSWER: The confident choice is C | C
+PUBLISH_AT: 2026-11-06T21:00:00Z
+YT_TITLE: Test Your Confidence: What Would You Do in These 3 Situations?
+THUMB_WORD: A, B OR C?
+TAGS: confidence test, test your confidence, what would you do, confidence, social skills, body language, psychology quiz, self improvement, elite mind decoder, black
+DESCRIPTION: Three everyday situations. Pick A, B or C before the timer runs out, then see the confident answer and why it works. Count your score and tell us in the comments: did you get 3 out of 3?
+
+Let's test your confidence level. Three situations. Pick your answer before the timer runs out, and keep score.
+
+Situation one. Your boss criticizes your work in front of the whole team. What do you do?
+
+A, stay silent and fix it later. B, calmly ask to talk after the meeting. C, defend yourself right there.
+
+Your five seconds start now.
+
+[pause 5]
+
+The confident answer is B. You stay calm, you don't argue in public, and you still stand up for yourself. That is control.
+
+Situation two. You walk into a party where you don't know anyone. What is your move?
+
+A, scroll your phone by the snacks. B, introduce yourself to someone standing alone. C, wait for someone to come to you.
+
+Decide in five seconds.
+
+[pause 5]
+
+The confident move is B. Confident people don't wait to be chosen. And the person standing alone will be glad you came over.
+
+Situation three. A coworker keeps interrupting you in a meeting. How do you respond?
+
+A, stop talking and let them go. B, talk louder over them. C, hold eye contact and calmly say, let me finish my point.
+
+Five seconds, final answer.
+
+[pause 5]
+
+The confident choice is C. No shouting, no shrinking. Calm words, steady eyes, and you keep the room.
+
+Now count your score. Three out of three? You already have real confidence. One or zero? Don't worry, that is what this channel is for. Comment your score below, and tap the subscribe button right below this video for a new test every week.

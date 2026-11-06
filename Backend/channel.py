@@ -55,7 +55,7 @@ def parse_script(path: Path) -> dict:
         key = key.strip().lower()
         if key == "source":
             meta["source"].append(value.strip())
-        elif key in ("cue", "sound", "glitch", "chat", "music"):
+        elif key in ("cue", "sound", "glitch", "chat", "music", "options", "countdown", "answer"):
             # CUE: <spoken words> | <on-screen text>, SOUND: <spoken words> | vibrate|cash, GLITCH: <spoken words>
             phrase, _, extra = value.partition("|")
             meta.setdefault("cues", []).append({"kind": key, "phrase": phrase.strip(), "value": extra.strip()})

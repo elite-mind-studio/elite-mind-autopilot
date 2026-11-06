@@ -55,6 +55,7 @@ MOOD_SONGS = {
     "tragic": ("Long Note Four", "Dark Times", "Lightless Dawn", "Sad Trio"),
     "tense": ("Volatile Reaction", "Ossuary 6 - Air", "Epic Unease", "Investigations"),
     "suspense": ("Ossuary 6 - Air", "Epic Unease", "Investigations"),
+    "quiz": ("Wallpaper", "Carefree", "Sneaky Snitch"),
     "upbeat": ("Sneaky Snitch", "Carefree", "Wallpaper", "Fluffing a Duck", "Monkeys Spinning Monkeys"),
 }
 

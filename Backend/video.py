@@ -158,6 +158,16 @@ def _chat_bubble(path: str, message: str, mine: bool, width: int) -> None:
     image.save(path)
 
 
+def _phrase_end(phrase: str):
+    """When the narrator finishes saying `phrase`, or None."""
+    target = [w for w in re.sub(r"[^a-z0-9' ]", " ", phrase.lower()).split() if w]
+    words = [(re.sub(r"[^a-z0-9']", "", w.lower()), e) for chunk in LAST_CAPTION_CHUNKS for w, _, e in chunk]
+    for i in range(len(words) - len(target) + 1):
+        if target and [w for w, _ in words[i:i + len(target)]] == target:
+            return words[i + len(target) - 1][1]
+    return None
+
+
 def _phrase_time(phrase: str):
     """When the narrator starts saying `phrase` (from the caption word timings), or None."""
     target = [w for w in re.sub(r"[^a-z0-9' ]", " ", phrase.lower()).split() if w]
@@ -170,13 +180,14 @@ def _phrase_time(phrase: str):
     return None
 
 
-def _choice_card(path: str, width: int, choice_a: str, choice_b: str) -> None:
-    """Two stacked option pills, A in green and B in red, for the "what would you do?" ending."""
-    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.075))
-    pill_h, gap = int(width * 0.15), int(width * 0.04)
-    card = Image.new("RGBA", (width, pill_h * 2 + gap), (0, 0, 0, 0))
+def _choice_card(path: str, width: int, *choices: str) -> None:
+    """Stacked option pills (A green, B red, C blue, D orange) for choices and quiz answers."""
+    font = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), int(width * 0.062))
+    pill_h, gap = int(width * 0.13), int(width * 0.03)
+    card = Image.new("RGBA", (width, pill_h * len(choices) + gap * (len(choices) - 1)), (0, 0, 0, 0))
     draw = ImageDraw.Draw(card)
-    for n, (letter, label, colour) in enumerate((("A", choice_a, "#2BB34A"), ("B", choice_b, "#E8323C"))):
+    colours = ("#2BB34A", "#E8323C", "#2F7BFF", "#FF9F1C")
+    for n, (letter, label, colour) in enumerate(zip("ABCD", choices, colours)):
         top = n * (pill_h + gap)
         draw.rounded_rectangle([0, top, width - 1, top + pill_h], radius=pill_h // 2 - 4, fill=(12, 14, 20, 225),
                                outline="#FFFFFF", width=max(3, pill_h // 22))
@@ -184,7 +195,16 @@ def _choice_card(path: str, width: int, choice_a: str, choice_b: str) -> None:
         cx, cy = pill_h // 2 + 6, top + pill_h // 2
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=colour)
         draw.text((cx, cy), letter, font=font, fill="#FFFFFF", anchor="mm")
-        draw.text((cx + r + int(width * 0.04), cy), label.strip().upper()[:22], font=font, fill="#FFFFFF", anchor="lm")
+        text = label.strip().upper()
+        room = width - (cx + r + int(width * 0.08))
+        size = int(width * 0.062)
+        fitted = font
+        while fitted.getlength(text) > room and size > int(width * 0.036):
+            size -= 2  # long answers get a smaller font so they stay whole inside the pill
+            fitted = ImageFont.truetype(str((FONTS_DIR / "bold_font.ttf").resolve()), size)
+        while fitted.getlength(text) > room and len(text) > 4:
+            text = text[:-2].rstrip() + "..."
+        draw.text((cx + r + int(width * 0.04), cy), text, font=fitted, fill="#FFFFFF", anchor="lm")
     card.save(path)
 
 
@@ -830,13 +850,34 @@ def _generate_video_ffmpeg(
     import json as _json
 
     glitch = ""
-    for cue in _json.loads(os.getenv("STORY_CUES", "") or "[]"):
+    cues_all = _json.loads(os.getenv("STORY_CUES", "") or "[]")
+    for cue in cues_all:
         at = _phrase_time(cue.get("phrase", ""))
         if at is None:
             continue
         if cue["kind"] == "glitch":
             window = f"between(t,{at:.2f},{at + 0.35:.2f})"
             glitch += f"rgbashift=rh=14:bh=-14:enable='{window}',noise=alls=45:allf=t:enable='{window}',"
+        elif cue["kind"] == "options" and cue.get("value"):
+            # OPTIONS: <spoken words> | A text | B text | C text  -> shown until the ANSWER cue that follows
+            labels = [o.strip() for o in cue["value"].split("|") if o.strip()]
+            later = [_phrase_time(c.get("phrase", "")) for c in cues_all if c["kind"] == "answer"]
+            end = min([x for x in later if x is not None and x > at] or [at + 12])
+            layer = TEMP_DIR / f"{uuid.uuid4()}_options.png"
+            _choice_card(str(layer), int(frame_width * 0.86), *labels)
+            text_layers.append((layer, int(frame_height * 0.12), at, end + 0.4, 0.2, 0.2))
+        elif cue["kind"] == "countdown":
+            # COUNTDOWN: <spoken words> | 5  -> big 5, 4, 3, 2, 1 starting just after those words
+            seconds = int(float(cue.get("value") or 5))
+            start = (_phrase_end(cue.get("phrase", "")) or at) + 0.15  # right after the narrator stops
+            for k in range(seconds):
+                layer = TEMP_DIR / f"{uuid.uuid4()}_count.png"
+                _text_layer(str(layer), [(str(seconds - k), "#FFE600")], int(frame_height * 0.16), frame_width)
+                text_layers.append((layer, int(frame_height * 0.40), start + k, start + k + 0.95, 0.05, 0.15))
+        elif cue["kind"] == "answer" and cue.get("value"):
+            layer = TEMP_DIR / f"{uuid.uuid4()}_answer.png"
+            _text_layer(str(layer), [(f"ANSWER: {cue['value'].upper()}", "#2BD34A")], int(frame_height * 0.075), frame_width)
+            text_layers.append((layer, int(frame_height * 0.40), at, at + 2.6, 0.1, 0.25))
         elif cue["kind"] == "chat" and cue.get("value"):
             # CHAT: <spoken words> | them: <message>  (or me: <message>), a text-message bubble
             sender, _, message = cue["value"].partition(":")
@@ -886,6 +927,9 @@ def _generate_video_ffmpeg(
                     at = _phrase_time(cue.get("phrase", ""))
                     if at is not None and cue["kind"] in ("sound", "glitch"):
                         cue_sounds.append((at, cue.get("value") if cue["kind"] == "sound" else "glitch"))
+                    elif at is not None and cue["kind"] == "countdown":
+                        end = (_phrase_end(cue.get("phrase", "")) or at) - 0.45  # sfx adds 0.6 s
+                        cue_sounds.append((end, f"countdown{int(float(cue.get('value') or 5))}"))
                     elif at is not None and cue["kind"] == "music":
                         plan.append((at, cue.get("value", "")))
                 # MUSIC lines: each section runs until the next one starts (the first from 0 s)
