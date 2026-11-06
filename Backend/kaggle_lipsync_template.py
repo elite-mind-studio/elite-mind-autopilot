@@ -46,7 +46,7 @@ for job in JOBS:
     result = WORK / f"result_{job['id']}"
     try:
         run(f"{PY} inference.py --driven_audio {wav} --source_image {face} --result_dir {result} "
-            f"--preprocess full --still --enhancer gfpgan --size 512 --expression_scale 1.1")
+            f"--preprocess crop --enhancer gfpgan --size 512 --expression_scale 1.6")
         videos = sorted(result.rglob("*.mp4"))
         if videos:
             (OUT / f"{job['id']}.mp4").write_bytes(videos[-1].read_bytes())
