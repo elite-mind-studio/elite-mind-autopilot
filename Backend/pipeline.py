@@ -100,6 +100,24 @@ def designed_thumbnail(title: str, script: str, fallback_image: str, words: str 
     return generate_designed_thumbnail(image, words or concept_words)
 
 
+LETTER_NAMES = {
+    "A": "ay", "B": "bee", "C": "see", "D": "dee", "E": "ee", "F": "eff", "G": "jee", "H": "aitch",
+    "I": "eye", "J": "jay", "K": "kay", "L": "el", "M": "em", "N": "en", "O": "oh", "P": "pee", "Q": "cue",
+    "R": "ar", "S": "ess", "T": "tee", "U": "you", "V": "vee", "W": "double you", "X": "ex", "Y": "why", "Z": "zee",
+}
+
+
+def _spoken(sentence: str) -> str:
+    """
+    Text as the voice should say it: initials like "D.B." or "J. K." are read letter by letter
+    ("dee bee"); a viewer said the voice mangled "D.B. Cooper". Captions keep the written form.
+    """
+    def letters(match: "re.Match") -> str:
+        return " ".join(LETTER_NAMES[c] for c in re.findall(r"[A-Z]", match.group(0))) + " "
+
+    return re.sub(r"(?<![A-Za-z])(?:[A-Z]\.\s?){2,}", letters, sentence).replace("  ", " ").strip()
+
+
 def _tone(data: dict, script: str) -> str:
     """tragic | tense | upbeat: drives music, pacing, colour and sound design."""
     if data.get("tone"):
@@ -385,7 +403,7 @@ def run_generation_pipeline(
             else (0.5 if tone in ("tragic", "suspense") else 0.4)
             for i in range(len(sentences))
         ]
-        chatterbox_files = _chatterbox_batch(sentences, voice.split(":", 1)[1], emit, mood, pauses)
+        chatterbox_files = _chatterbox_batch([_spoken(s) for s in sentences], voice.split(":", 1)[1], emit, mood, pauses)
         if chatterbox_files is None:
             voice = os.getenv("CHATTERBOX_FALLBACK_VOICE", "kokoro:am_onyx")
             voice_prefix = voice[:2]
@@ -403,11 +421,11 @@ def run_generation_pipeline(
         for attempt in range(5):
             try:
                 if voice.startswith("kokoro:"):
-                    kokoro_tts_save(sentence, voice.split(":", 1)[1], current_tts_path)
+                    kokoro_tts_save(_spoken(sentence), voice.split(":", 1)[1], current_tts_path)
                 elif voice.endswith("Neural"):
-                    edge_tts_save(sentence, voice, current_tts_path)
+                    edge_tts_save(_spoken(sentence), voice, current_tts_path)
                 else:
-                    tts(sentence, voice, filename=current_tts_path)
+                    tts(_spoken(sentence), voice, filename=current_tts_path)
             except Exception as err:
                 emit(f"[-] TTS attempt {attempt + 1} failed: {err}", "warning")
             if os.path.exists(current_tts_path):
