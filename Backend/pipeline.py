@@ -641,7 +641,7 @@ def run_generation_pipeline(
                 song_clip = song_clip.with_effects(
                     [afx.AudioLoop(duration=original_duration)]
                 )
-                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.06")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
+                song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.04")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
 
                 mixed_audio = CompositeAudioClip(
                     [original_audio, song_clip]
@@ -699,7 +699,7 @@ def run_generation_pipeline(
                     song_clip = song_clip.with_effects(
                         [afx.AudioLoop(duration=original_duration)]
                     )
-                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.06")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
+                    song_clip = song_clip.with_volume_scaled(float(os.getenv("MUSIC_VOLUME", "0.04")) * (1.4 if tone in ("tragic", "suspense") else 1.0)).with_fps(44100)
                     comp_audio = CompositeAudioClip(
                         [original_audio, song_clip]
                     ).with_duration(original_duration)
