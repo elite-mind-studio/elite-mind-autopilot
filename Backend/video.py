@@ -436,7 +436,8 @@ def _highlight_ass(chunks: list, path: str, width: int, height: int, font: str, 
     clean = lambda w: w.replace("{", "(").replace("}", ")").replace("\\", "")
     lines = []
     for n, chunk in enumerate(chunks):
-        chunk_end = chunks[n + 1][0][1] if n + 1 < len(chunks) else chunk[-1][2] + 0.3
+        # A caption stays until the next one, but clears during long silences (quiz countdowns, pauses)
+        chunk_end = min(chunks[n + 1][0][1], chunk[-1][2] + 0.8) if n + 1 < len(chunks) else chunk[-1][2] + 0.3
         for j, (_, start, _) in enumerate(chunk):
             end = chunk[j + 1][1] if j + 1 < len(chunk) else max(chunk_end, start + 0.15)
             words = []
@@ -872,7 +873,7 @@ def _generate_video_ffmpeg(
             start = (_phrase_end(cue.get("phrase", "")) or at) + 0.15  # right after the narrator stops
             for k in range(seconds):
                 layer = TEMP_DIR / f"{uuid.uuid4()}_count.png"
-                _text_layer(str(layer), [(str(seconds - k), "#FFE600")], int(frame_height * 0.16), frame_width)
+                _text_layer(str(layer), [(str(seconds - k), "#FFE600")], int(frame_height * 0.22), frame_width)
                 text_layers.append((layer, int(frame_height * 0.40), start + k, start + k + 0.95, 0.05, 0.15))
         elif cue["kind"] == "answer" and cue.get("value"):
             layer = TEMP_DIR / f"{uuid.uuid4()}_answer.png"
