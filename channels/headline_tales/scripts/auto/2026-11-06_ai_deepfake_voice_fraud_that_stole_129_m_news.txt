@@ -1,0 +1,16 @@
+FORMAT: short
+SUBJECT: AI-deepfake voice fraud that stole $129 million from U.S. companies
+TITLE: AI Fraud
+YT_TITLE: AI Voice Scam Steals $129 Million. How Did They Pull It Off?
+TAGS: AI,deepfake,fraud,wire fraud,cybercrime,law enforcement,cryptocurrency
+DESCRIPTION: Three foreign nationals used AI-generated voices to impersonate CEOs and lawyers, duping companies into wiring over one hundred twenty-nine million dollars.
+SOURCE: CBS News US - https://www.cbsnews.com/news/3-ai-steal-129-million-companies-impersonating-executives-lawyers/
+SOURCE: NBC News - https://www.nbcnews.com/news/us-news/3-foreign-nationals-allegedly-used-ai-mimic-ceos-129m-scheme-doj-says-rcna607818
+SOURCE: Wikipedia, Deepfake - https://en.wikipedia.org/wiki/Deepfake
+
+Three suspects used AI-generated voice and video to pose as corporate CEOs and big-law attorneys, and they convinced employees to wire over one hundred twenty-nine million dollars to foreign accounts. 
+The scheme targeted accounting departments at hospitals in Missouri and California, a bank in Rhode Island, a fintech firm in the United Kingdom, a mutual fund in Massachusetts and a pet-food company in Florida, among others. 
+During calls the scammers mimicked the executives' speech and even showed fabricated video, then directed victims to a fake attorney who instructed a wire transfer. 
+After the money moved, the trio converted the funds into cryptocurrency to hide the source before splitting the proceeds. 
+Federal investigators say the operation ran from July two-thousand twenty-four to February two-thousand twenty-six, 
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
