@@ -317,6 +317,10 @@ def run_generation_pipeline(
     # Long videos: the description's one-tap subscribe link is clickable there (not in Shorts)
     if video_format == "long" and os.getenv("YOUTUBE_SUBSCRIBE_LINK", "").strip():
         call_to_action = f"{call_to_action} Tap the subscribe link in the description.".strip()
+    # Elite Shorts tease the next topic instead of a generic "subscribe"
+    if data.get("nextTitle") and video_format == "short" and not series:
+        call_to_action = (f"Coming up next: {data['nextTitle']}. "
+                          "Tap the subscribe button right below this video, so you don't miss it.")
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"
     # Kept for the learning loop (autopilot records the hook of each posted video)

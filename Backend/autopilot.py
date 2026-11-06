@@ -391,9 +391,15 @@ def run_video(
         if message.startswith("Uploaded video ID:"):
             uploaded.append(message)
 
-    run_generation_pipeline(
-        data=build_payload(topic, upload, video_format), is_cancelled=None, on_log=on_log
-    )
+    payload = build_payload(topic, upload, video_format)
+    # End on a specific promise: the next topic in the same queue ("Coming up next: ...")
+    if video_format == "short" and queue != "series":
+        upcoming = _read_lines(_topic_files(queue)[0])[1:2]
+        if upcoming:
+            line, _, fixed = upcoming[0].partition("|| Title:")
+            fixed = fixed.split("||")[0]
+            payload["nextTitle"] = (fixed or re.split(r"\s[(:]|[.;]\s|\|\|", line, maxsplit=1)[0]).strip().rstrip(".")
+    run_generation_pipeline(data=payload, is_cancelled=None, on_log=on_log)
 
     if upload and not uploaded:
         raise RuntimeError("Video was generated but the YouTube upload failed.")
