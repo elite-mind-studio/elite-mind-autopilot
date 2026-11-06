@@ -82,13 +82,13 @@ jobs:
       AUTOPILOT_LONG_PARAGRAPHS: "10"
       AUTOPILOT_LONG_MAX_WORDS: "1500"
       AUTOPILOT_LONG_SCENE_SECONDS: "5"
-      VIDEO_LAYOUT: "letterbox"
-      SCRIPT_STYLE: "listicle"
+      VIDEO_LAYOUT: "auto"        # lists: title-bar layout; stories: full screen
+      SCRIPT_STYLE: "auto"        # numbered topics are lists, the rest are stories
       SCRIPT_EXTRA_RULES: "Make the viewer FEEL it. Open with a 'you' hook that puts something they care about at stake (their money, their pride, their family). Include one human moment (a real-feeling person like the viewer). Halfway through add a mini-cliffhanger such as 'But here is the part nobody tells you'. Use short punchy sentences and concrete numbers. End by looping back to the opening line. Frame every tip as practical, ethical leverage the viewer can use with confidence (or to protect themselves), never as a way to manipulate or harm others."
       KOKORO_SPEED: "1.1"
       IMAGE_STYLE: "flat 2D vector cartoon illustration, explainer animation style, clean simple shapes, bold dark outlines, plain light cream background, bright friendly colors, minimal detail, 16:9 composition"
       IMAGE_PROMPT_KIND: "Flat 2D cartoon illustration"
-      AUTOPILOT_CAPTION_COLOR: "#FFE600"
+      AUTOPILOT_CAPTION_COLOR: "#FFE600,#00E5FF,#FFFFFF"
       CLOUDFLARE_STEPS: "4"
       LONG_SCRIPT_STYLE: "pov"
       LONG_VISUAL_MODE: "stock_scenes"

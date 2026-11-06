@@ -229,7 +229,8 @@ def build_payload(topic: str, upload: bool, video_format: str = "short") -> dict
         "paragraphNumber": int(os.getenv("AUTOPILOT_PARAGRAPHS", "3")),
         "stockVideos": int(os.getenv("AUTOPILOT_STOCK_VIDEOS", "5")),
         "subtitlesPosition": "center,center",
-        "color": os.getenv("AUTOPILOT_CAPTION_COLOR", "#FFFFFF"),
+        # Comma-separated list: the caption accent colour changes from video to video
+        "color": random.choice([c.strip() for c in os.getenv("AUTOPILOT_CAPTION_COLOR", "#FFFFFF").split(",") if c.strip()]),
         "customPrompt": "",
         "useMusic": True,
         "automateYoutubeUpload": upload,

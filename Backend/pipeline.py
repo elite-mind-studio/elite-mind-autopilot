@@ -249,6 +249,11 @@ def run_generation_pipeline(
         voice_prefix = voice[:2]
 
     # A hand-written script (e.g. fact-checked documentaries) is used as-is
+    # VIDEO_LAYOUT=auto: numbered list Shorts use the title-bar layout, story Shorts go full screen
+    if (os.getenv("VIDEO_LAYOUT_MODE") or os.getenv("VIDEO_LAYOUT", "")) == "auto":
+        os.environ["VIDEO_LAYOUT_MODE"] = "auto"
+        numbered = bool(re.match(r"\s*\d", data.get("videoSubject", "")))
+        os.environ["VIDEO_LAYOUT"] = "letterbox" if numbered else "full"
     script = data.get("script") or generate_script(
         data["videoSubject"],
         paragraph_number,

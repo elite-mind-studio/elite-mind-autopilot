@@ -247,6 +247,10 @@ def generate_script(
     # Recurring story character, e.g. "Mr. Black", who the lesson is told through
     character = os.getenv("STORY_CHARACTER", "").strip()
     script_style = (script_style or os.getenv("SCRIPT_STYLE", "story")).strip().lower()
+    # "auto": numbered topics ("5 habits...") are lists, everything else is told as a story,
+    # so the channel is not one repeated template (YouTube flags mass-produced formats)
+    if script_style == "auto":
+        script_style = "listicle" if re.match(r"\s*\d", video_subject) else "story"
     if series:
         part, parts = series["part"], series["parts"]
         recap = (
