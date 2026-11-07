@@ -1,6 +1,6 @@
 FORMAT: short
 SUBJECT: The 2005 Banco Central heist in Fortaleza, Brazil: a fake artificial grass shop, an 80 metre tunnel and 3.5 tons of cash
-TITLE: 3.5 TONNES OF CASH
+TITLE: 3.5 TONS OF CASH
 VOICE: emotional
 TONE: tense
 YT_TITLE: The Fake Grass Shop That Robbed a Central Bank
