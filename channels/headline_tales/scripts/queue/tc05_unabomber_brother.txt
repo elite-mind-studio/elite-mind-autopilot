@@ -1,12 +1,12 @@
 FORMAT: short
-SUBJECT: How the Unabomber was caught in 1996 after his brother David recognised his writing in the published manifesto
+SUBJECT: How the Unabomber was caught in 1996 after his brother David recognized his writing in the published manifesto
 TITLE: CAUGHT BY HIS BROTHER
 VOICE: emotional
 TONE: tense
 YT_TITLE: The FBI Couldn't Catch Him for 17 Years. His Brother Did
 THUMB_WORD: BROTHER
 TAGS: unabomber, ted kaczynski, david kaczynski, fbi, true crime, manifesto, washington post, real story, true story, headline tales
-DESCRIPTION: For 17 years, the FBI hunted the bomber it called UNABOM. In 1995 his manifesto was published in The Washington Post, and his brother David recognised the writing. Ted Kaczynski was arrested at his Montana cabin on 3 April 1996.
+DESCRIPTION: For 17 years, the FBI hunted the bomber it called UNABOM. In 1995 his manifesto was published in The Washington Post, and his brother David recognized the writing. Ted Kaczynski was arrested at his Montana cabin on 3 April 1996.
 SOURCE: Wikipedia, Ted Kaczynski - https://en.wikipedia.org/wiki/Ted_Kaczynski
 
 Have you ever heard of a man the FBI couldn't catch for seventeen years, until his own brother read the newspaper? Sit tight. Let's go on a journey.
