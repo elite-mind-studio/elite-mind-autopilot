@@ -131,9 +131,15 @@ jobs:
             # Shorts only (owner's call: long videos got almost no views). The documentary slot posts
             # a third Short instead, and there is no morning plan/thumbnail alert. Set the repo
             # variable HEADLINE_LONG_VIDEOS=true to bring documentaries back.
+            # A hand-written documentary planned for today (scripts/auto/<date>_planned.json) still posts
+            planned="channels/headline_tales/scripts/auto/$(date -u +%F)_planned.json"
             if [ "${{ vars.HEADLINE_LONG_VIDEOS }}" != "true" ]; then
               [ "$mode" = "plan" ] && { echo "Long videos are off: no documentary to plan."; exit 0; }
-              mode=auto-short
+              if [ "$mode" = "auto" ] && [ -f "$planned" ]; then
+                echo "Posting the documentary planned for today: $planned"
+              else
+                mode=auto-short
+              fi
             fi
             uv run python Backend/channel.py headline_tales $mode ${{ inputs.dry_run && '--dry-run' || '' }}
           fi
