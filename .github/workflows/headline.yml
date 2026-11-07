@@ -128,6 +128,13 @@ jobs:
               mode=auto-short
             fi
             [ "${{ inputs.mode }}" = "plan" ] && mode=plan
+            # Shorts only (owner's call: long videos got almost no views). The documentary slot posts
+            # a third Short instead, and there is no morning plan/thumbnail alert. Set the repo
+            # variable HEADLINE_LONG_VIDEOS=true to bring documentaries back.
+            if [ "${{ vars.HEADLINE_LONG_VIDEOS }}" != "true" ]; then
+              [ "$mode" = "plan" ] && { echo "Long videos are off: no documentary to plan."; exit 0; }
+              mode=auto-short
+            fi
             uv run python Backend/channel.py headline_tales $mode ${{ inputs.dry_run && '--dry-run' || '' }}
           fi
 

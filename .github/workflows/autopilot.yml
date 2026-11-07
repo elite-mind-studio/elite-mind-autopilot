@@ -183,6 +183,11 @@ jobs:
           elif [ "${{ github.event.schedule }}" = "43 14 * * *" ]; then
             args="--series"
           fi
+          # Shorts only (owner's call: long videos got almost no views). The Friday long-video run is
+          # skipped; set the repo variable ELITE_LONG_VIDEOS=true to bring long videos back.
+          case " $args " in
+            *" --long "*) if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ]; then echo "Long videos are off."; exit 0; fi ;;
+          esac
           uv run python Backend/autopilot.py run $args
 
       - name: Save video as artifact
