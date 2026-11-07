@@ -281,6 +281,7 @@ Subject: {story['subject']}. Angle: {story['angle']}
 STRICT RULES:
 - Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
 - Neutral tone, never take sides; attribute claims when the sources do. Numbers written in words.
+- American English for a mostly US audience: American spelling, dollars, miles and feet.
 - Make it emotional but true: lead with the most gripping fact, show what it means for real people, and keep
   tension rising sentence by sentence. Never invent details, and never sensationalise deaths.
 - 80-100 words (about 50-60 seconds), 5-6 short paragraphs. Start directly with the action ("X did Y, and ..."), each sentence a
