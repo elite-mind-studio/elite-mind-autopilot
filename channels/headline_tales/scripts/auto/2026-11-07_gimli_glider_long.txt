@@ -1,0 +1,66 @@
+FORMAT: long
+SUBJECT: The Gimli Glider: Air Canada Flight 143 ran out of fuel at 41,000 feet in 1983 and glided to a racetrack full of people
+TITLE: The Gimli Glider Explained
+YT_TITLE: The Gimli Glider: The Jet That Ran Out of Fuel at 41,000 Feet
+THUMB_WORD: NO FUEL!
+VOICE: emotional
+TONE: tense
+TAGS: gimli glider, air canada flight 143, plane ran out of fuel, aviation documentary, pilot hero, boeing 767, aviation mystery, true story, survival story, headline tales
+DESCRIPTION: On July 23, 1983, a brand-new Air Canada Boeing 767 ran out of fuel at 41,000 feet, because of a fuel calculation mix-up during Canada's switch to the metric system. With both engines dead and most instruments dark, Captain Bob Pearson, an experienced glider pilot, and First Officer Maurice Quintal glided the jet to a closed air force base at Gimli, Manitoba, which was being used that day for a car race. All 69 people on board survived. The full story.
+SOURCE: Wikipedia, Gimli Glider - https://en.wikipedia.org/wiki/Gimli_Glider
+GRAPHIC: 0 | {"type": "title", "kicker": "HEADLINE TALES", "title": "The Gimli<br>Glider", "counter": {"label": "FEET", "to": 41000}, "stamp": "NO FUEL"}
+GRAPHIC: 7 | {"type": "stat", "value": 20088, "suffix": " LITERS", "caption": "Fuel the jet needed", "sub": "It took on only 4,917 liters"}
+
+Can you imagine flying at forty one thousand feet, and hearing a sound no pilot on board had ever heard before? The sound that means every engine has stopped. This really happened, to a brand new jet with sixty nine people on board. And what the pilots did next is still taught as one of the greatest saves in aviation history. Sit tight. Let's go on a journey.
+
+July 1983. Air Canada Flight 143 is getting ready to fly from Montreal to Edmonton, with a stop in Ottawa. The plane is a Boeing 767, one of the most modern airliners in the world. It is only a few months old.
+
+But there is a problem nobody wants to talk about. The system that measures the fuel is broken.
+
+Before the flight, a technician had been testing the faulty fuel gauge system. He was called away in the middle of the job. When the crew came on board, the fuel gauges in the cockpit were completely blank.
+
+Captain Bob Pearson knew it. But he believed the plane was still safe to fly, as long as the fuel was measured by hand, with measuring sticks in the tanks.
+
+And that is where everything went wrong.
+
+Canada was switching to the metric system. This new 767 measured its fuel in kilograms. But when the crew asked for the fuel's density, they were given a number in pounds. And nobody converted it.
+
+The plane needed over twenty thousand liters of fuel to make the trip. It took on less than five thousand. Less than half of what it needed.
+
+On paper, everything looked fine. The jet took off, and climbed to forty one thousand feet.
+
+Over Red Lake, Ontario, a warning lights up. Low fuel pressure, left engine. Then the right.
+
+Then the sound. A sharp bong. Nobody in the cockpit could remember ever hearing it before. It meant all engines were out.
+
+Within seconds, many of the screens in front of the pilots went dark. The jet was now a glider, almost eight miles up, with sixty nine people on board.
+
+But here is the part that saved them.
+
+A small propeller dropped out of the belly of the plane. A ram air turbine, spinning in the wind. It gave the pilots just enough power to move the controls.
+
+And Captain Bob Pearson had a secret skill. He was an experienced glider pilot. He knew how to fly without engines.
+
+First Officer Maurice Quintal started doing the math. In ten nautical miles, they had lost five thousand feet. They would never make it to Winnipeg.
+
+Then Quintal remembered something. An old air force base nearby, at Gimli, Manitoba. He had served there years before.
+
+What he didn't know was that the base had closed. Part of it had become a racetrack. And that very day, a car race was being held there. The old runway was full of cars, campers, and people.
+
+The jet came in too high, and too fast. So Pearson did something almost nobody does in a big airliner. A forward slip. He turned the plane sideways into the wind, like a glider pilot, to drop height quickly without speeding up.
+
+As they touched down, the nose wheel had not locked into place. It collapsed. The nose of the plane slammed into the runway and scraped along the ground.
+
+That broken nose wheel actually helped. The extra friction slowed the plane faster, and it stopped before reaching the crowd.
+
+Every single person on board survived. There were only minor injuries, mostly from the emergency slides, which were too short for the plane's tilted angle.
+
+The investigation found that Air Canada had never clearly said who was responsible for calculating the fuel when the gauges failed.
+
+At first, Pearson was demoted and Quintal was suspended. But later, the two pilots were awarded a special diploma for outstanding airmanship.
+
+And the plane? It was repaired, and flew passengers for another twenty five years. When it finally retired in 2008, Pearson and Quintal were on board for its last flight.
+
+One wrong number almost brought down a brand new jet. Two calm pilots brought it home.
+
+Which story should we explain next? Tell us in the comments. Tap the subscribe link in the description, so you never miss a story.

@@ -326,7 +326,9 @@ if __name__ == "__main__":
         try:
             if planned.exists():  # written by this morning's "plan" run (the owner got its title)
                 names = json.loads(planned.read_text(encoding="utf-8"))
-                long_script, short_script = SCRIPTS_DIR / names["long"], SCRIPTS_DIR / names["short"]
+                long_script = SCRIPTS_DIR / names["long"]
+                # A hand-written documentary can come without a Short (its Short may have posted already)
+                short_script = SCRIPTS_DIR / names["short"] if names.get("short") else None
                 print(f"[+] Using this morning's planned documentary {long_script.name}", flush=True)
             else:
                 long_script, short_script = prepare()
