@@ -25,7 +25,7 @@ on:
       profile:
         description: "Channel profile for a hand-written script (channels/<profile>.env)"
         type: choice
-        options: [headline_tales, elite_suspense, elite_quiz]
+        options: [headline_tales, elite_suspense, elite_quiz, elite_neon]
         default: headline_tales
       dry_run:
         description: "Test: make and check today's videos but post nothing"
