@@ -52,5 +52,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add research/report.md research/lessons.json research/learning.md topics.txt topics_long.txt topics_series.txt
           git commit -m "research: weekly viral report and topic ideas" || exit 0
-          git pull --rebase
+          git pull --rebase --autostash  # other files the run touched must not block the commit
           git push
