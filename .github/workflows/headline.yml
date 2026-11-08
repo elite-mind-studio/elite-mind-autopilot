@@ -133,7 +133,12 @@ jobs:
             # variable HEADLINE_LONG_VIDEOS=true to bring documentaries back.
             # A hand-written documentary planned for today (scripts/auto/<date>_planned.json) still posts
             planned="channels/headline_tales/scripts/auto/$(date -u +%F)_planned.json"
-            if [ "${{ vars.HEADLINE_LONG_VIDEOS }}" != "true" ]; then
+            # Long videos switch back on by themselves at 100 subscribers (owner's milestone)
+            subs=$(uv run python Backend/channel_stats.py youtube-oauth2-headline_tales.json 2>/dev/null | tail -1)
+            echo "Subscribers: ${subs:-0}"
+            long_on="${{ vars.HEADLINE_LONG_VIDEOS }}"
+            [ "${subs:-0}" -ge 100 ] 2>/dev/null && long_on=true
+            if [ "$long_on" != "true" ]; then
               [ "$mode" = "plan" ] && { echo "Long videos are off: no documentary to plan."; exit 0; }
               if [ "$mode" = "auto" ] && [ -f "$planned" ]; then
                 echo "Posting the documentary planned for today: $planned"

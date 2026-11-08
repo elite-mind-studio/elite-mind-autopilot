@@ -186,7 +186,13 @@ jobs:
           # Shorts only (owner's call: long videos got almost no views). The Friday long-video run is
           # skipped; set the repo variable ELITE_LONG_VIDEOS=true to bring long videos back.
           case " $args " in
-            *" --long "*) if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ]; then echo "Long videos are off."; exit 0; fi ;;
+            *" --long "*)
+              # Long videos switch back on by themselves at 100 subscribers (owner's milestone)
+              subs=$(uv run python Backend/channel_stats.py youtube-oauth2.json 2>/dev/null | tail -1)
+              echo "Subscribers: ${subs:-0}"
+              if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ] && ! [ "${subs:-0}" -ge 100 ] 2>/dev/null; then
+                echo "Long videos are off until 100 subscribers."; exit 0
+              fi ;;
           esac
           uv run python Backend/autopilot.py run $args
 
