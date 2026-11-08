@@ -248,7 +248,7 @@ def generate_script(
         """
 
     # Hook format (owner's pick from a creator's "10 hooks" video): a short scroll-stopping
-    # opener, then the main point; the pipeline adds a quick like/subscribe/share line after it
+    # opener, then the main point, then the explanation
     if not customPrompt:
         prompt += f"""
             Paragraph 1 is ONLY two sentences: a short opener of 3-7 words, then one sentence
