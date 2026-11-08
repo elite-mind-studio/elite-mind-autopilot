@@ -53,6 +53,7 @@ Use `.env.example` as your template.
 | `YOUTUBE_DESCRIPTION_FOOTER` | Text appended to every upload's description, e.g. a not-financial-advice note. | empty |
 | `YOUTUBE_PLAYLIST` | Playlist title every upload is added to (created if missing). | empty |
 | `VIDEO_CALL_TO_ACTION` | Spoken outro appended to every script, e.g. `Like, share and subscribe!`. | empty |
+| `EARLY_CTA` | Quick like/subscribe/share line spoken right after the hook and main point (`off` disables it). | `on` |
 
 ## Notes
 

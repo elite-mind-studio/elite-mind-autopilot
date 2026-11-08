@@ -8,6 +8,16 @@ from logstream import log
 from typing import Tuple, List, Optional
 from utils import ENV_FILE
 
+# Scroll-stopping openers; the model picks one that is honestly true for the video
+HOOK_OPENERS = (
+    'Pick the opener from these (or a close variation), and only one that is honestly true for the video: '
+    '"I shouldn\'t be saying this." / "I have a question for you." / "What would happen if...?" / '
+    '"I almost didn\'t post this." / "I bet you didn\'t know this." / "This could cost you money." '
+    '(only for money topics) / "Most of you will skip this." / "Nobody tells you this." / '
+    '"You won\'t believe this one." / "Here is something most people get wrong." '
+    'Never use the same opener as the title, and never promise something the video does not deliver.'
+)
+
 # Load environment variables
 load_dotenv(ENV_FILE)
 
@@ -237,6 +247,14 @@ def generate_script(
             well-known principle or rule (e.g. the 80/20 rule, the rule of 72).
         """
 
+    # Hook format (owner's pick from a creator's "10 hooks" video): a short scroll-stopping
+    # opener, then the main point; the pipeline adds a quick like/subscribe/share line after it
+    if not customPrompt:
+        prompt += f"""
+            Paragraph 1 is ONLY two sentences: a short opener of 3-7 words, then one sentence
+            that states the main point of the video. {HOOK_OPENERS}
+        """
+
     if video_format == "long":
         prompt += """
             This is a LONG-FORM video of about 8 to 12 minutes. Go deeper: tell a fuller story
@@ -338,7 +356,7 @@ def generate_script(
     if character:
         prompt += f"""
             Structure:
-            1. The FIRST sentence is a hook about the theory itself, not about the character:
+            1. After the opener, the first full sentence is a hook about the theory itself, not about the character:
                a "Why does...?" / "Why do...?" question or a bold claim that makes the viewer
                curious (e.g. "Why does the medium coffee cost almost as much as the large one?").
                Do not mention {character} in the first sentence.

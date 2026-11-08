@@ -22,6 +22,8 @@ from typing import List, Optional
 
 import requests
 
+from gpt import HOOK_OPENERS
+
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = ROOT / "channels" / "headline_tales" / "scripts" / "auto"
 POSTED = ROOT / "channels" / "headline_tales" / "posted.json"
@@ -291,7 +293,9 @@ STRICT RULES:
 SOURCES:
 {_sources_block(sources)}
 
-- The FIRST sentence states the most staggering true fact and opens a question, like
+- Paragraph 1 is ONLY two sentences: a short opener of 3-7 words, then the most staggering true fact.
+  {HOOK_OPENERS}
+- That fact sentence opens a question, like
   "This private jet fell about five miles in one minute. And investigators may have found a clue to why."
 - short_title follows the same pattern: the staggering fact, then the open question or clue, e.g.
   "This Jet Fell 5 Miles in One Minute. Investigators Found a Clue". Digits for numbers, never a false promise.

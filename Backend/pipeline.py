@@ -1,5 +1,6 @@
 import os
 import re
+import random
 import shutil
 import subprocess
 import time
@@ -209,6 +210,39 @@ def _chatterbox_batch(sentences: list, reference: str, emit, mood: str = "calm",
         return None
 
 
+# Said right after the hook and main point (owner's format): a quick ask, then the explanation
+EARLY_CTAS = {
+    "short": [
+        "Sit back, and before we start, like this video, subscribe, and share it with a friend.",
+        "Before we get into it, hit like, subscribe, and send this to someone who needs it.",
+        "Get comfortable. Like, subscribe, and share this with a friend. Now, let's get into it.",
+        "Quick favor before we start: like, subscribe, and share this with someone you know.",
+    ],
+    "long": [
+        "And if you enjoy stories like this, like this video, subscribe, and share it with a friend.",
+    ],
+}
+
+
+def _with_early_cta(script: str, video_format: str) -> str:
+    """Insert a short like/subscribe/share line after the hook and main point (EARLY_CTA=off disables it)."""
+    if os.getenv("EARLY_CTA", "on").strip().lower() in ("off", "false", "0", "no"):
+        return script
+    paragraphs = [p for p in re.split(r"\n\s*\n", script.strip()) if p.strip()]
+    first = [s for s in re.split(SENTENCE_END, paragraphs[0].strip()) if s.strip()] if paragraphs else []
+    # Hand-written scripts may already ask early, or put the [pause] beats in the opening
+    if not first or "subscribe" in " ".join(paragraphs[:2]).lower() or "[pause" in paragraphs[0].lower():
+        return script
+    line = random.choice(EARLY_CTAS["long" if video_format == "long" else "short"])
+    # Long videos: after the whole intro paragraph; Shorts: after the hook and main point
+    if (len(first) <= 3 or video_format == "long") and len(paragraphs) > 1:
+        paragraphs.insert(1, line)
+    else:
+        # A long opening paragraph: split it after the hook and the main point
+        paragraphs[0:1] = [" ".join(first[:2]), line, " ".join(first[2:])] if len(first) > 2 else [paragraphs[0], line]
+    return "\n\n".join(p for p in paragraphs if p.strip())
+
+
 def run_generation_pipeline(
     data: dict,
     is_cancelled,
@@ -335,6 +369,7 @@ def run_generation_pipeline(
                           "Tap the subscribe button right below this video, so you don't miss it.")
     if call_to_action:
         script = f"{script.rstrip().rstrip('.')}. {call_to_action}"
+    script = _with_early_cta(script, video_format)
     # Kept for the learning loop (autopilot records the hook of each posted video)
     (TEMP_DIR / "script.txt").write_text(script, encoding="utf-8")
 
