@@ -464,19 +464,17 @@ def youtube_auth() -> None:
 
 
 def premiere_nearby(hours: float = 4) -> bool:
-    """True when an Elite Mind story Short (elite_suspense) premieres within `hours` of now."""
-    posted = PROJECT_ROOT / "channels" / "elite_suspense" / "posted.json"
-    if not posted.exists():
-        return False
+    """True when a hand-made Elite Mind Short (any channels/elite_* profile) premieres within `hours` of now."""
     from datetime import timezone
 
     now = datetime.now(timezone.utc)
-    for entry in json.loads(posted.read_text(encoding="utf-8")).values():
-        when = (entry.get("publish_at") or "").strip()
-        if when:
-            at = datetime.fromisoformat(when.replace("Z", "+00:00"))
-            if abs((at - now).total_seconds()) <= hours * 3600:
-                return True
+    for posted in (PROJECT_ROOT / "channels").glob("elite_*/posted.json"):
+        for entry in json.loads(posted.read_text(encoding="utf-8")).values():
+            when = (entry.get("publish_at") or "").strip()
+            if when:
+                at = datetime.fromisoformat(when.replace("Z", "+00:00"))
+                if abs((at - now).total_seconds()) <= hours * 3600:
+                    return True
     return False
 
 
