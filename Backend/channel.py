@@ -223,7 +223,9 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         from youtube import post_comment
 
         lines = [f"▶ Watch the full documentary: {long_url}"] if long_url else []
-        lines.append("👇 Which story should we explain next? We post one big story every single day, so subscribe and don't miss tomorrow's.")
+        # Elite profiles set their own question (FIRST_COMMENT_ASK); Headline Tales asks for the next story
+        lines.append(spec.get("ask") or os.getenv("FIRST_COMMENT_ASK", "").strip()
+                     or "👇 Which story should we explain next? We post one big story every single day, so subscribe and don't miss tomorrow's.")
         if subscribe_link:
             lines.append(f"🔔 Subscribe: {subscribe_link}")
         post_comment(video_id, "\n\n".join(lines))
