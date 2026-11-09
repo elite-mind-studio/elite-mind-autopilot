@@ -1,0 +1,41 @@
+FORMAT: short
+SUBJECT: Buy, Borrow, Die: how billionaires live on loans and pay almost no income tax, explained step by step with Black
+TITLE: TAX TRICK
+VOICE: calm
+TONE: tense
+CAST: Black is a faceless glowing white 3D figure in a black suit with a gold tie and a gold watch, standing on a dark reflective floor; every scene is a minimal 3D infographic on pure black with glowing gold and red neon labels: stacks of stock certificates, a glowing bank building, a loan contract, a rising gold chart line, a tax return marked "$0", a family inheriting a glowing gold box, a hospital nurse figure for contrast
+MUSIC: Why do billionaires | Investigations
+GRAPHIC: 0 | {"type": "title", "kicker": "TRICKS OF THE RICH", "title": "Buy. Borrow.<br>Die.", "stamp": "TAX TRICK"}
+GRAPHIC: 1 | {"type": "stat", "value": 100000000, "prefix": "$", "caption": "Black's company stock", "sub": "Example numbers"}
+GRAPHIC: 2 | {"type": "stat", "value": 2400000, "prefix": "$", "caption": "Tax if he sells $10 million", "sub": "About 23.8% federal tax on the gain"}
+GRAPHIC: 4 | {"type": "stat", "value": 0, "prefix": "$", "caption": "Income tax on a loan", "sub": "A loan is not income"}
+GRAPHIC: 8 | {"type": "stat", "value": 401, "prefix": "$", "suffix": " BILLION", "caption": "Wealth gained by the 25 richest Americans", "sub": "Federal income tax paid: $13.6 billion (ProPublica, 2014-2018)"}
+PUBLISH_AT: 2026-11-10T20:30:00Z
+YT_TITLE: Why Billionaires Borrow Money They Don't Need (Buy, Borrow, Die)
+THUMB_WORD: TAX TRICK
+TAGS: buy borrow die, billionaire tax, how the rich avoid taxes, tricks of the rich, step up in basis, money psychology, wealth, propublica, elite mind decoder
+DESCRIPTION: Why would a billionaire borrow money? Because a loan is not income, growth you haven't sold isn't taxed, and when the owner dies the heirs' stock gets a "stepped-up" price, so those gains are never taxed. People call it "Buy, Borrow, Die". In 2021, ProPublica reported that the 25 richest Americans gained $401 billion in wealth from 2014 to 2018 and paid $13.6 billion in federal income tax. Black's numbers are an example. Educational only, not tax advice. Is it smart, or unfair? Tell us in the comments.
+SOURCE: ProPublica, The Secret IRS Files (June 2021) - https://www.propublica.org/article/the-secret-irs-files-trove-of-never-before-seen-records-reveal-how-the-wealthiest-avoid-income-tax
+SOURCE: Wikipedia, Stepped-up basis - https://en.wikipedia.org/wiki/Stepped-up_basis
+
+Why do billionaires borrow money when they already have billions? It's not because they need it. It's a tax trick. And Black is going to show you how it works.
+
+Black owns one hundred million dollars in company stock. He wants ten million dollars to spend.
+
+If he sells, he pays tax on the gain. His stock cost him almost nothing, so that's about two point four million dollars. Gone.
+
+So Black doesn't sell. He walks into a bank and borrows the ten million, with his stock as the guarantee.
+
+And here's the trick. A loan isn't income. So there's no income tax on it. Not one dollar.
+
+Meanwhile, his stock keeps growing. And growth you haven't sold isn't taxed either. When the interest comes due, he just borrows again.
+
+Then the final step. When Black dies, his kids inherit the stock, and the tax system resets its price to today's value. All those years of gains? Never taxed. Estate tax can still apply, but the gains are wiped clean.
+
+Buy. Borrow. Die. That's what people call it.
+
+In 2021, ProPublica reported that the twenty-five richest Americans gained four hundred and one billion dollars in wealth over five years, and paid just thirteen point six billion in federal income tax.
+
+A nurse pays tax on every single paycheck. Black lives on loans.
+
+Is that smart, or is it unfair? Tell me in the comments. And tap the subscribe button right below this video for more tricks of the rich.
