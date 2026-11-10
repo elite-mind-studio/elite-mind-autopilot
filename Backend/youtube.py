@@ -307,15 +307,23 @@ def add_to_playlist(video_id: str, playlist_title: str) -> str:
         ).execute()
         playlist_id = created["id"]
 
-    youtube.playlistItems().insert(
-        part="snippet",
-        body={
-            "snippet": {
-                "playlistId": playlist_id,
-                "resourceId": {"kind": "youtube#video", "videoId": video_id},
-            }
-        },
-    ).execute()
+    # A just-created playlist or just-uploaded video often answers 409 "aborted" at first: retry
+    for attempt in range(4):
+        try:
+            youtube.playlistItems().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "resourceId": {"kind": "youtube#video", "videoId": video_id},
+                    }
+                },
+            ).execute()
+            break
+        except HttpError as err:
+            if err.resp.status != 409 or attempt == 3:
+                raise
+            time.sleep(15 * (attempt + 1))
     return playlist_id
 
 

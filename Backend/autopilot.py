@@ -478,6 +478,33 @@ def premiere_nearby(hours: float = 4) -> bool:
     return False
 
 
+def post_premiere_comments() -> None:
+    """Post the saved first comment on Elite premieres that have aired (they can't take comments before)."""
+    from datetime import timezone
+
+    from youtube import get_authenticated_service, post_comment
+
+    now = datetime.now(timezone.utc)
+    for posted in (PROJECT_ROOT / "channels").glob("elite_*/posted.json"):
+        for entry in json.loads(posted.read_text(encoding="utf-8")).values():
+            when, text = (entry.get("publish_at") or "").strip(), entry.get("first_comment")
+            if not (when and text):
+                continue
+            aired = datetime.fromisoformat(when.replace("Z", "+00:00"))
+            if not now - timedelta(days=2) < aired < now:
+                continue
+            try:
+                threads = get_authenticated_service().commentThreads().list(
+                    part="snippet", videoId=entry["id"], maxResults=50).execute().get("items", [])
+                own = os.getenv("CHANNEL_ID", "UC6-jC2Uapm8I2PDT2I1nS8A")
+                if not any(t["snippet"]["topLevelComment"]["snippet"].get("authorChannelId", {}).get("value") == own
+                           for t in threads):
+                    post_comment(entry["id"], text)
+                    print(f"[+] Premiere comment posted on {entry['url']}")
+            except Exception as err:  # never block the Short over a comment
+                print(f"[-] Premiere comment on {entry.get('url')} failed: {err}")
+
+
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     video_format = "long" if "--long" in sys.argv[2:] else "short"
@@ -486,6 +513,7 @@ if __name__ == "__main__":
     elif command == "tick":
         tick()
     elif command == "run":
+        post_premiere_comments()
         if premiere_nearby(2):
             # The evening slot belongs to tonight's story premiere: max 3 Elite posts a day
             print("[*] A scheduled Elite premiere takes this slot; this Short moves to the next run.")

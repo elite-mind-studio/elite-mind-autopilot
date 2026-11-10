@@ -218,7 +218,10 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
         raise RuntimeError(f"Upload of {spec['slug']} failed")
     url = f"https://youtu.be/{video_id}"
     print(f"[+] Posted {spec['slug']}: {url}", flush=True)
-    # First comment: the full documentary link (if any) and an invitation to comment and subscribe
+    # First comment: the full documentary link (if any) and an invitation to comment and subscribe.
+    # A premiere is private until it goes live, so its comment is saved and posted by the next
+    # Elite autopilot run after it airs (autopilot.post_premiere_comments)
+    first_comment = ""
     try:
         from youtube import post_comment
 
@@ -228,7 +231,9 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
                      or "👇 Which story should we explain next? We post one big story every single day, so subscribe and don't miss tomorrow's.")
         if subscribe_link:
             lines.append(f"🔔 Subscribe: {subscribe_link}")
-        post_comment(video_id, "\n\n".join(lines))
+        first_comment = "\n\n".join(lines)
+        if not spec.get("publish_at"):
+            post_comment(video_id, first_comment)
     except Exception as err:
         print(f"[-] First comment failed: {err}", flush=True)
 
@@ -258,7 +263,8 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
 
         posted_alert(os.getenv("THUMB_CHANNEL", "headline"), title, url, bool(custom))
     posted[spec["slug"]] = {"id": video_id, "url": url, "title": title, "format": spec.get("format", "short"),
-                            "publish_at": spec.get("publish_at", "")}
+                            "publish_at": spec.get("publish_at", ""),
+                            **({"first_comment": first_comment} if spec.get("publish_at") else {})}
     _posted_file(name).write_text(json.dumps(posted, indent=2), encoding="utf-8")
     return url
 
