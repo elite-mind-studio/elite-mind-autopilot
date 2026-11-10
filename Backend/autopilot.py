@@ -486,7 +486,7 @@ if __name__ == "__main__":
     elif command == "tick":
         tick()
     elif command == "run":
-        if premiere_nearby(4 if "--series" in sys.argv[2:] else 2):
+        if premiere_nearby(2):
             # The evening slot belongs to tonight's story premiere: max 3 Elite posts a day
             print("[*] A scheduled Elite premiere takes this slot; this Short moves to the next run.")
             sys.exit(0)
