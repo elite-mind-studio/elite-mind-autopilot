@@ -1,0 +1,15 @@
+FORMAT: short
+SUBJECT: FAA nationwide ground stop
+TITLE: FAA Ground Stop
+YT_TITLE: Nationwide FAA Ground Stop. Telecommunication Outage Halts All Departures
+TAGS: FAA,ground stop,telecommunication outage,air traffic control,flight delays,travel news
+DESCRIPTION: The FAA ordered an unprecedented nationwide ground stop after a telecom outage crippled communications, stranding thousands of travelers.
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-issues-nationwide-ground-stop/
+SOURCE: Wikipedia, Federal Aviation Administration - https://en.wikipedia.org/wiki/Federal_Aviation_Administration
+
+You won't believe this one. A rare nationwide ground stop halted every departing flight in the United States today.
+The Federal Aviation Administration said a sudden telecommunication outage affected all Air Route Traffic Control Centers, forcing the action for safety.
+Secretary of Transportation Sean Duffy and Homeland Security Secretary Markwayne Mullin both said there was no indication of a nefarious act, only a communications failure.
+Flight tracking showed roughly three thousand one hundred aircraft were airborne when the stop began, and within hours over ten thousand delays and two thousand cancellations were logged.
+Investigators from the FAA and the Transportation Security Administration are now probing the radio-frequency issue that silenced pilot communications.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
