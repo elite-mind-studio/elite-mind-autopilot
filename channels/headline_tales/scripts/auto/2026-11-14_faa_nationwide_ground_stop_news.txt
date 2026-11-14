@@ -1,0 +1,17 @@
+FORMAT: short
+SUBJECT: FAA Nationwide Ground Stop
+TITLE: GROUND STOP
+YT_TITLE: Nationwide Ground Stop Halts Thousands of Flights. What Caused It?
+TAGS: FAA,ground stop,air travel,flight cancellations,telecommunications outage,air traffic control
+DESCRIPTION: A rare FAA nationwide ground stop grounded all departing U.S. flights, canceling nearly eight thousand flights and stranding travelers.
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-canceled-flights-travelers-what-we-know/
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-issues-nationwide-ground-stop/
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cqx2wyvyr3zzo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, Federal Aviation Administration - https://en.wikipedia.org/wiki/Federal_Aviation_Administration
+
+You won't believe this. A rare nationwide ground stop grounded every departing U.S. flight Friday, and stranding thousands of travelers.
+The FAA ordered the stoppage at 3:36 p.m. EST while about 3,500 planes were in the air, and all airborne aircraft landed safely.
+A preliminary investigation points to an overload of aging Cisco 600 series routers built between 2001 and 2006, causing a telecommunications outage and inconsistent data flow.
+The halt lasted about five hours, ending around 8:20 p.m. EST, and airlines are now scrambling to reschedule flights and reposition crews.
+Tens of thousands remain stuck in airports, many unsure where they'll sleep tonight, while officials assure the sky is safe to fly again.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
