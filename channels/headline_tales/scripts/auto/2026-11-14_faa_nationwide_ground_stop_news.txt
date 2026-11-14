@@ -1,17 +1,15 @@
 FORMAT: short
 SUBJECT: FAA Nationwide Ground Stop
 TITLE: GROUND STOP
-YT_TITLE: Nationwide Ground Stop Halts Thousands of Flights. What Caused It?
-TAGS: FAA,ground stop,air travel,flight cancellations,telecommunications outage,air traffic control
-DESCRIPTION: A rare FAA nationwide ground stop grounded all departing U.S. flights, canceling nearly eight thousand flights and stranding travelers.
-SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-canceled-flights-travelers-what-we-know/
+YT_TITLE: Nationwide Ground Stop Caused by Telecom Upgrade. How a Router Crash Halted All Flights
+TAGS: FAA,ground stop,telecom outage,air traffic control,flight delays,cancellations,router failure
+DESCRIPTION: A telecom network upgrade overloaded old routers, forcing the FAA to shut down departing flights across the U.S. for five hours.
 SOURCE: CBS News US - https://www.cbsnews.com/news/faa-issues-nationwide-ground-stop/
-SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cqx2wyvyr3zzo?at_medium=RSS&at_campaign=rss
 SOURCE: Wikipedia, Federal Aviation Administration - https://en.wikipedia.org/wiki/Federal_Aviation_Administration
 
-You won't believe this. A rare nationwide ground stop grounded every departing U.S. flight Friday, and stranding thousands of travelers.
-The FAA ordered the stoppage at 3:36 p.m. EST while about 3,500 planes were in the air, and all airborne aircraft landed safely.
-A preliminary investigation points to an overload of aging Cisco 600 series routers built between 2001 and 2006, causing a telecommunications outage and inconsistent data flow.
-The halt lasted about five hours, ending around 8:20 p.m. EST, and airlines are now scrambling to reschedule flights and reposition crews.
-Tens of thousands remain stuck in airports, many unsure where they'll sleep tonight, while officials assure the sky is safe to fly again.
+You won't believe this one. 
+The outage stemmed from Cisco 600 series routers, built between two thousand one and two thousand six, that became overwhelmed and fed out-of-sync data into the air traffic control system.
+Because the routers flooded the network with inconsistent packets, voice lines went static and screens blacked out, forcing the FAA to shut down the system for safety.
+The freeze lasted about five hours, leaving more than two thousand delays and nearly four thousand cancellations, with Delta, United and American hit hardest.
+
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
