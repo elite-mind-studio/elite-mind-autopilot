@@ -61,6 +61,7 @@ jobs:
       CHATTERBOX_FALLBACK_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
       VIDEO_MAX_WORDS: "120"            # about 45-55 seconds: short Shorts get watched to the end
+      PARALLAX: "true"                  # 3D camera moves on every picture (Backend/parallax.py); falls back to a zoom
       VISUAL_MODE: ai_images
       TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"

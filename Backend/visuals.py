@@ -14,6 +14,7 @@ import os
 import random
 import re
 import subprocess
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -304,9 +305,31 @@ def group_scenes(sentences: List[str], durations: List[float], target: float = 3
     return scenes
 
 
+def _parallax_segment(image_path: str, duration: float, index: int, out_path: str, size) -> bool:
+    """PARALLAX=true: a depth-based 3D camera move (Backend/parallax.py) instead of a flat zoom.
+    Runs in the Python that has torch (the Chatterbox env on GitHub); False = use Ken Burns."""
+    if os.getenv("PARALLAX", "").lower() not in ("1", "true", "yes"):
+        return False
+    python = os.getenv("CHATTERBOX_PYTHON") or sys.executable
+    motion = ("dolly", "orbit", "rise")[index % 3]
+    try:
+        subprocess.run(
+            [python, str(Path(__file__).resolve().parent / "parallax.py"), image_path, out_path, motion,
+             f"{duration:.3f}", str(size[0]), str(size[1]), str(FPS)],
+            check=True, capture_output=True, timeout=600,
+            env={**os.environ, "PARALLAX_FFMPEG": imageio_ffmpeg.get_ffmpeg_exe()},
+        )
+        return Path(out_path).exists()
+    except Exception as err:  # never lose a video over the effect
+        print(f"[-] Parallax failed on scene {index}, using a zoom: {getattr(err, 'stderr', err)}", flush=True)
+        return False
+
+
 def _ken_burns_segment(
     image_path: str, duration: float, index: int, out_path: str, size=(WIDTH, HEIGHT)
 ) -> None:
+    if _parallax_segment(image_path, duration, index, out_path, size):
+        return
     frames = max(1, round(duration * FPS))
     zoom_step = 0.08 / frames
     # Alternate zoom in / zoom out and drift direction for variety
