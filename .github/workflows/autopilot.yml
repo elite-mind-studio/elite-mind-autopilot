@@ -60,7 +60,7 @@ jobs:
       AUTOPILOT_VOICE: "chatterbox:onyx"          # natural voice cloned from voices/onyx.wav
       CHATTERBOX_FALLBACK_VOICE: "kokoro:am_onyx"
       AUTOPILOT_PARAGRAPHS: "8"
-      VIDEO_MAX_WORDS: "140"
+      VIDEO_MAX_WORDS: "120"            # about 45-55 seconds: short Shorts get watched to the end
       VISUAL_MODE: ai_images
       TEXT_PROVIDER: hosted
       STORY_CHARACTER: "Black"
@@ -192,6 +192,12 @@ jobs:
               echo "Subscribers: ${subs:-0}"
               if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ] && ! [ "${subs:-0}" -ge 100 ] 2>/dev/null; then
                 echo "Long videos are off until 100 subscribers."; exit 0
+              fi ;;
+            *)
+              # Recovery mode (owner, Nov 15): 2 Elite Shorts a day (12:30 pm and 8 pm ET); the
+              # 3 pm ET run (20:00 UTC) is skipped unless the repo variable ELITE_THREE_A_DAY=true
+              if [ "$(date -u +%H)" = "20" ] && [ "${{ vars.ELITE_THREE_A_DAY }}" != "true" ]; then
+                echo "Recovery mode: 2 Shorts a day, the 3 pm ET slot is off."; exit 0
               fi ;;
           esac
           uv run python Backend/autopilot.py run $args
