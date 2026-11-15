@@ -1,16 +1,20 @@
 FORMAT: short
 SUBJECT: Nationwide FAA ground stop
 TITLE: Ground Stop Chaos
-YT_TITLE: Nationwide Ground Stop Triggered by Router Flood. Why Did It Happen?
-TAGS: FAA,ground stop,air travel,telecom outage,Sean Duffy,air traffic control,legacy systems,fiber upgrade
-DESCRIPTION: A router upgrade overload caused a rare nationwide FAA ground stop, stranding thousands and exposing aging telecom infrastructure.
+YT_TITLE: Nationwide Ground Stop: Thousands Stranded After Telecom Glitch. What Went Wrong?
+TAGS: FAA,ground stop,air travel,telecom outage,Sean Duffy,air traffic control,flight cancellations,aviation news
+DESCRIPTION: A rare FAA nationwide ground stop left thousands of travelers stuck after a telecom upgrade overload, sparking calls for billions in new funding.
 SOURCE: CBS News US - https://www.cbsnews.com/news/ground-stop-faa-telecom-network-sean-duffy-face-the-nation/
-SOURCE: Wikipedia, 2026 FAA nationwide ground stop - https://en.wikipedia.org/wiki/2026_FAA_nationwide_ground_stop
+SOURCE: Wikipedia, Federal Aviation Administration - https://en.wikipedia.org/wiki/Federal_Aviation_Administration
 
-I almost didn't post this.
-A newly installed router flooded the FAA network with a thousand connection attempts every four to five seconds, forcing a rare nationwide ground stop.
-The three-and-a-half-hour halt halted departures at every U.S. airport, cancelling nearly three thousand five hundred scheduled flights and .
-Passengers were left stranded in packed terminals as gates filled and some inbound planes were diverted to smaller fields.
-Officials say the outage stemmed from an upgrade that swapped aging copper lines for fiber at a remote site, exposing a telecom network built on decades-old copper, floppy disks and antique keyboards.
-Transportation Secretary Sean Duffy said the FAA now needs fifty billion dollars from Congress to rebuild the system from the ground up.
+I bet you didn't know this. A nationwide ground stop forced the FAA to halt all flights on Friday, stranding thousands of travelers across the country.
+
+The outage stemmed from overloaded routers during a telecom upgrade meant to replace aging copper lines with fiber in remote facilities.
+
+Officials said L3Harris Technologies was performing the maintenance when the new router began flooding other routers, crippling the network.
+
+Transportation Secretary Sean Duffy blamed the contractor, called for a $50 billion congressional appropriation, and said the old network must be replaced.
+
+He noted that over seventy percent of copper lines have already switched to fiber without incident, but the incident shows the urgency of a full rebuild.
+
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
