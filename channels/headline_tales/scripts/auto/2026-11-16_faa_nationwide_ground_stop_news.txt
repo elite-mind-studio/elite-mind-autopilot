@@ -1,20 +1,16 @@
 FORMAT: short
 SUBJECT: FAA Nationwide Ground Stop
 TITLE: GROUND STOP
-YT_TITLE: You won't believe this. Nearly 8,000 flights canceled after FAA ground stop. Investigators still searching for cause
-TAGS: FAA,ground stop,flight cancellations,air travel,investigation,US aviation
-DESCRIPTION: A four-and-a-half-hour FAA nationwide ground stop halted thousands of flights. The cause remains under investigation.
-SOURCE: NBC News - https://www.nbcnews.com/pop-culture/movies/robert-pattinson-named-newest-james-bond-rcna607085
+YT_TITLE: Nationwide Ground Stop Hits Thousands. What Went Wrong?
+TAGS: FAA,ground stop,air traffic control,transportation,FAA outage,air travel,investigation
+DESCRIPTION: A sudden FAA communications failure grounded flights across the U.S., sparking an investigation amid recent DOT funding for modernization.
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-trump-admin-response/
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-warnings-records/
 SOURCE: Wikipedia, 2026 FAA nationwide ground stop - https://en.wikipedia.org/wiki/2026_FAA_nationwide_ground_stop
 
-You won't believe this. Nearly eight thousand flights were canceled when the FAA ordered a nationwide ground stop on November thirteenth.
-
-The four-and-a-half-hour halt forced departures from every US airport to pause, while airborne planes were allowed to finish their routes.
-
-More than ten thousand other flights were delayed, leaving gates packed, passengers stranded, and even Amtrak's phone lines flooded as travelers searched for alternatives.
-
-Sports teams, wrestling events, and even trans-Atlantic flights had to scramble for new plans, with some chartered buses and later flights taking the place of the missed planes.
-
-Investigators say a newly installed optical-fiber router was sending a thousand connection attempts every few seconds, disrupting aircraft communications, but the exact cause is still being examined.
+You won't believe this one. 
+Within minutes the FBI, DHS, DoD, and dozens of agencies were looped into a crisis call, while President Trump was briefed while in an economic policy meeting.
+Transportation Secretary Sean Duffy said a router installed during a fiber-optic upgrade was spitting out more than a thousand connection attempts every four to five seconds, flooding the FAA network.
+The overload traced back to L3Harris's maintenance at a remote site, a contractor whose contracts have faced years of audit warnings and billions in extensions since 2002.
 
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
