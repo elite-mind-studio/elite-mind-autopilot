@@ -1,0 +1,15 @@
+FORMAT: short
+SUBJECT: FAA nationwide ground stop
+TITLE: Ground Stop
+YT_TITLE: A Single Router Halted All US Flights. What Went Wrong?
+TAGS: FAA,air traffic control,ground stop,telecommunications outage,aviation news
+DESCRIPTION: A five-hour nationwide air-traffic shutdown traced back to an aging router and decades-old contracts.
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-warnings-records/
+SOURCE: Wikipedia, Federal Aviation Administration - https://en.wikipedia.org/wiki/Federal_Aviation_Administration
+
+I bet you didn't know this. A single router that should have been replaced in two thousand six caused a five-hour nationwide ground stop on Friday.
+The outage exposed decades of warnings about the FAA's aging telecommunications system, highlighted in audits and congressional testimony.
+Officials say the router is part of a network managed by L3Harris, a contractor whose contracts have been extended ten times since two thousand two, adding over one point five billion dollars in spending.
+The 2024 Inspector General report warned that many replacement parts are no longer produced and that knowledge of the old equipment may have been lost as retirees leave.
+L3Harris claims it has completed seventy percent of the switch from copper lines to fiber, but critics note billions have already been spent on projects that were repeatedly delayed or terminated.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
