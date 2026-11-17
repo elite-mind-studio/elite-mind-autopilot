@@ -1,0 +1,11 @@
+FORMAT: short
+SUBJECT: Recent FAA Nationwide Ground Stop
+TITLE: Ground Stop Chaos
+YT_TITLE: Nationwide Ground Stop Halts Thousands of Flights. Investigators Trace Router Flood.
+TAGS: FAA,ground stop,air traffic,router failure,aviation news,transportation
+DESCRIPTION: A technical glitch grounded U.S. air traffic for hours, cancelling thousands of flights. Officials scramble to fix the aging system.
+SOURCE: CBS News US - https://www.cbsnews.com/news/white-house-tiger-team-ground-stop/
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-warnings-records/
+SOURCE: Wikipedia, 2026 FAA nationwide ground stop - https://en.wikipedia.org/wiki/2026_FAA_nationwide_ground_stop
+
+I bet you didn't know this. Nearly eight thousand flights were cancelled and more than ten thousand delayed when a nationwide ground stop hit the United States. The four-and-a-half hour halt began just after 3:30 p.m. Friday, grounding departures while roughly three thousand five hundred aircraft stayed aloft. Investigators say a newly installed router began sending a thousand connection attempts every few seconds, flooding the FAA's network and crippling communications at seventeen control centers. A White House "tiger team" of FAA, intelligence, defense and transportation officials met within hours to prevent another outage. Officials also note years of watchdog warnings about aging equipment, costly non-competitive contracts and a lack of a master schedule for modernization. Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
