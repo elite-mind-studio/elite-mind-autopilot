@@ -1,0 +1,15 @@
+FORMAT: short
+SUBJECT: FAA Nationwide Ground Stop
+TITLE: GROUND STOP CHAOS
+YT_TITLE: Nobody tells you this. Nearly 8,000 flights cancelled after FAA ground stop.
+TAGS: FAA,ground stop,air travel,cancellations,technology outage,US aviation,flight delays,security
+DESCRIPTION: A malfunctioning router caused a four-hour nationwide FAA ground stop, leading to thousands of cancellations and raising tech-security concerns.
+SOURCE: CBS News US - https://www.cbsnews.com/news/united-airlines-system-outage-departing-flights/
+SOURCE: Wikipedia, 2026 FAA nationwide ground stop - https://en.wikipedia.org/wiki/2026_FAA_nationwide_ground_stop
+
+Nobody tells you this. Nearly eight thousand flights were cancelled and more than ten thousand delayed after a nationwide ground stop crippled U.S. air traffic.
+The FAA halted departures at 20:54 UTC on November thirteenth when a new router flooded the system with a thousand connection attempts every few seconds, choking communication at seventeen control centers.
+That four-and-a-half hour freeze forced about three thousand five hundred scheduled flights to stay on the ground, while planes already in the sky were allowed to finish their routes.
+Airlines scrambled: United Airlines reported a ninety-minute outage in its weight-and-balance system, delaying seven hundred fifteen flights, though it said there was no sign of a cyberattack.
+The ripple reached beyond the U.S.: London-Heathrow saw twenty-nine cancellations and nineteen delays, and Mexican authorities kept U.S.–bound flights on the tarmac until clearance returned.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
