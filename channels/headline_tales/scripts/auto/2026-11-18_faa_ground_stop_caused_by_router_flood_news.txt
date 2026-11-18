@@ -1,0 +1,23 @@
+FORMAT: short
+SUBJECT: FAA ground stop caused by router flood
+TITLE: Router Flood
+YT_TITLE: A Single Router Flood Halted All US Flights. Investigators Trace the Source
+TAGS: FAA,ground stop,router flood,air traffic control,flight cancellations,aviation safety,L3Harris,Sean Duffy,transportation
+DESCRIPTION: A newly installed router flooded the FAA's network, triggering a nationwide ground stop. Investigators are now pinpointing why the router sent thousands of connection attempts every few seconds.
+SOURCE: CBS News US - https://www.cbsnews.com/news/ground-stop-l3harris-system-outage/
+SOURCE: CBS News US - https://www.cbsnews.com/news/network-outages-cyber-malicious-activity-homeland-security-hearing/
+SOURCE: CBS News US - https://www.cbsnews.com/news/faa-ground-stop-canceled-flights-travelers-what-we-know/
+SOURCE: CBS News US - https://www.cbsnews.com/news/sean-duffy-senate-republicans-faa-ground-stop/
+SOURCE: Wikipedia, 2026 FAA nationwide ground stop - https://en.wikipedia.org/wiki/2026_FAA_nationwide_ground_stop
+
+I almost didn't post this. 
+
+The router, being deployed at a site in Arkansas, began sending about one thousand connection attempts every four to five seconds, overwhelming the system and destabilizing aircraft communications and radar feeds.
+
+L3Harris, the contractor that runs the network, struggled for hours to locate the exact IP address, despite a monitoring center in Florida that tracks outages in real time.
+
+The FAA initially flagged two possible sites—one in Amarillo, Texas, and the Arkansas location—before concluding the new router was the cause.
+
+Transportation Secretary Sean Duffy said the incident underscores the need for a massive FAA modernization effort, and he is pushing for billions of dollars to replace aging equipment.
+
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
