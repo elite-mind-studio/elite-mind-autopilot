@@ -1,0 +1,16 @@
+FORMAT: short
+SUBJECT: Nvidia's future after Jensen Huang's scandal
+TITLE: Nvidia Shock
+YT_TITLE: Nvidia Won't Reinstate Jensen Huang. Board Acts Amid Record Profits
+TAGS: Nvidia,Jensen Huang,board decision,AI chips,China scandal,tech news,stock market
+DESCRIPTION: Nvidia's board refuses to bring back Jensen Huang after a personal scandal, while the chipmaker reports soaring earnings and shifts its China strategy.
+SOURCE: CBS News US - https://www.cbsnews.com/news/nvidia-stops-shipping-hopper-chips-china/
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/cmy86pp336qlo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, Nvidia - https://en.wikipedia.org/wiki/Nvidia
+
+You won't believe this. 
+Interim CEO Colette Kress said the firm has stopped shipping its Hopper AI chips to China, cutting a $2.4 billion revenue stream that made up about two percent of total sales.
+The move follows revelations that Huang had a relationship with a woman linked to Chinese intelligence, raising national-security concerns.
+Despite the scandal, Nvidia reported fiscal third-quarter earnings of $65.3 billion, more than double a year ago, and revenue of $115.8 billion.
+The board also created a panel to oversee national-security policy and export-control compliance, signaling a tighter regulatory stance.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
