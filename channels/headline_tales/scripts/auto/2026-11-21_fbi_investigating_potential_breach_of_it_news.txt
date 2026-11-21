@@ -1,0 +1,17 @@
+FORMAT: short
+SUBJECT: FBI investigating potential breach of its crime database
+TITLE: DATABASE BREACH
+YT_TITLE: FBI's Crime Database Breached. What's at stake?
+TAGS: FBI,NCIC,cybersecurity,databreach,law enforcement,news
+DESCRIPTION: The FBI is probing an apparent intrusion of its national crime information system, raising concerns about law-enforcement data security.
+SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
+SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/ckz749ey0r75o?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, National Crime Information Center - https://en.wikipedia.org/wiki/National_Crime_Information_Center
+
+I have a question for you. The FBI is investigating an apparent breach of its National Crime Information Center, the nationwide law-enforcement database.
+This system links federal, state, tribal and local agencies, letting officers share arrest warrants, missing-person alerts and stolen-vehicle info in real time.
+
+Officials have not disclosed who may be behind the intrusion, and the FBI has offered no comment.
+The breach follows a recent cyber-attack on the USDA's farmer-payment system, 
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
