@@ -1,0 +1,19 @@
+FORMAT: short
+SUBJECT: FBI investigating apparent hack of its crime database
+TITLE: NCIC Breach
+YT_TITLE: FBI Database Hacked. What It Means for Every Officer?
+TAGS: FBI,NCIC,cybersecurity,law enforcement,databreach,US news
+DESCRIPTION: The FBI is probing an apparent hack of its National Crime Information Center, the backbone of law-enforcement data sharing.
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
+SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cmde1lj4yjxno?at_medium=RSS&at_campaign=rss
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/ck053mzy2qqeo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, National Crime Information Center - https://en.wikipedia.org/wiki/National_Crime_Information_Center
+
+I almost didn't post this. 
+
+Officials have not disclosed who accessed the system or how far the intrusion reached, and the scope of compromised data remains unclear.
+
+The incident follows recent cyber alerts at the Department of Agriculture and other government networks, raising fresh worries about the nation's overall cybersecurity posture.
+
+ Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
