@@ -1,17 +1,18 @@
 FORMAT: short
 SUBJECT: FBI investigating potential breach of its crime database
-TITLE: DATABASE BREACH
-YT_TITLE: FBI's Crime Database Breached. What's at stake?
-TAGS: FBI,NCIC,cybersecurity,databreach,law enforcement,news
-DESCRIPTION: The FBI is probing an apparent intrusion of its national crime information system, raising concerns about law-enforcement data security.
+TITLE: NCIC Breach
+YT_TITLE: FBI Database Hacked? Inside the NCIC Breach Investigation
+TAGS: FBI,NCIC,cybersecurity,crime database,law enforcement,hack,investigation
+DESCRIPTION: The FBI is probing an apparent hack of its nationwide crime database, raising concerns for law enforcement and the public.
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
 SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
 SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
 SOURCE: BBC World - https://www.bbc.co.uk/news/articles/ckz749ey0r75o?at_medium=RSS&at_campaign=rss
 SOURCE: Wikipedia, National Crime Information Center - https://en.wikipedia.org/wiki/National_Crime_Information_Center
 
-I have a question for you. The FBI is investigating an apparent breach of its National Crime Information Center, the nationwide law-enforcement database.
-This system links federal, state, tribal and local agencies, letting officers share arrest warrants, missing-person alerts and stolen-vehicle info in real time.
-
-Officials have not disclosed who may be behind the intrusion, and the FBI has offered no comment.
-The breach follows a recent cyber-attack on the USDA's farmer-payment system, 
+I shouldn't be saying this. And an apparent hack has penetrated the FBI's National Crime Information Center, the backbone that shares fugitive, missing-person and criminal-history data with agencies across the country.
+The breach was first reported by CNN and confirmed by an unnamed source to the Associated Press, prompting the bureau to launch an investigation on Saturday.
+The NCIC, maintained by the FBI's CJIS division, connects federal, state, tribal and local law-enforcement systems, making any compromise a potential threat to everyday safety.
+Officials have not disclosed who accessed the system or how extensive the exposure is, and the FBI declined to comment as the probe continues.
+This incident follows recent cyber-alerts at the USDA and multiple government outages, intensifying worries about the nation's overall cyber defenses.
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
