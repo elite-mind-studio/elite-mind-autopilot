@@ -1,88 +1,88 @@
-# Viral research - 2026-11-15T04:38+00:00
+# Viral research - 2026-11-22T04:38+00:00
 
 ## Top outliers
-- **541.7x** | 9,154,730 views | 58s | [99/100 House, Car, Career, Money.వేరేవాళ్ల life lo ముందే వచ్చాయని,  late అయిపోయిందని feel అవ్వకండి](https://youtu.be/P1rIqCrW1n0)
-- **431.5x** | 8,587,355 views | 32s | [Dad's reverse psychology trick worked a little too well! 😂🎶 #funny #kids #parenting #relatable](https://youtu.be/Qdb4LxnTL0g)
-- **372.1x** | 372,053 views | 39s | [A discipline  mindset fears nothingSimply Animated](https://youtu.be/yOHX_x33ATI)
-- **354.2x** | 354,209 views | 572s | [POV: You Earn $1Billion Every Day ](https://youtu.be/bhpg_bIqFMI)
-- **325.6x** | 410,207 views | 475s | [Rich Kid vs Poor Kid: Born the Same Night… Who Really Won?](https://youtu.be/wWbpHl_73nw)
-- **323.8x** | 553,650 views | 907s | [₹25 लाख के बाद Money Psychology कैसे बदलती है? | Wealth Mindset  💸🧠](https://youtu.be/IoUePOhyhEY)
-- **316.4x** | 1,034,626 views | 33s | [What Friends Think of You (Color Psychology Trick)](https://youtu.be/Ju_EXjXsVzE)
-- **273.9x** | 273,932 views | 297s | [ज़्यादा समझदार लोग गरीब क्यों रह जाते हैं? | Rich vs Poor Mindset](https://youtu.be/xieCBHz4Gbw)
-- **261.3x** | 17,326,764 views | 26s | [POV: Your family is rich😛 (Part-1)](https://youtu.be/nXJ4ORhuicM)
-- **243.8x** | 967,989 views | 645s | [How To Read People Like Patrick Jane](https://youtu.be/gJiBPHSmed8)
-- **236.1x** | 4,673,830 views | 44s | [POV: You're a billionaire's assistant #shorts](https://youtu.be/aXiflDsqTv0)
-- **222.7x** | 621,458 views | 111s | [a rich vs poor mindset #shorts](https://youtu.be/W4J_UaGuLs8)
-- **217.3x** | 217,275 views | 91s | [Aishwarya Rai's Sneaky Trick to Think Faster Under Pressure #shorts #bodylanguage](https://youtu.be/s8pgXjd_UTg)
-- **200.1x** | 200,050 views | 39s | [Motivation vs Discipline vs Obsession vs Ego 🔥 Who Quits Last?](https://youtu.be/zCTraSHyAkk)
-- **143.0x** | 143,043 views | 97s | [How Manipulators Lie Without Breaking the Truth](https://youtu.be/qWM8yFZXMmo)
-- **140.6x** | 414,677 views | 71s | [RICH vs POOR. Millionaire Pretended to Be HOMELESS with a LAMBO #bighomelessboss  #richvspoor](https://youtu.be/SPtO3Qdl6Ik)
-- **137.3x** | 3,048,041 views | 41s | [Make Anyone Feel Guilty in 2 Steps | Psychology Trick](https://youtu.be/cuT1ta1lBlI)
-- **131.9x** | 1,807,155 views | 55s | [Discipline is the Life Changer 💪💯#shortsfeed #decipline #short](https://youtu.be/Uf0sWSeeiK4)
-- **117.9x** | 371,364 views | 715s | [Your Life After Inheriting $10 Billion](https://youtu.be/-8bbx8thKx4)
-- **106.7x** | 465,390 views | 397s | [5 Eye Contact Hacks That Feel illegal (100% work)](https://youtu.be/1kp_P5snwqc)
+- **859.8x** | 3,465,020 views | 16s | [Motivated vs Disciplined vs Obsessed: Same Exam #shorts](https://youtu.be/YdaG3mdUw4Q)
+- **736.2x** | 736,199 views | 16s | [Let Their Hate Make You Stronger |  #motivation #discipline](https://youtu.be/2wI0TsQYtrE)
+- **605.9x** | 3,120,341 views | 12s | [What you don’t see behind the podium #discipline #obsession #shorts](https://youtu.be/FrRHlxI4Oq4)
+- **551.1x** | 12,566,138 views | 26s | [Overthinker vs Doer: Same Stone #shorts #viral #stickman](https://youtu.be/jpj3u8o8pv0)
+- **533.6x** | 533,604 views | 14s | [Turn Their Fire Into Your Fuel |  #motivation #discipline](https://youtu.be/v47bw8iM10E)
+- **510.9x** | 510,877 views | 706s | [बनिए उधार क्यों देते हैं? 😱 अमीरों की पैसे कमाने की असली चाल | Money Psychology](https://youtu.be/-HjRnoooC4E)
+- **392.2x** | 392,204 views | 39s | [A discipline  mindset fears nothingSimply Animated](https://youtu.be/yOHX_x33ATI)
+- **373.1x** | 399,255 views | 572s | [POV: You Earn $1Billion Every Day ](https://youtu.be/bhpg_bIqFMI)
+- **329.8x** | 1,698,445 views | 14s | [Don't just be disciplined, be obsessed #mindset #motivation #shorts](https://youtu.be/ktQxcKrYvUY)
+- **325.1x** | 555,888 views | 907s | [₹25 लाख के बाद Money Psychology कैसे बदलती है? | Wealth Mindset  💸🧠](https://youtu.be/IoUePOhyhEY)
+- **321.3x** | 1,066,582 views | 33s | [What Friends Think of You (Color Psychology Trick)](https://youtu.be/Ju_EXjXsVzE)
+- **306.8x** | 306,836 views | 32s | [Discipline vs Motivation - An Animated Short Film](https://youtu.be/My9mhF5DX0s)
+- **274.1x** | 274,062 views | 297s | [ज़्यादा समझदार लोग गरीब क्यों रह जाते हैं? | Rich vs Poor Mindset](https://youtu.be/xieCBHz4Gbw)
+- **260.2x** | 17,330,745 views | 26s | [POV: Your family is rich😛 (Part-1)](https://youtu.be/nXJ4ORhuicM)
+- **245.4x** | 458,945 views | 475s | [Rich Kid vs Poor Kid: Born the Same Night… Who Really Won?](https://youtu.be/wWbpHl_73nw)
+- **234.8x** | 314,595 views | 91s | [Aishwarya Rai's Sneaky Trick to Think Faster Under Pressure #shorts #bodylanguage](https://youtu.be/s8pgXjd_UTg)
+- **225.6x** | 1,087,560 views | 645s | [How To Read People Like Patrick Jane](https://youtu.be/gJiBPHSmed8)
+- **222.8x** | 4,677,936 views | 44s | [POV: You're a billionaire's assistant #shorts](https://youtu.be/aXiflDsqTv0)
+- **204.5x** | 351,804 views | 75s | [Psychology of Money Bangla #shorts দুবাই থেকে ৩০ লাখ… ৫ বছর পর বাড়ি নিলামে!  #shorts #fyp](https://youtu.be/8Y83E3Yj0w0)
+- **154.1x** | 337,384 views | 97s | [How Manipulators Lie Without Breaking the Truth](https://youtu.be/qWM8yFZXMmo)
 
 ## Title stats
 ```
 {
   "videos_analysed": 100,
-  "starts_with_number_%": 18,
-  "has_number_%": 44,
-  "says_you_%": 25,
-  "pov_%": 8,
-  "why_how_%": 9,
-  "question_%": 13,
-  "all_caps_word_%": 17,
-  "median_title_chars": 68.5,
-  "median_short_seconds": 45,
-  "median_long_seconds": 739
+  "starts_with_number_%": 13,
+  "has_number_%": 37,
+  "says_you_%": 21,
+  "pov_%": 10,
+  "why_how_%": 11,
+  "question_%": 12,
+  "all_caps_word_%": 20,
+  "median_title_chars": 62.5,
+  "median_short_seconds": 40,
+  "median_long_seconds": 666
 }
 ```
 
 ## Patterns
-- Topics related to money psychology and mind tricks
-- Use of numbers and lists in titles
-- Emotional triggers like surprise and curiosity
-- Titles with a sense of secrecy or exclusivity
-- Use of action words like 'boost' and 'hacks'
-- Relatable scenarios and everyday applications
+- Quick, high-energy hooks that pose a contrast or challenge (e.g., 'Motivated vs Disciplined vs Obsessed')
+- Focus on money psychology or mind tricks with a concrete, numeric angle (e.g., '5 Sneaky Supermarket Mind Tricks')
+- Emotional pull of obsession, discipline, or power – viewers feel they'll gain an edge
+- Titles start with a number, a 'you' statement, or a bold promise, and stay under 70 characters
+- Fast-paced animation with clear visual metaphors, keeping the story under 30 seconds
+- Use of universal symbols (money, fire, podium) and relatable scenarios that trigger curiosity
 
 ## Title Formulas
-- How to {} in {} Simple Steps
-- {} Ways to {} Without {}
-- The {}-Minute {} to {}
-- {} Secrets to {} That {} Don't Know
-- {} Proven {} to {} Instantly
+- X [Adjective] [Noun] That [Action] Your [Result] – #shorts
+- How to [Verb] [Topic] in Y Seconds – [Number] Tricks
+- What Happens When You [Do Something] – 5 Surprising Facts
+- POV: You [Experience] [Outcome] – [Number] Secrets
+- [Number] [Psychology/Money] Hacks That Feel Illegal
 
 ## Hooks
-- Have you ever felt like you're being manipulated into spending more money?
-- What if you could boost your confidence with just one simple trick?
-- Are you falling victim to these common mind tricks that are costing you thousands?
-- Discover the hidden psychology behind why you can't stop buying things you don't need
-- Unlock the secret to making more money without changing your job or lifestyle
+- Ever wonder why the rich smile when you're stressed? Let's crack that code in 15 seconds.
+- What if I told you the same habit that makes billionaires obsessed could be your secret weapon?
+- Stop scrolling – the next 10 seconds will change how you read any room.
+- Imagine turning every 'no' into a 'yes' with just two body-language moves.
+- Ready to see how a simple mindset shift can make your wallet feel ten times heavier?
 
 ## Shorts
-- 5 Sneaky Money Habits Keeping You Broke
-- 3 Dark Psychology Tricks Used by Salespeople
-- 4 Ways to Boost Your Charisma Without Saying a Word
-- 6 Mind Tricks to Make You Save More Money
-- 7 Secrets to Building Wealth That Most People Don't Know
-- 3 Illegal-Feeling Eye Contact Hacks That Instantly Boost Your Confidence
-- 5 Common Mind Tricks That Are Costing You Thousands
-- 4 Proven Ways to Increase Your Discipline and Achieve Your Goals
-- 6 Surprising Ways to Make More Money Without Changing Your Job
-- 3 Simple Steps to Overcoming Your Fear of Success
+- 3 hidden money-psychology tricks banks use to make you spend more
+- 5 illegal-feeling eye-contact hacks that instantly boost charisma
+- 4 subtle body-language moves that make anyone respect you
+- 6 obsession-fuelled habits that turn discipline into unstoppable success
+- 2 quick mind tricks to silence overthinking in under 5 seconds
+- 7 millionaire-style budgeting hacks you can apply today
+- 3 powerful color-psychology cues that change how people see you
+- 5 secret ways successful people turn criticism into fuel
+- 4 mental shortcuts that double your decision-making speed
+- 2 surprising reasons why rich people hate 'saving' and love 'investing'
 
 ## Series
-- Series title (Part 1/5): Introduction to Mind Tricks | Next: Part 2 - The Psychology of Sales
-- Series title (Part 2/5): The Psychology of Sales | Next: Part 3 - The Art of Persuasion
-- Series title (Part 3/5): The Art of Persuasion | Next: Part 4 - The Power of Body Language
-- Series title (Part 4/5): The Power of Body Language | Next: Part 5 - Mastering the Game
-- Series title (Part 5/5): Mastering the Game
+- Series title (Part 1/5): The Science of Obsession | Next: The Discipline Paradox
+- Series title (Part 2/5): The Discipline Paradox | Next: Money Mindset Hacks
+- Series title (Part 3/5): Money Mindset Hacks | Next: Body Language Power
+- Series title (Part 4/5): Body Language Power | Next: Psychological Pricing Tricks
+- Series title (Part 5/5): Psychological Pricing Tricks
 
 ## Long
-- POV: You're a Millionaire for a Day
-- POV: You're Trying to Save Money But Keep Failing
-- POV: You're a Master of Mind Tricks and Persuasion
-- POV: You're Struggling to Build Wealth and Achieve Your Goals
-- POV: You're a Victim of Dark Psychology and Mind Control
+- POV: You're a billionaire's assistant who discovers the hidden psychology behind every deal
+- POV: You're an underdog who cracks the secret money mindset of the ultra-rich
+- POV: You're stuck in a dead-end job and learn 5 discipline hacks that turn you into a high-performer
+- POV: You're at a family dinner where wealth secrets are whispered – what you hear changes everything
+- POV: You're a street-level negotiator using illegal-feeling eye-contact tricks to close any sale
