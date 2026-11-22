@@ -1,0 +1,21 @@
+FORMAT: short
+SUBJECT: FBI investigating apparent hack of its crime database
+TITLE: Database Breach
+YT_TITLE: FBI Crime Database Hacked. What Happens Next?
+TAGS: FBI,NCIC,cybersecurity,crime database,law enforcement,investigation,hack
+DESCRIPTION: The FBI's NCIC system appears to have been breached, raising concerns for law-enforcement operations and public safety.
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
+SOURCE: NBC News - https://www.nbcnews.com/politics/justice-department/fbi-investigating-potential-breach-crime-database-rcna610536
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/c64gn0gy8rj3o?at_medium=RSS&at_campaign=rss
+SOURCE: BBC Business - https://www.bbc.co.uk/news/articles/c6jreyqgw4e9o?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, Interstate Identification Index - https://en.wikipedia.org/wiki/Interstate_Identification_Index
+
+I bet you didn't know this. The FBI is investigating an apparent hack of its National Crime Information Center database, the system that shares fugitive, missing-person and criminal-history data with agencies across the country.
+
+The scope of the intrusion is still unclear, and the FBI has not commented publicly on who may be responsible.
+
+Officials note the agency has long been a target for hackers, citing prior attacks on its job portal and internal surveillance systems.
+
+The incident arrives amid a string of recent government cyber-outages, though there is no indication it is linked to those events.
+
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
