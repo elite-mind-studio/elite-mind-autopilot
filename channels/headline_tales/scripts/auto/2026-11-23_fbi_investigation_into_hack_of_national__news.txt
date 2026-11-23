@@ -1,0 +1,17 @@
+FORMAT: short
+SUBJECT: FBI investigation into hack of National Crime Information Center database
+TITLE: NCIC Hack
+YT_TITLE: FBI Probe Reveals Possible Hack of Crime Database. What's at Risk?
+TAGS: FBI,NCIC,cybersecurity,databreach,lawenforcement,investigation
+DESCRIPTION: The FBI is investigating a suspected breach of its National Crime Information Center, a key law-enforcement database. Details are still unclear.
+SOURCE: CBS News US - https://www.cbsnews.com/news/delta-air-lines-nationwide-delays-amid-baggage-network-system-issue/
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cvze7de86pk3o?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, 2026 FBI data breach - https://en.wikipedia.org/wiki/2026_FBI_data_breach
+
+Nobody tells you this. And the FBI is now investigating an apparent hack of its National Crime Information Center database, a system that shares warrants, missing-person reports and criminal histories with agencies across the country.
+The breach was first reported by CNN and confirmed by an AP source, but the bureau declined to comment, leaving the scope of the intrusion uncertain.
+President Donald Trump said on Fox News that he had just heard about the incident and called it "not good," while officials noted recent digital outages in other sectors that were not linked to cyber-attacks.
+Experts reminded viewers that the NCIC holds critical information on nationwide criminal activity, and its protection is a top priority for U.S. security agencies.
+The FBI has a history of being targeted by groups like ShinyHunters, which previously claimed to steal data from a job portal, underscoring the growing challenge of cyber threats.
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
