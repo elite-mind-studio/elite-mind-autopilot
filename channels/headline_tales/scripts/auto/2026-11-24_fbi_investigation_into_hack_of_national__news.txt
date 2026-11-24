@@ -1,15 +1,18 @@
 FORMAT: short
 SUBJECT: FBI investigation into hack of National Crime Information Center database
-TITLE: Database Breach
-YT_TITLE: FBI NCIC Hack Uncovered. Could Law Enforcement Be Blind?
+TITLE: NCIC Hack
+YT_TITLE: FBI Probe Reveals NCIC Hack. Sensitive Data At Risk?
 TAGS: FBI,NCIC,cybersecurity,law enforcement,databreach,investigation
-DESCRIPTION: The FBI is probing a possible intrusion into its core criminal-justice database, raising alarms for police across the nation.
+DESCRIPTION: The FBI is investigating a possible breach of its core crime database, raising concerns for law-enforcement safety.
 SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
-SOURCE: CBS News US - https://www.cbsnews.com/news/jensen-huang-congress-reinstatement-nvidia/
-SOURCE: CBS News US - https://www.cbsnews.com/news/anthropic-ipo-nasdaq-debut-claude-ai/
-SOURCE: BBC World - https://www.bbc.co.uk/news/articles/c63rgpy50x98o?at_medium=RSS&at_campaign=rss
-SOURCE: Wikipedia, 2026 FBI data breach - https://en.wikipedia.org/wiki/2026_FBI_data_breach
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/federal-judge-denies-request-release-man-shot-immigration-138336454
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/crpdw1qx7jgxo?at_medium=RSS&at_campaign=rss
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/cm5y1ezx2gqyo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, National Crime Information Center - https://en.wikipedia.org/wiki/National_Crime_Information_Center
 
-I almost didn't post this. The FBI discovered an apparent hack of its National Crime Information Center, the central database that police use for fugitives, missing persons and stolen property. The scope remains unclear, and the bureau has declined to comment while the hack was first reported by CNN and confirmed to the Associated Press. President Trump called the news "not good" in a Fox interview, highlighting political concern. Historically, the FBI has been a frequent target, with recent intrusions into its job portal and surveillance systems.
+I shouldn't be saying this. The FBI is probing an apparent hack of its National Crime Information Center database, .
 
-Which story should we explain next? Tell us in the comments. And tap the subscribe button right below this video. We explain one big story every single day.
+Officials declined to comment, and the scope of the intrusion remains unclear, leaving agencies nationwide on edge.
+President Trump called the news "not good" on television, while the bureau, historically a frequent hacking target, has faced other cyber incidents this year.
+
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
