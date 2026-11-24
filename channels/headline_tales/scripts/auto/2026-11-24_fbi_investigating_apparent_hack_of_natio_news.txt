@@ -1,0 +1,19 @@
+FORMAT: short
+SUBJECT: FBI investigating apparent hack of National Crime Information Center database
+TITLE: NCIC Breach
+YT_TITLE: FBI NCIC Hack Uncovered. Could Law Enforcement Be Exposed?
+TAGS: FBI,NCIC,cybersecurity,law enforcement,databreach,investigation
+DESCRIPTION: The FBI is probing an apparent hack of its National Crime Information Center database, raising concerns about compromised law-enforcement data.
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/fbi-investigating-apparent-hack-key-criminal-justice-information-138345950
+SOURCE: CBS News US - https://www.cbsnews.com/news/ilhan-omar-home-search-documents-magistrate-judge-probable-cause/
+SOURCE: NBC News - https://www.nbcnews.com/politics/trump-administration/todd-blanche-nvidia-investigation-ceo-jensen-huang-trump-rcna611132
+SOURCE: BBC World - https://www.bbc.co.uk/news/articles/crpdw1qx7jgxo?at_medium=RSS&at_campaign=rss
+SOURCE: Wikipedia, 2026 FBI data breach - https://en.wikipedia.org/wiki/2026_FBI_data_breach
+
+I almost didn't post this.
+
+That breach could expose fugitive, missing-person and criminal-history records that local, state and federal officers rely on daily.
+
+President Donald Trump said on Fox News, "We just heard about it and I will say that it's not good," underscoring the alarm in Washington.
+
+Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
