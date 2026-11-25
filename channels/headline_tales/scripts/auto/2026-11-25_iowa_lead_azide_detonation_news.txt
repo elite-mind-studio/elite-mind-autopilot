@@ -1,23 +1,19 @@
 FORMAT: short
 SUBJECT: Iowa lead azide detonation
-TITLE: Lead Dust Threat
-YT_TITLE: Army Detonates Five Tons of Lead Azide, Toxic Dust May Reach Missouri
-TAGS: lead azide, Iowa Army Ammunition Plant, toxic dust, plume, evacuation, environmental impact, USDA farms, Missouri, Illinois, Army detonation
-DESCRIPTION: The U.S. Army blew up a decades-old stockpile of lead azide in Iowa, sending a toxic plume toward neighboring states and prompting evacuations and environmental testing.
+TITLE: Lead Dust Plume
+YT_TITLE: You won't believe this one. Army detonates five tons of lead azide, plume may reach Missouri
+TAGS: lead azide, Iowa Army Ammunition Plant, environmental risk, toxic dust, Missouri plume, EPA, Army detonation
+DESCRIPTION: The U.S. Army detonated five tons of lead azide in Iowa, and maps show a possible toxic dust plume drifting into Missouri.
 SOURCE: CBS News US - https://www.cbsnews.com/news/maps-show-how-far-lead-dust-from-about-5-tons-of-iowa-explosives-could-spread/
-SOURCE: CBS News US - https://www.cbsnews.com/news/lead-azide-detonation-iowa-army-explosives/
+SOURCE: ABC News US - https://abcnews.com/US/wireStory/us-army-detonating-5-ton-stockpile-lead-azide-138426544
 SOURCE: Wikipedia, Lead(II) azide - https://en.wikipedia.org/wiki/Lead(II)_azide
 
-You won't believe this. The U.S. Army detonated about five tons of lead azide in Iowa, creating a plume of toxic dust that could travel into Missouri. Could this dust affect farms and families?
+You won't believe this one. The U.S. Army blew up roughly five tons of unstable lead azide in Iowa, and models show a dust plume potentially reaching northeast Missouri.
 
-The explosion occurred at nine a.m. Wednesday at the Iowa Army Ammunition Plant, using sixty-eight barrels that had stored the material for more than twenty years.
+The blast occurred at 9 a.m. Wednesday at the Iowa Army Ammunition Plant in Middletown, using 68 barrels of the compound.
 
-Maps show the plume moving southwest, reaching northeast Missouri by early afternoon and narrowing toward Macon by late afternoon, while wind arrows point the dust away from Burlington.
+Army officials said mitigation steps—water saturation, sand barriers and foam—reduced particle spread, and EPA monitors recorded zero lead in the air within fifteen minutes.
 
-Officials warned residents within five miles southwest to evacuate and urged those up to twenty miles away to stay indoors, close windows, and cover livestock feed.
-
-The USDA estimates two hundred fifty farms could be impacted, and cattle farmer Steve Lucie worries about soil and herd health.
-
-An investigation is under way to sample lead on farmland, playgrounds and water, while Missouri and Illinois agencies set up extra monitoring.
+Nonetheless, the Tuesday maps illustrate a shaded plume moving southwest toward the Missouri line, passing near Knox City and narrowing toward Macon by late afternoon.
 
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
