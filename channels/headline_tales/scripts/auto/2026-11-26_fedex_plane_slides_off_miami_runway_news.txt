@@ -1,16 +1,15 @@
 FORMAT: short
 SUBJECT: FedEx plane slides off Miami runway
-TITLE: RUNWAY OVERRUN
-YT_TITLE: FedEx Cargo Plane Slides Off Miami Runway. Thanksgiving Travel Disrupted
-TAGS: FedEx,Miami International Airport,runway overrun,Thanksgiving travel,flight delays,FAA,air cargo
-DESCRIPTION: A FedEx MD-11 overran a Miami runway on Thanksgiving Eve, forcing a near-total shutdown and delaying thousands of travelers.
+TITLE: Runway Chaos
+YT_TITLE: FedEx Cargo Plane Overruns Miami Runway, Leaving Only One Open Before Thanksgiving
+TAGS: FedEx,Miami International Airport,runway overrun,Thanksgiving travel,MD-11,FAA investigation,cargo plane,flight delays
+DESCRIPTION: A FedEx MD-11 overshot the runway at Miami International, shutting down most of the airport just before the holiday travel rush.
 SOURCE: ABC News US - https://abcnews.com/US/wireStory/fedex-airplane-overruns-runway-miami-airport-temporarily-closing-138460484
-SOURCE: BBC World - https://www.bbc.co.uk/news/articles/ckm2mz3prq77o?at_medium=RSS&at_campaign=rss
 SOURCE: Wikipedia, Miami International Airport - https://en.wikipedia.org/wiki/Miami_International_Airport
 
-I almost didn't post this. A FedEx cargo plane slid off a Miami runway on Wednesday night, shutting down all but one runway on the eve of Thanksgiving.
-The MD-11, coming from Memphis, ran onto the grass at about 8:40 p.m., and no injuries were reported, according to airport officials.
-
-Miami International handles over a thousand daily flights and is a top-five U.S. hub for Thanksgiving, with the American Automobile Association expecting eighty-one point five million Americans to travel this week.
-Passengers were urged to check with airlines for updates, while FedEx coordinated with investigators and confirmed its crew was safe.
+You won't believe this. A FedEx cargo plane overran a runway at Miami International Airport Wednesday night, forcing all but one runway to close just before Thanksgiving.
+The McDonnell Douglas MD-11 was coming from Memphis when it encountered an issue on landing, and the aircraft slid off the pavement at about eight forty p.m.
+Miami-Dade fire units responded, but officials reported no injuries among crew or passengers.
+The Federal Aviation Administration opened an investigation, and airlines warned passengers to check for updates as hours-long delays built up.
+By early Thursday, the airport was working to resume normal operations, urging travelers to stay patient.
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
