@@ -1,15 +1,16 @@
 FORMAT: short
 SUBJECT: FedEx plane slides off Miami runway
-TITLE: Runway Chaos
-YT_TITLE: FedEx Cargo Plane Overruns Miami Runway, Leaving Only One Open Before Thanksgiving
-TAGS: FedEx,Miami International Airport,runway overrun,Thanksgiving travel,MD-11,FAA investigation,cargo plane,flight delays
-DESCRIPTION: A FedEx MD-11 overshot the runway at Miami International, shutting down most of the airport just before the holiday travel rush.
+TITLE: RUNWAY OVERRUN
+YT_TITLE: FedEx Cargo Plane Slides Off Miami Runway. Flights Halted Before Thanksgiving
+TAGS: FedEx,Miami International Airport,runway overrun,Thanksgiving travel,FAA investigation,MD-11,cargo plane,flight delays
+DESCRIPTION: A FedEx MD-11 overran a Miami International Airport runway Wednesday night, shutting down all but one runway and causing hours-long delays just before the holiday travel rush.
 SOURCE: ABC News US - https://abcnews.com/US/wireStory/fedex-airplane-overruns-runway-miami-airport-temporarily-closing-138460484
+SOURCE: NBC News - https://www.nbcnews.com/news/us-news/mississippi-plane-crash-victims-members-prominent-florida-family-rcna611318
 SOURCE: Wikipedia, Miami International Airport - https://en.wikipedia.org/wiki/Miami_International_Airport
 
-You won't believe this. A FedEx cargo plane overran a runway at Miami International Airport Wednesday night, forcing all but one runway to close just before Thanksgiving.
-The McDonnell Douglas MD-11 was coming from Memphis when it encountered an issue on landing, and the aircraft slid off the pavement at about eight forty p.m.
-Miami-Dade fire units responded, but officials reported no injuries among crew or passengers.
-The Federal Aviation Administration opened an investigation, and airlines warned passengers to check for updates as hours-long delays built up.
-By early Thursday, the airport was working to resume normal operations, urging travelers to stay patient.
+I almost didn't post this. A FedEx cargo plane slid off a Miami International Airport runway Wednesday night, forcing all but one runway to shut down.
+The McDonnell Douglas MD-11 was coming from Memphis and, according to officials, experienced an issue on landing; fortunately, no injuries were reported.
+
+The Federal Aviation Administration opened an investigation and warned travelers of hours-long delays as crews worked to clear the aircraft.
+With Thanksgiving travel looming, the disruption threatened to affect thousands of holiday plans, prompting the airport to urge passengers to check with their airlines for the latest updates.
 Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day.
