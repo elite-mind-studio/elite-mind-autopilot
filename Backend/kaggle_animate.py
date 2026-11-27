@@ -7,6 +7,7 @@ Usage (test):
 """
 import base64
 import json
+import os
 import shutil
 import sys
 import time
@@ -35,7 +36,7 @@ def _small_jpeg(path) -> str:
     return base64.b64encode(buffer.getvalue()).decode()
 
 
-def animate(jobs: List[dict], out_dir: Path, timeout_minutes: int = 150) -> Path:
+def animate(jobs: List[dict], out_dir: Path, timeout_minutes: int = 150, model: str = "ltx") -> Path:
     """jobs: [{"id", "image": Path, "prompt"}] -> out_dir with <id>.mp4 for every success."""
     work = PROJECT_ROOT / "kaggle" / f"animate_{uuid.uuid4().hex[:8]}"
     work.mkdir(parents=True, exist_ok=True)
@@ -43,7 +44,7 @@ def animate(jobs: List[dict], out_dir: Path, timeout_minutes: int = 150) -> Path
         kernel_id = f"{_username()}/{KERNEL_SLUG}"
         payload = [{"id": j["id"], "prompt": j["prompt"], "image_b64": _small_jpeg(j["image"])} for j in jobs]
         code = TEMPLATE.read_text(encoding="utf-8").replace(
-            "__JOBS__", base64.b64encode(json.dumps(payload).encode()).decode())
+            "__JOBS__", base64.b64encode(json.dumps(payload).encode()).decode()).replace("__MODEL__", model)
         (work / "animate.py").write_text(code, encoding="utf-8")
         (work / "kernel-metadata.json").write_text(json.dumps({
             "id": kernel_id, "title": KERNEL_SLUG, "code_file": "animate.py", "language": "python",
@@ -52,11 +53,18 @@ def animate(jobs: List[dict], out_dir: Path, timeout_minutes: int = 150) -> Path
         }), encoding="utf-8")
         print(f"[+] Sending {len(jobs)} picture(s) to animate on the Kaggle GPU...", flush=True)
         _kaggle("kernels", "push", "-p", str(work))
-        deadline, status = time.time() + timeout_minutes * 60, ""
+        # Right after a push the status can still show the previous run's "complete": only
+        # accept a finished status once this run was seen queued or running (or after 10 minutes)
+        deadline, status, started, seen = time.time() + timeout_minutes * 60, "", time.time(), False
         while time.time() < deadline:
             time.sleep(30)
-            status = _kaggle("kernels", "status", kernel_id).lower()
-            if any(word in status for word in ("complete", "error", "cancel")):
+            try:
+                status = _kaggle("kernels", "status", kernel_id).lower()
+            except RuntimeError as err:  # a short internet drop must not end the wait
+                print(f"[-] Status check failed, retrying: {str(err)[-120:]}", flush=True)
+                continue
+            seen = seen or "queued" in status or "running" in status
+            if any(word in status for word in ("complete", "error", "cancel")) and (seen or time.time() - started > 600):
                 break
         print(f"[*] Kaggle status: {status.strip()[-120:]}", flush=True)
         out_dir = Path(out_dir)
@@ -71,7 +79,8 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
 
     load_dotenv(PROJECT_ROOT / ".env")
+    model_arg = os.getenv("ANIMATE_MODEL", "ltx")
     target, rest = Path(sys.argv[1]), sys.argv[2:]
     test_jobs = [{"id": Path(rest[i]).stem, "image": rest[i], "prompt": rest[i + 1]} for i in range(0, len(rest), 2)]
-    result = animate(test_jobs, target)
+    result = animate(test_jobs, target, model=model_arg)
     print(f"[+] Results in {result}: {[p.name for p in result.rglob('*') if p.is_file()]}")

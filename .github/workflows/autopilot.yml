@@ -188,11 +188,13 @@ jobs:
           # skipped; set the repo variable ELITE_LONG_VIDEOS=true to bring long videos back.
           case " $args " in
             *" --long "*)
-              # Long videos switch back on by themselves at 100 subscribers (owner's milestone)
+              # Long videos are on from 70 subscribers (owner, Nov 27): one a week, Friday.
+              # The depth camera effect is for Shorts only (a 10-minute video has ~200 pictures)
+              export PARALLAX=false
               subs=$(uv run python Backend/channel_stats.py youtube-oauth2.json 2>/dev/null | tail -1)
               echo "Subscribers: ${subs:-0}"
-              if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ] && ! [ "${subs:-0}" -ge 100 ] 2>/dev/null; then
-                echo "Long videos are off until 100 subscribers."; exit 0
+              if [ "${{ vars.ELITE_LONG_VIDEOS }}" != "true" ] && ! [ "${subs:-0}" -ge 70 ] 2>/dev/null; then
+                echo "Long videos are off until 70 subscribers."; exit 0
               fi ;;
             *)
               # Recovery mode (owner, Nov 15): 2 Elite Shorts a day (12:30 pm and 8 pm ET); the
