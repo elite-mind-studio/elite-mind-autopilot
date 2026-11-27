@@ -198,7 +198,7 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
     # The subscribe link is the very first line of every description
     parts = [subscribe_line, spec.get("description", "")]
     if long_url:
-        parts.append(f"▶ Watch the full documentary: {long_url}")
+        parts.append(f"▶ {os.getenv('LONG_LINK_LABEL', 'Watch the full documentary')}: {long_url}")
     if spec["source"]:
         parts.append("Sources:\n" + "\n".join(f"- {s}" for s in spec["source"]))
     parts.append(os.getenv("YOUTUBE_DESCRIPTION_FOOTER", ""))
@@ -225,7 +225,7 @@ def post(name: str, script_path: Path, video: Path, long_url: str = "") -> str:
     try:
         from youtube import post_comment
 
-        lines = [f"▶ Watch the full documentary: {long_url}"] if long_url else []
+        lines = [f"▶ {os.getenv('LONG_LINK_LABEL', 'Watch the full documentary')}: {long_url}"] if long_url else []
         # Elite profiles set their own question (FIRST_COMMENT_ASK); Headline Tales asks for the next story
         lines.append(spec.get("ask") or os.getenv("FIRST_COMMENT_ASK", "").strip()
                      or "👇 Which story should we explain next? We post one big story every single day, so subscribe and don't miss tomorrow's.")
