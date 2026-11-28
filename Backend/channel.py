@@ -386,7 +386,11 @@ if __name__ == "__main__":
                     script.write_text(header + "\n\n" + "\n\n".join(paragraphs) + "\n", encoding="utf-8")
                     print(f"[+] Ending teases the next story: {teaser}", flush=True)
         else:
-            script = prepare_short()
+            # Queue empty: a famous real case (timeless mysteries beat daily news by far), news only as a last resort
+            from news import prepare_case_short
+
+            script = prepare_case_short() if profile == "headline_tales" else None
+            script = script or prepare_short()
         if "--dry-run" in sys.argv:
             make_checked(profile, script, reuse=False)
         else:

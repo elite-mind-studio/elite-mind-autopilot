@@ -189,9 +189,9 @@ NO_REPEAT_SHORT = """- is a NEW topic: never one of these recent topics, not eve
 US_SOURCES = ("NPR National", "CBS News US", "ABC News US", "NBC News")
 
 
-def pick_story(items: List[dict], for_short: bool = False) -> dict:
+def pick_story(items: List[dict], for_short: bool = False, exclude: Optional[List[str]] = None) -> dict:
     listing = "\n".join(f"{i}. [{it['source']}] {it['title']} - {it['summary'][:140]}" for i, it in enumerate(items[:150]))
-    done = "\n".join(f"- {t}" for t in recent_topics()) or "- (none yet)"
+    done = "\n".join(f"- {t}" for t in recent_topics() + list(exclude or [])) or "- (none yet)"
     return chat_json(f"""
 You choose today's story for "Headline Tales", a YouTube channel of real mysteries and true crime:
 short, neutral, well-sourced stories, one every day. Pick ONE story from today's headlines.
@@ -363,7 +363,16 @@ def prepare_short() -> Path:
         raise RuntimeError(f"Only {len(items)} headlines fetched")
     # US stories first, so the picker sees them within its list
     items = sorted(items, key=lambda it: it["source"] not in US_SOURCES)
-    story = pick_story(items, for_short=True)
+    recent, rejected = recent_topics(), []
+    for _ in range(3):
+        story = pick_story(items, for_short=True, exclude=rejected)
+        repeat = too_similar(f"{story['subject']} {story.get('angle', '')}", recent + rejected)
+        if not repeat:
+            break
+        print(f"[-] Picked a repeat ({story['subject']!r} ~ {repeat!r}); picking again", flush=True)
+        rejected.append(story["subject"])
+    else:
+        raise RuntimeError("Only repeats of recent stories today; not posting a news Short")
     print(f"[+] Short story: {story['subject']} - {story['angle']}", flush=True)
     sources = gather(story, items)
     if len(sources) < 2:
@@ -386,6 +395,136 @@ def prepare_short() -> Path:
     )
     print(f"[+] Script: {path.name}", flush=True)
     return path
+
+
+CASES = ROOT / "channels" / "headline_tales" / "cases.txt"
+CASES_USED = ROOT / "channels" / "headline_tales" / "cases_used.txt"
+STOPWORDS = set("""the a an and or of to in on at for with from by is was were are be been this that these those it its
+his her their they them he she who what when where why how after before over into out about than then just more most
+new news story says said could would will can may might what's whats""".split())
+
+
+def _keywords(text: str) -> set:
+    words = re.findall(r"[a-z0-9$]+", text.lower())
+    # crude stemming so "hack", "hacked" and "hacking" count as the same word
+    return {re.sub(r"(ing|ed|es|s)$", "", w) for w in words if len(w) > 2 and w not in STOPWORDS}
+
+
+def too_similar(subject: str, topics: List[str]) -> Optional[str]:
+    """The recent topic this subject repeats (shares most of its key words), if any.
+    The picker is told not to repeat topics, but it did (one FBI hack story went out 7 times)."""
+    mine = _keywords(subject)
+    for topic in topics:
+        theirs = _keywords(topic)
+        shared = mine & theirs
+        if len(shared) >= 2 and len(shared) / max(1, min(len(mine), len(theirs))) >= 0.4:
+            return topic
+    return None
+
+
+def write_case_short(case: str, sources: List[dict]) -> dict:
+    return chat_json(f"""
+You write for "Headline Tales": gripping, neutral YouTube Shorts about famous real mysteries, heists, cons and
+escapes. Today's case: {case}
+
+STRICT RULES:
+- Use ONLY facts stated in the SOURCES below. No outside facts, no guesses, no invented numbers, quotes or names.
+- Neutral tone; when the source says something is disputed or unknown, say so. Numbers written in words.
+- American English for a mostly US audience: American spelling, dollars, miles and feet.
+- Tell it as a story: the most astonishing true fact first, then what happened step by step, each sentence pulling
+  the viewer to the next, and end on the open question or the twist. Never sensationalise deaths.
+- Family-friendly for advertisers: leave out nudity, crude or sexual details, gore and slurs, even if the source has them.
+- STRICTLY 80-100 words before the ending line (about 50-60 seconds): 5-6 short paragraphs separated by blank lines,
+  each one or two short sentences. Pick the 4-5 most gripping facts; leave the rest out. End with exactly:
+  "Which story should we explain next? Tell us in the comments, and tap the subscribe button right below this video. We explain one big story every single day."
+
+SOURCES:
+{_sources_block(sources)}
+
+- Paragraph 1 is ONLY two sentences: a short opener of 3-7 words, then the most staggering true fact.
+  {HOOK_OPENERS}
+- short_title: the staggering fact, then the open question or twist, e.g.
+  "$500 Million in Art Was Stolen… And Nobody Has Ever Found It". Digits for numbers, never a false promise.
+
+Return ONLY JSON: {{"short_title": "YouTube Shorts title, max 80 chars", "title_bar": "2-4 WORD HOOK",
+"description": "1-2 sentence description", "tags": "comma separated tags", "short_script": "..."}}
+""")
+
+
+# Sentences with these words are dropped from Shorts (advertisers; the model ignores the rule sometimes)
+CRUDE = re.compile(r"\b(buttocks?|butt|naked|nude|nudity|sex|sexual|spank\w*|genital\w*|porn\w*|stripper|orgy)\b", re.I)
+
+
+def _family_friendly(text: str) -> str:
+    """Drop crude sentences and the empty paragraphs any removal leaves behind."""
+    paragraphs = []
+    for para in re.split(r"\n\s*\n", text):
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+", para.strip()) if s and not CRUDE.search(s)]
+        if sentences:
+            paragraphs.append(" ".join(sentences))
+    return "\n\n".join(paragraphs)
+
+
+def _shortened(text: str, limit: int = 110) -> str:
+    """Models overshoot word counts: ask once for a tighter version (same facts only) when it runs long."""
+    body = text.split("Which story should we explain next")[0].strip()
+    if len(body.split()) <= limit:
+        return text
+    reply = chat(f"""Shorten this YouTube Short narration to 85-100 words. Keep the first two sentences' hook,
+the most gripping facts and the ending question. Use ONLY facts already in it; add nothing new. 5-6 short
+paragraphs separated by blank lines. Return only the narration.
+
+{body}""").strip()
+    print(f"[*] Shortened the Short from {len(body.split())} to {len(reply.split())} words", flush=True)
+    return reply if 60 <= len(reply.split()) < len(body.split()) else text
+
+
+def prepare_case_short() -> Optional[Path]:
+    """A Short on the next famous case in cases.txt (Wikipedia as the source). None if none are left."""
+    if not CASES.exists():
+        return None
+    lines = CASES.read_text(encoding="utf-8").splitlines()
+    cases = [l for l in lines if l.strip() and not l.startswith("#")]
+    recent = recent_topics()
+    for line in cases:
+        subject, _, wiki_title = line.partition("|| wiki:")
+        subject, wiki_title = subject.strip(), wiki_title.strip() or subject.strip()
+        # whatever happens, this case is used up (a failed source should not block the list)
+        lines.remove(line)
+        CASES.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        with CASES_USED.open("a", encoding="utf-8") as used:
+            used.write(line + "\n")
+        repeat = too_similar(subject, recent)
+        if repeat:
+            print(f"[-] Skipping case {subject!r}: too close to {repeat!r}", flush=True)
+            continue
+        wiki = wikipedia(wiki_title)
+        if not wiki or len(wiki["text"].split()) < 300:
+            print(f"[-] Skipping case {subject!r}: no usable Wikipedia article", flush=True)
+            continue
+        print(f"[+] Case Short: {subject}", flush=True)
+        sources = [{**wiki, "title": wiki["source"], "text": " ".join(wiki["text"].split()[:MAX_SOURCE_WORDS])}]
+        draft = write_case_short(subject, sources)
+        draft["short_script"] = _family_friendly(_shortened(_family_friendly(draft["short_script"])))
+        draft["short_script"] = _with_ending(
+            _checked(draft["short_script"], sources, "case short"),
+            ASK_NEXT + " And tap the subscribe button right below this video. We explain one big story every single day.",
+        )
+        draft["short_script"] = _family_friendly(draft["short_script"])
+        if len(draft["short_script"].split()) < 60:
+            print(f"[-] Case {subject!r} too short after the fact-check; trying the next", flush=True)
+            continue
+        SCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+        path = SCRIPTS_DIR / f"{_slug(subject)}_news.txt"
+        path.write_text(
+            f"FORMAT: short\nSUBJECT: {subject}\nTITLE: {draft.get('title_bar', subject)}\n"
+            f"YT_TITLE: {draft['short_title']}\nTAGS: {draft.get('tags', '')}\nDESCRIPTION: {draft.get('description', '')}\n"
+            f"SOURCE: {wiki['source']} - {wiki['link']}\n\n" + draft["short_script"].strip() + "\n",
+            encoding="utf-8",
+        )
+        print(f"[+] Script: {path.name}", flush=True)
+        return path
+    return None
 
 
 def prepare() -> tuple:

@@ -1,0 +1,28 @@
+# Famous real cases for Headline Tales Shorts, used when the hand-written queue is empty
+# (timeless mysteries, heists, cons and escapes did far better than daily news).
+# One per line: <subject> || wiki: <Wikipedia article title>
+# Used lines move to cases_used.txt. Avoid graphic violence, mass deaths and child harm.
+The Max Headroom TV signal hijacking: someone took over two Chicago TV stations in 1987 and was never caught || wiki: Max Headroom signal hijacking
+Victor Lustig, the con man who "sold" the Eiffel Tower to a scrap dealer || wiki: Victor Lustig
+The Great Brink's Robbery: eleven men stole millions from a Boston vault in 1950 || wiki: Great Brink's Robbery
+Anna Sorokin, the fake heiress who fooled New York's elite || wiki: Anna Sorokin
+The disappearance of Jimmy Hoffa: one of America's most famous unsolved vanishings || wiki: Disappearance of Jimmy Hoffa
+Christopher Knight, the man who lived alone in the Maine woods for 27 years and survived by burglary || wiki: Christopher Thomas Knight
+The Mary Celeste: the ship found sailing with nobody on board || wiki: Mary Celeste
+Charles Ponzi, the man whose name became a fraud || wiki: Charles Ponzi
+The 1966 World Cup trophy theft, solved by a dog named Pickles || wiki: Pickles (dog)
+Ferdinand Waldo Demara, "The Great Impostor" who posed as a Navy surgeon || wiki: Ferdinand Waldo Demara
+The Bitfinex hack: a New York couple and 3.6 billion dollars in stolen bitcoin || wiki: 2016 Bitfinex hack
+The lost colony of Roanoke and the word carved on a post || wiki: Roanoke Colony
+Elizabeth Holmes and Theranos: the blood test that never worked || wiki: Theranos
+The disappearance of Amelia Earhart over the Pacific in 1937 || wiki: Amelia Earhart
+Fyre Festival: the luxury island festival that turned into a disaster || wiki: Fyre Festival
+Flight 19: five Navy planes that vanished near the Bermuda Triangle in 1945 || wiki: Flight 19
+Clark Rockefeller: the impostor who pretended to be a Rockefeller for years || wiki: Christian Gerhartsreiter
+The Dancing Plague of 1518: when hundreds of people could not stop dancing || wiki: Dancing plague of 1518
+Steven Jay Russell, the con man who escaped prison four times || wiki: Steven Jay Russell
+Forrest Fenn's hidden treasure and the decade-long hunt to find it || wiki: Forrest Fenn
+The Great Train Robbery of 1963: the gang that stopped a mail train in England || wiki: Great Train Robbery (1963)
+The Oak Island money pit: two centuries of digging for treasure || wiki: Oak Island mystery
+The Somerton Man: the unknown man found on an Australian beach, identified 74 years later || wiki: Tamam Shud case
+The Pink Panthers: the jewel thieves behind hundreds of robberies worldwide || wiki: Pink Panthers
