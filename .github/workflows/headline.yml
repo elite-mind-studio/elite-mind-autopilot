@@ -160,6 +160,9 @@ jobs:
           P="${{ inputs.profile || 'headline_tales' }}"
           [ -f "channels/$P/posted.json" ] || exit 0
           cp "channels/$P/posted.json" "$RUNNER_TEMP/posted.json"
+          # The famous-case list shrinks as cases are used (Backend/news.py prepare_case_short)
+          cp channels/headline_tales/cases.txt "$RUNNER_TEMP/cases.txt" 2>/dev/null || true
+          cp channels/headline_tales/cases_used.txt "$RUNNER_TEMP/cases_used.txt" 2>/dev/null || true
           mkdir -p "$RUNNER_TEMP/auto" && cp -r channels/headline_tales/scripts/auto/. "$RUNNER_TEMP/auto/" 2>/dev/null || true
           ls channels/headline_tales/scripts/queue/ 2>/dev/null > "$RUNNER_TEMP/queue_left.txt" || true
           git config user.name "github-actions[bot]"
@@ -168,11 +171,13 @@ jobs:
             git fetch -q origin main && git reset -q --hard origin/main
             mkdir -p "channels/$P" && cp "$RUNNER_TEMP/posted.json" "channels/$P/posted.json"
             mkdir -p channels/headline_tales/scripts/auto && cp -r "$RUNNER_TEMP/auto/." channels/headline_tales/scripts/auto/ 2>/dev/null || true
+            for f in cases.txt cases_used.txt; do [ -f "$RUNNER_TEMP/$f" ] && cp "$RUNNER_TEMP/$f" "channels/headline_tales/$f"; done
             # Remove only the queued scripts this run used (scripts queued meanwhile stay)
             for used in $(comm -23 <(sort "$RUNNER_TEMP/queue_start.txt") <(sort "$RUNNER_TEMP/queue_left.txt")); do
               git rm -q --ignore-unmatch "channels/headline_tales/scripts/queue/$used"
             done
-            git add -A "channels/$P/posted.json" channels/headline_tales/scripts/auto
+            git add -A "channels/$P/posted.json" channels/headline_tales/scripts/auto channels/headline_tales/cases.txt
+            [ -f channels/headline_tales/cases_used.txt ] && git add channels/headline_tales/cases_used.txt
             git commit -q -m "headline: record posted videos" || exit 0
             git push -q && exit 0
             sleep 5
